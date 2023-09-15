@@ -14,10 +14,11 @@
 <meta property="og:description" content="Learning is an other-worldly designed game. I classify learning as a game, because it features the following:  ??? (Most important feature, but usually ignored, I’ll reveal it later) Rules: you cheat,">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2023-09-14T02:28:56.000Z">
-<meta property="article:modified_time" content="2023-09-14T07:58:45.006Z">
+<meta property="article:modified_time" content="2023-09-15T08:00:40.896Z">
 <meta property="article:author" content="5eqn">
 <meta property="article:tag" content="Gaming">
 <meta property="article:tag" content="Earth OL">
+<meta property="article:tag" content="Good">
 <meta name="twitter:card" content="summary">
     
     
@@ -95,6 +96,8 @@
     <span id="actions">
       <ul>
         
+        <li><a class="icon" aria-label="Previous post" href="/2023/09/15/js-crazy/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
         
         <li><a class="icon" aria-label="Next post" href="/2023/09/13/ss-snecko/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
@@ -162,7 +165,7 @@
       
     <div class="article-tag">
         <i class="fa-solid fa-tag"></i>
-        <a class="p-category" href="/tags/Earth-OL/" rel="tag">Earth OL</a>, <a class="p-category" href="/tags/Gaming/" rel="tag">Gaming</a>
+        <a class="p-category" href="/tags/Earth-OL/" rel="tag">Earth OL</a>, <a class="p-category" href="/tags/Gaming/" rel="tag">Gaming</a>, <a class="p-category" href="/tags/Good/" rel="tag">Good</a>
     </div>
 
 
@@ -252,7 +255,7 @@
 <p>ChatGPT gave some code, the related part is:</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">basic_strategy_predict</span>(<span class="params">player_hand, dealer_upcard</span>):</span><br><span class="line">    <span class="comment"># Basic strategy: Make decisions (hit or stand) based on the player&#x27;s hand and the dealer&#x27;s upcard.</span></span><br><span class="line">    </span><br><span class="line">    player_value = calculate_hand_value(player_hand)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Probability knowledge: The likelihood of busting when hitting</span></span><br><span class="line">    <span class="comment"># If the player&#x27;s hand value is 11 or less, it&#x27;s always safe to hit.</span></span><br><span class="line">    <span class="keyword">if</span> player_value &lt;= <span class="number">11</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;hit&#x27;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># If the player&#x27;s hand value is 12 to 16 and the dealer&#x27;s upcard is 7 or higher,</span></span><br><span class="line">    <span class="comment"># hitting is the safer choice because the player&#x27;s chances of beating the dealer are low.</span></span><br><span class="line">    <span class="keyword">if</span> <span class="number">12</span> &lt;= player_value &lt;= <span class="number">16</span> <span class="keyword">and</span> dealer_upcard <span class="keyword">in</span> [<span class="string">&#x27;7&#x27;</span>, <span class="string">&#x27;8&#x27;</span>, <span class="string">&#x27;9&#x27;</span>, <span class="string">&#x27;10&#x27;</span>, <span class="string">&#x27;Ace&#x27;</span>]:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;hit&#x27;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># If the player&#x27;s hand value is 17 or higher, standing is generally the safer choice.</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;stand&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<p>This seems to naive. You want some Probability Theory that you’ve never learnt. You can ask:</p>
+<p>This seems too naive. You want some Probability Theory that you’ve never learnt. You can ask:</p>
 <blockquote>
 <p>Can you implement something that uses advanced probability knowledge? Some calculus is preferred.</p>
 </blockquote>
