@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="I want arrays in silent-lang to be as intuitive as possible, this is what happened to my design. Array creation1234let n &#x3D; inputlet initedArray &#x3D; [0 rep n]let uninitedArray &#x3D; [rep n]let fixedArray &#x3D; [">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Silent-Lang | Array Design">
+<meta property="og:url" content="https://www.5eqn.top/2023/09/15/silent-array/index.html">
+<meta property="og:site_name" content="Blog of 5eqn">
+<meta property="og:description" content="I want arrays in silent-lang to be as intuitive as possible, this is what happened to my design. Array creation1234let n &#x3D; inputlet initedArray &#x3D; [0 rep n]let uninitedArray &#x3D; [rep n]let fixedArray &#x3D; [">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-09-15T14:54:44.000Z">
+<meta property="article:modified_time" content="2023-09-15T15:56:50.457Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="Good">
+<meta property="article:tag" content="PL">
+<meta property="article:tag" content="Silent-Lang">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Silent-Lang | Array Design</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/friend/">Friend</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2023/09/15/why-eng/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://www.5eqn.top/2023/09/15/silent-array/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://www.5eqn.top/2023/09/15/silent-array/&text=Silent-Lang | Array Design"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://www.5eqn.top/2023/09/15/silent-array/&title=Silent-Lang | Array Design"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://www.5eqn.top/2023/09/15/silent-array/&is_video=false&description=Silent-Lang | Array Design"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Silent-Lang | Array Design&body=Check out this article: https://www.5eqn.top/2023/09/15/silent-array/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://www.5eqn.top/2023/09/15/silent-array/&title=Silent-Lang | Array Design"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://www.5eqn.top/2023/09/15/silent-array/&title=Silent-Lang | Array Design"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://www.5eqn.top/2023/09/15/silent-array/&title=Silent-Lang | Array Design"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://www.5eqn.top/2023/09/15/silent-array/&title=Silent-Lang | Array Design"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://www.5eqn.top/2023/09/15/silent-array/&name=Silent-Lang | Array Design&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://www.5eqn.top/2023/09/15/silent-array/&t=Silent-Lang | Array Design"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-creation"><span class="toc-number">1.</span> <span class="toc-text">Array creation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-indexing"><span class="toc-number">2.</span> <span class="toc-text">Array indexing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-modification"><span class="toc-number">3.</span> <span class="toc-text">Array modification</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-length"><span class="toc-number">4.</span> <span class="toc-text">Array length</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-typing"><span class="toc-number">5.</span> <span class="toc-text">Array typing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Not-supported"><span class="toc-number">6.</span> <span class="toc-text">Not supported</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Array-slicing"><span class="toc-number">6.1.</span> <span class="toc-text">Array slicing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dynamic-lengthed-Array"><span class="toc-number">6.2.</span> <span class="toc-text">Dynamic-lengthed Array</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Silent-Lang | Array Design
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-09-15T14:54:44.000Z" class="dt-published" itemprop="datePublished">2023-09-15</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Good/" rel="tag">Good</a>, <a class="p-category" href="/tags/PL/" rel="tag">PL</a>, <a class="p-category" href="/tags/Silent-Lang/" rel="tag">Silent-Lang</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>I want arrays in <a target="_blank" rel="noopener" href="https://github.com/5eqn/silent-lang">silent-lang</a> to be as intuitive as possible, this is what happened to my design.</p>
+<h2 id="Array-creation"><a href="#Array-creation" class="headerlink" title="Array creation"></a>Array creation</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">let n = input</span><br><span class="line">let initedArray = [0 rep n]</span><br><span class="line">let uninitedArray = [rep n]</span><br><span class="line">let fixedArray = [2, 3, 4]</span><br></pre></td></tr></table></figure>
+
+<p>Uninited array begins with random values, they should be treated as non-accessible.</p>
+<p>The <code>rep</code> keyword (stands for “repeat”) is for avoiding ambiguity between value multiplication, while keeping a semantically-clear syntax.</p>
+<h2 id="Array-indexing"><a href="#Array-indexing" class="headerlink" title="Array indexing"></a>Array indexing</h2><p>Same as C, just:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">let arr = [2, 3, 4]</span><br><span class="line">let _ = print(arr[0])</span><br></pre></td></tr></table></figure>
+
+<p><code>0</code> means the first element.</p>
+<h2 id="Array-modification"><a href="#Array-modification" class="headerlink" title="Array modification"></a>Array modification</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let n = input</span><br><span class="line">let arr, x, y = [input rep n], input, input</span><br><span class="line">  upd arr[x &lt;- arr[y], y &lt;- arr[x]], x, y</span><br></pre></td></tr></table></figure>
+
+<p>Please note that an instance of array is affine, meaning that:</p>
+<ul>
+<li>After being referenced as a whole (not indexing), it can no longer be used</li>
+<li>Being referenced is not mandatory</li>
+</ul>
+<p>For example, this is illegal:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let n = input</span><br><span class="line">let arr, x, y = [input rep n], input, input</span><br><span class="line">  upd arr[x &lt;- arr[y]][y &lt;- arr[x]], x, y</span><br></pre></td></tr></table></figure>
+
+<p>Reason: after calculating <code>arr[x &lt;- arr[y]]</code>, <code>arr</code> is no longer referenceable. Please always remember that <code>let</code> is <em>associating a name with contents of specific memory address</em>, not manipulating memory directly, which is the duty of referencing.</p>
+<h2 id="Array-length"><a href="#Array-length" class="headerlink" title="Array length"></a>Array length</h2><p>I would probably use a struct to represent an array:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">array</span> &#123;</span></span><br><span class="line">  <span class="type">int</span> length;</span><br><span class="line">  <span class="type">int</span> *ptr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>This way, you can refer to the length (capacity) of an array with:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">let arr = [1, 2, 3]</span><br><span class="line">let _ = print(len(arr)) // 3</span><br></pre></td></tr></table></figure>
+
+<p>Just like Golang.</p>
+<h2 id="Array-typing"><a href="#Array-typing" class="headerlink" title="Array typing"></a>Array typing</h2><p>I’d like to add dependently-typed arrays afterwards, but for now I’ll just make a simple one:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">let f = (1 arr: int[]) =&gt; arr[0 &lt;- 5]</span><br><span class="line">let _ = print(f([2, 3, 4])[0]) // 5</span><br></pre></td></tr></table></figure>
+
+<p>Just like C.</p>
+<h2 id="Not-supported"><a href="#Not-supported" class="headerlink" title="Not supported"></a>Not supported</h2><h3 id="Array-slicing"><a href="#Array-slicing" class="headerlink" title="Array slicing"></a>Array slicing</h3><p>Slicing might seem convenient, but it coexists with concatenation, which violates the philosophy of silent-lang: view mutations as <em>silent</em> functions from state to state, not how to dynamically construct the result. It also introduces great challenge when linear-checking.</p>
+<h3 id="Dynamic-lengthed-Array"><a href="#Dynamic-lengthed-Array" class="headerlink" title="Dynamic-lengthed Array"></a>Dynamic-lengthed Array</h3><p>One finishing structs in silent-lang, dynamic-lengthed array can be implemented <em>inside</em> silent-lang. I want the core language to contain as few features as possible.</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/friend/">Friend</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-creation"><span class="toc-number">1.</span> <span class="toc-text">Array creation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-indexing"><span class="toc-number">2.</span> <span class="toc-text">Array indexing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-modification"><span class="toc-number">3.</span> <span class="toc-text">Array modification</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-length"><span class="toc-number">4.</span> <span class="toc-text">Array length</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-typing"><span class="toc-number">5.</span> <span class="toc-text">Array typing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Not-supported"><span class="toc-number">6.</span> <span class="toc-text">Not supported</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Array-slicing"><span class="toc-number">6.1.</span> <span class="toc-text">Array slicing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dynamic-lengthed-Array"><span class="toc-number">6.2.</span> <span class="toc-text">Dynamic-lengthed Array</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://www.5eqn.top/2023/09/15/silent-array/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://www.5eqn.top/2023/09/15/silent-array/&text=Silent-Lang | Array Design"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://www.5eqn.top/2023/09/15/silent-array/&title=Silent-Lang | Array Design"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://www.5eqn.top/2023/09/15/silent-array/&is_video=false&description=Silent-Lang | Array Design"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Silent-Lang | Array Design&body=Check out this article: https://www.5eqn.top/2023/09/15/silent-array/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://www.5eqn.top/2023/09/15/silent-array/&title=Silent-Lang | Array Design"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://www.5eqn.top/2023/09/15/silent-array/&title=Silent-Lang | Array Design"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://www.5eqn.top/2023/09/15/silent-array/&title=Silent-Lang | Array Design"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://www.5eqn.top/2023/09/15/silent-array/&title=Silent-Lang | Array Design"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://www.5eqn.top/2023/09/15/silent-array/&name=Silent-Lang | Array Design&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://www.5eqn.top/2023/09/15/silent-array/&t=Silent-Lang | Array Design"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/friend/">Friend</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
