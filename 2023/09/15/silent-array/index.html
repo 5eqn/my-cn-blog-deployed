@@ -6,15 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-    <meta name="description" content="（还没时间翻译，等等鼠鼠先写完算法和概率论作业吧……） I want arrays in silent-lang to be as intuitive as possible, this is what happened to my design. Array creation1234let n &#x3D; inputlet initedArray &#x3D; [0 rep n]let uninitedArray">
+    <meta name="description" content="我希望绷语言中的数组尽可能符合直觉，这是我的设计发生的变化。 数组创建1234let n &#x3D; inputlet initedArray &#x3D; [0 rep n]let uninitedArray &#x3D; [rep n]let fixedArray &#x3D; [2, 3, 4]  未初始化的数组的值是随机的，但应该被视为不可访问。 使用 rep 关键字（代表 repeat）而不是 * 或 x，是为了避免和值的直">
 <meta property="og:type" content="article">
 <meta property="og:title" content="绷语言 | 数组设计">
 <meta property="og:url" content="https://blog.5eqn.top/2023/09/15/silent-array/index.html">
 <meta property="og:site_name" content="5eqn 的博客">
-<meta property="og:description" content="（还没时间翻译，等等鼠鼠先写完算法和概率论作业吧……） I want arrays in silent-lang to be as intuitive as possible, this is what happened to my design. Array creation1234let n &#x3D; inputlet initedArray &#x3D; [0 rep n]let uninitedArray">
+<meta property="og:description" content="我希望绷语言中的数组尽可能符合直觉，这是我的设计发生的变化。 数组创建1234let n &#x3D; inputlet initedArray &#x3D; [0 rep n]let uninitedArray &#x3D; [rep n]let fixedArray &#x3D; [2, 3, 4]  未初始化的数组的值是随机的，但应该被视为不可访问。 使用 rep 关键字（代表 repeat）而不是 * 或 x，是为了避免和值的直">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-09-15T14:54:44.000Z">
-<meta property="article:modified_time" content="2023-09-18T02:13:11.379Z">
+<meta property="article:modified_time" content="2023-09-18T06:38:29.482Z">
 <meta property="article:author" content="5eqn">
 <meta property="article:tag" content="PL">
 <meta property="article:tag" content="绷语言">
@@ -132,7 +132,7 @@
     
     
       <div id="toc">
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-creation"><span class="toc-number">1.</span> <span class="toc-text">Array creation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-indexing"><span class="toc-number">2.</span> <span class="toc-text">Array indexing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-modification"><span class="toc-number">3.</span> <span class="toc-text">Array modification</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-length"><span class="toc-number">4.</span> <span class="toc-text">Array length</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-typing"><span class="toc-number">5.</span> <span class="toc-text">Array typing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Not-supported"><span class="toc-number">6.</span> <span class="toc-text">Not supported</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Array-slicing"><span class="toc-number">6.1.</span> <span class="toc-text">Array slicing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dynamic-lengthed-Array"><span class="toc-number">6.2.</span> <span class="toc-text">Dynamic-lengthed Array</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%88%9B%E5%BB%BA"><span class="toc-number">1.</span> <span class="toc-text">数组创建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E6%A0%87%E5%BA%8F"><span class="toc-number">2.</span> <span class="toc-text">数组标序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E4%BF%AE%E6%94%B9"><span class="toc-number">3.</span> <span class="toc-text">数组修改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E9%95%BF%E5%BA%A6"><span class="toc-number">4.</span> <span class="toc-text">数组长度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E7%B1%BB%E5%9E%8B"><span class="toc-number">5.</span> <span class="toc-text">数组类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E6%94%AF%E6%8C%81%E7%9A%84%E7%89%B9%E6%80%A7"><span class="toc-number">6.</span> <span class="toc-text">不支持的特性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%90%88%E5%B9%B6"><span class="toc-number">6.1.</span> <span class="toc-text">数组合并</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%AE%9A%E9%95%BF%E6%95%B0%E7%BB%84"><span class="toc-number">6.2.</span> <span class="toc-text">不定长数组</span></a></li></ol></li></ol>
       </div>
     
   </span>
@@ -177,40 +177,40 @@
   
 
   <div class="content e-content" itemprop="articleBody">
-    <p>（还没时间翻译，等等鼠鼠先写完算法和概率论作业吧……）</p>
-<p>I want arrays in <a target="_blank" rel="noopener" href="https://github.com/5eqn/silent-lang">silent-lang</a> to be as intuitive as possible, this is what happened to my design.</p>
-<h2 id="Array-creation"><a href="#Array-creation" class="headerlink" title="Array creation"></a>Array creation</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">let n = input</span><br><span class="line">let initedArray = [0 rep n]</span><br><span class="line">let uninitedArray = [rep n]</span><br><span class="line">let fixedArray = [2, 3, 4]</span><br></pre></td></tr></table></figure>
+    <p>我希望<a target="_blank" rel="noopener" href="https://github.com/5eqn/silent-lang">绷语言</a>中的数组尽可能符合直觉，这是我的设计发生的变化。</p>
+<h2 id="数组创建"><a href="#数组创建" class="headerlink" title="数组创建"></a>数组创建</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">let n = input</span><br><span class="line">let initedArray = [0 rep n]</span><br><span class="line">let uninitedArray = [rep n]</span><br><span class="line">let fixedArray = [2, 3, 4]</span><br></pre></td></tr></table></figure>
 
-<p>Uninited array begins with random values, they should be treated as non-accessible.</p>
-<p>The <code>rep</code> keyword (stands for “repeat”) is for avoiding ambiguity between value multiplication, while keeping a semantically-clear syntax.</p>
-<h2 id="Array-indexing"><a href="#Array-indexing" class="headerlink" title="Array indexing"></a>Array indexing</h2><p>Same as C, just:</p>
+<p>未初始化的数组的值是随机的，但应该被视为不可访问。</p>
+<p>使用 <code>rep</code> 关键字（代表 repeat）而不是 <code>*</code> 或 <code>x</code>，是为了避免和值的直接相乘混淆，且让语义尽可能清晰。</p>
+<h2 id="数组标序"><a href="#数组标序" class="headerlink" title="数组标序"></a>数组标序</h2><p>和 C 一样，直接：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">let arr = [2, 3, 4]</span><br><span class="line">let _ = print(arr[0])</span><br></pre></td></tr></table></figure>
 
-<p><code>0</code> means the first element.</p>
-<h2 id="Array-modification"><a href="#Array-modification" class="headerlink" title="Array modification"></a>Array modification</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let n = input</span><br><span class="line">let arr, x, y = [input rep n], input, input</span><br><span class="line">  upd arr[x &lt;- arr[y], y &lt;- arr[x]], x, y</span><br></pre></td></tr></table></figure>
+<p><code>0</code> 代表第一个元素。</p>
+<h2 id="数组修改"><a href="#数组修改" class="headerlink" title="数组修改"></a>数组修改</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let n = input</span><br><span class="line">let arr, x, y = [input rep n], input, input</span><br><span class="line">  upd arr[x &lt;- arr[y], y &lt;- arr[x]], x, y</span><br></pre></td></tr></table></figure>
 
-<p>Please note that an instance of array is affine, meaning that:</p>
+<p>请注意数组是仿射的，也就是说：</p>
 <ul>
-<li>After being referenced as a whole (not indexing), it can no longer be used</li>
-<li>Being referenced is not mandatory</li>
+<li>在被整体引用（不包括取一个数的情况）时，不再能被引用</li>
+<li>不一定要被引用</li>
 </ul>
-<p>For example, this is illegal:</p>
+<p>这和 Rust 的内存管理系统实质上是一样的。例如，以下代码是不合法的：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let n = input</span><br><span class="line">let arr, x, y = [input rep n], input, input</span><br><span class="line">  upd arr[x &lt;- arr[y]][y &lt;- arr[x]], x, y</span><br></pre></td></tr></table></figure>
 
-<p>Reason: after calculating <code>arr[x &lt;- arr[y]]</code>, <code>arr</code> is no longer referenceable. Please always remember that <code>let</code> is <em>associating a name with contents of specific memory address</em>, not manipulating memory directly, which is the duty of referencing.</p>
-<h2 id="Array-length"><a href="#Array-length" class="headerlink" title="Array length"></a>Array length</h2><p>I would probably use a struct to represent an array:</p>
+<p>不合法是因为在计算 <code>arr[x &lt;- arr[y]]</code> 之后，<code>arr</code> 不再能被引用。</p>
+<p>一个好的直觉是把 <code>let</code> 看成是在关联一个名字和一个内存地址的东西，而不是直接操作内存。只有作为整体引用（例如数组修改）才会操作内存，虽然看起来是在产生一个新的值。</p>
+<h2 id="数组长度"><a href="#数组长度" class="headerlink" title="数组长度"></a>数组长度</h2><p>我可能会使用一个结构体来代表一个数组：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">array</span> &#123;</span></span><br><span class="line">  <span class="type">int</span> length;</span><br><span class="line">  <span class="type">int</span> *ptr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>This way, you can refer to the length (capacity) of an array with:</p>
+<p>有了这样的结构体，你可以这样获取一个数组的长度（容量）：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">let arr = [1, 2, 3]</span><br><span class="line">let _ = print(len(arr)) // 3</span><br></pre></td></tr></table></figure>
 
-<p>Just like Golang.</p>
-<h2 id="Array-typing"><a href="#Array-typing" class="headerlink" title="Array typing"></a>Array typing</h2><p>I’d like to add dependently-typed arrays afterwards, but for now I’ll just make a simple one:</p>
+<p>就像 Go 语言一样。</p>
+<h2 id="数组类型"><a href="#数组类型" class="headerlink" title="数组类型"></a>数组类型</h2><p>我后面想加入依值类型，但现在我只想写简单的版本：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">let f = (1 arr: int[]) =&gt; arr[0 &lt;- 5]</span><br><span class="line">let _ = print(f([2, 3, 4])[0]) // 5</span><br></pre></td></tr></table></figure>
 
-<p>Just like C.</p>
-<h2 id="Not-supported"><a href="#Not-supported" class="headerlink" title="Not supported"></a>Not supported</h2><h3 id="Array-slicing"><a href="#Array-slicing" class="headerlink" title="Array slicing"></a>Array slicing</h3><p>Slicing might seem convenient, but it coexists with concatenation, which violates the philosophy of silent-lang: view mutations as <em>silent</em> functions from state to state, not how to dynamically construct the result. It also introduces great challenge when linear-checking.</p>
-<h3 id="Dynamic-lengthed-Array"><a href="#Dynamic-lengthed-Array" class="headerlink" title="Dynamic-lengthed Array"></a>Dynamic-lengthed Array</h3><p>Once finishing structs in silent-lang, dynamic-lengthed array can be implemented <em>inside</em> silent-lang. I want the core language to contain as few features as possible.</p>
+<p>就像 C 语言一样。</p>
+<h2 id="不支持的特性"><a href="#不支持的特性" class="headerlink" title="不支持的特性"></a>不支持的特性</h2><h3 id="数组合并"><a href="#数组合并" class="headerlink" title="数组合并"></a>数组合并</h3><p>数组合并是一个构造方式，但在绷语言的设计哲学中，我们希望任何对数组发生的变化只是从上一状态而来。</p>
+<h3 id="不定长数组"><a href="#不定长数组" class="headerlink" title="不定长数组"></a>不定长数组</h3><p>不定长数组可以通过定长数组直接实现，没必要作为核心语言特性。</p>
 
   </div>
 </article>
@@ -242,7 +242,7 @@
     
     
       <div id="toc-footer" style="display: none">
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-creation"><span class="toc-number">1.</span> <span class="toc-text">Array creation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-indexing"><span class="toc-number">2.</span> <span class="toc-text">Array indexing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-modification"><span class="toc-number">3.</span> <span class="toc-text">Array modification</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-length"><span class="toc-number">4.</span> <span class="toc-text">Array length</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Array-typing"><span class="toc-number">5.</span> <span class="toc-text">Array typing</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Not-supported"><span class="toc-number">6.</span> <span class="toc-text">Not supported</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Array-slicing"><span class="toc-number">6.1.</span> <span class="toc-text">Array slicing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dynamic-lengthed-Array"><span class="toc-number">6.2.</span> <span class="toc-text">Dynamic-lengthed Array</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%88%9B%E5%BB%BA"><span class="toc-number">1.</span> <span class="toc-text">数组创建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E6%A0%87%E5%BA%8F"><span class="toc-number">2.</span> <span class="toc-text">数组标序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E4%BF%AE%E6%94%B9"><span class="toc-number">3.</span> <span class="toc-text">数组修改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E9%95%BF%E5%BA%A6"><span class="toc-number">4.</span> <span class="toc-text">数组长度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E7%B1%BB%E5%9E%8B"><span class="toc-number">5.</span> <span class="toc-text">数组类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E6%94%AF%E6%8C%81%E7%9A%84%E7%89%B9%E6%80%A7"><span class="toc-number">6.</span> <span class="toc-text">不支持的特性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%90%88%E5%B9%B6"><span class="toc-number">6.1.</span> <span class="toc-text">数组合并</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%AE%9A%E9%95%BF%E6%95%B0%E7%BB%84"><span class="toc-number">6.2.</span> <span class="toc-text">不定长数组</span></a></li></ol></li></ol>
       </div>
     
 
