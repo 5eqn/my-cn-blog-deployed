@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="这一次对绷语言的特性进行了大改，会在下面详细阐述。 CF 737 D. (*2200)原题 C++1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980">
+<meta property="og:type" content="article">
+<meta property="og:title" content="绷语言 | 设计哲学 Pt.4">
+<meta property="og:url" content="https://blog.5eqn.top/2023/09/29/silent-philo-4/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="这一次对绷语言的特性进行了大改，会在下面详细阐述。 CF 737 D. (*2200)原题 C++1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-09-29T15:36:31.000Z">
+<meta property="article:modified_time" content="2023-09-29T16:13:13.804Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="PL">
+<meta property="article:tag" content="绷语言">
+<meta property="article:tag" content="技术性">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>绷语言 | 设计哲学 Pt.4</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/09/29/silent-philo-3/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/09/29/silent-philo-4/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&text=绷语言 | 设计哲学 Pt.4"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&title=绷语言 | 设计哲学 Pt.4"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&is_video=false&description=绷语言 | 设计哲学 Pt.4"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=绷语言 | 设计哲学 Pt.4&body=Check out this article: https://blog.5eqn.top/2023/09/29/silent-philo-4/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&title=绷语言 | 设计哲学 Pt.4"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&title=绷语言 | 设计哲学 Pt.4"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&title=绷语言 | 设计哲学 Pt.4"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&title=绷语言 | 设计哲学 Pt.4"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&name=绷语言 | 设计哲学 Pt.4&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/09/29/silent-philo-4/&t=绷语言 | 设计哲学 Pt.4"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#CF-737-D-2200"><span class="toc-number">1.</span> <span class="toc-text">CF 737 D. (*2200)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#C"><span class="toc-number">1.1.</span> <span class="toc-text">C++</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80"><span class="toc-number">1.2.</span> <span class="toc-text">绷语言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E6%80%A7%E8%AF%B4%E6%98%8E"><span class="toc-number">1.3.</span> <span class="toc-text">特性说明</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        绷语言 | 设计哲学 Pt.4
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-09-29T15:36:31.000Z" class="dt-published" itemprop="datePublished">2023-09-29</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PL/" rel="tag">PL</a>, <a class="p-category" href="/tags/%E6%8A%80%E6%9C%AF%E6%80%A7/" rel="tag">技术性</a>, <a class="p-category" href="/tags/%E7%BB%B7%E8%AF%AD%E8%A8%80/" rel="tag">绷语言</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>这一次对绷语言的特性进行了大改，会在下面详细阐述。</p>
+<h2 id="CF-737-D-2200"><a href="#CF-737-D-2200" class="headerlink" title="CF 737 D. (*2200)"></a>CF 737 D. (*2200)</h2><p><a target="_blank" rel="noopener" href="https://codeforces.com/contest/1557/problem/D">原题</a></p>
+<h3 id="C"><a href="#C" class="headerlink" title="C++"></a>C++</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utility&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> seg &#123;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> N = <span class="number">6e5</span> + <span class="number">4</span>;</span><br><span class="line"><span class="type">int</span> n;</span><br><span class="line">std::pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt; a[N &lt;&lt; <span class="number">2</span>];</span><br><span class="line">std::pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt; t[N &lt;&lt; <span class="number">2</span>];</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">int</span> <span class="title">mid</span><span class="params">(<span class="type">int</span> l, <span class="type">int</span> r)</span> </span>&#123; <span class="keyword">return</span> l + (r - l) / <span class="number">2</span>; &#125;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">pull</span><span class="params">(<span class="type">int</span> p)</span> </span>&#123; a[p] = std::<span class="built_in">max</span>(a[p &lt;&lt; <span class="number">1</span>], a[p &lt;&lt; <span class="number">1</span> | <span class="number">1</span>]); &#125;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  std::<span class="built_in">fill</span>(a, a + (n &lt;&lt; <span class="number">2</span>), std::<span class="built_in">pair</span>&lt;<span class="type">int</span>, <span class="type">int</span>&gt;(<span class="number">0</span>, <span class="number">-1</span>));</span><br><span class="line">  std::<span class="built_in">fill</span>(t, t + (n &lt;&lt; <span class="number">2</span>), std::<span class="built_in">pair</span>&lt;<span class="type">int</span>, <span class="type">int</span>&gt;(<span class="number">0</span>, <span class="number">-1</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">int</span> l, <span class="type">int</span> r, <span class="type">int</span> p)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (r - l != <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="type">int</span> m = <span class="built_in">mid</span>(l, r);</span><br><span class="line">    a[p &lt;&lt; <span class="number">1</span>] = std::<span class="built_in">max</span>(a[p &lt;&lt; <span class="number">1</span>], t[p]);</span><br><span class="line">    a[p &lt;&lt; <span class="number">1</span> | <span class="number">1</span>] = std::<span class="built_in">max</span>(a[p &lt;&lt; <span class="number">1</span> | <span class="number">1</span>], t[p]);</span><br><span class="line">    t[p &lt;&lt; <span class="number">1</span>] = std::<span class="built_in">max</span>(t[p &lt;&lt; <span class="number">1</span>], t[p]);</span><br><span class="line">    t[p &lt;&lt; <span class="number">1</span> | <span class="number">1</span>] = std::<span class="built_in">max</span>(t[p &lt;&lt; <span class="number">1</span> | <span class="number">1</span>], t[p]);</span><br><span class="line">  &#125;</span><br><span class="line">  t[p] = &#123;<span class="number">0</span>, <span class="number">-1</span>&#125;;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span> <span class="title">add</span><span class="params">(<span class="type">int</span> lq, <span class="type">int</span> rq, std::pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt; b, <span class="type">int</span> l = <span class="number">0</span>, <span class="type">int</span> r = n,</span></span></span><br><span class="line"><span class="params"><span class="function">                <span class="type">int</span> p = <span class="number">1</span>)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (r &lt;= l)</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  <span class="built_in">push</span>(l, r, p);</span><br><span class="line">  <span class="keyword">if</span> (lq &lt;= l &amp;&amp; rq &gt;= r) &#123;</span><br><span class="line">    a[p] = std::<span class="built_in">max</span>(a[p], b);</span><br><span class="line">    t[p] = std::<span class="built_in">max</span>(t[p], b);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="type">int</span> m = <span class="built_in">mid</span>(l, r);</span><br><span class="line">    <span class="keyword">if</span> (lq &lt; m)</span><br><span class="line">      <span class="built_in">add</span>(lq, rq, b, l, m, p &lt;&lt; <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (rq &gt; m)</span><br><span class="line">      <span class="built_in">add</span>(lq, rq, b, m, r, p &lt;&lt; <span class="number">1</span> | <span class="number">1</span>);</span><br><span class="line">    <span class="built_in">pull</span>(p);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> std::pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt; <span class="title">query</span><span class="params">(<span class="type">int</span> lq, <span class="type">int</span> rq, <span class="type">int</span> l = <span class="number">0</span>, <span class="type">int</span> r = n,</span></span></span><br><span class="line"><span class="params"><span class="function">                                 <span class="type">int</span> p = <span class="number">1</span>)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (r &lt;= l)</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="number">0</span>, <span class="number">-1</span>&#125;;</span><br><span class="line">  std::pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt; f = &#123;<span class="number">0</span>, <span class="number">-1</span>&#125;;</span><br><span class="line">  <span class="built_in">push</span>(l, r, p);</span><br><span class="line">  <span class="keyword">if</span> (lq &lt;= l &amp;&amp; rq &gt;= r) &#123;</span><br><span class="line">    f = a[p];</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="type">int</span> m = <span class="built_in">mid</span>(l, r);</span><br><span class="line">    <span class="keyword">if</span> (lq &lt; m)</span><br><span class="line">      f = std::<span class="built_in">max</span>(f, <span class="built_in">query</span>(lq, rq, l, m, p &lt;&lt; <span class="number">1</span>));</span><br><span class="line">    <span class="keyword">if</span> (rq &gt; m)</span><br><span class="line">      f = std::<span class="built_in">max</span>(f, <span class="built_in">query</span>(lq, rq, m, r, p &lt;&lt; <span class="number">1</span> | <span class="number">1</span>));</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> f;</span><br><span class="line">&#125;</span><br><span class="line">&#125; <span class="comment">// namespace seg</span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> N = <span class="number">3e5</span> + <span class="number">4</span>;</span><br><span class="line">std::vector&lt;std::pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;&gt; region[N];</span><br><span class="line">std::vector&lt;<span class="type">int</span>&gt; bounds;</span><br><span class="line">std::vector&lt;<span class="type">int</span>&gt; prev;</span><br><span class="line"><span class="type">int</span> vis[N];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">disc</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> std::<span class="built_in">upper_bound</span>(bounds.<span class="built_in">begin</span>(), bounds.<span class="built_in">end</span>(), x) - bounds.<span class="built_in">begin</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  std::ios::<span class="built_in">sync_with_stdio</span>(<span class="literal">false</span>);</span><br><span class="line">  std::cin.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">  std::cout.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// read input</span></span><br><span class="line">  <span class="type">int</span> n, m;</span><br><span class="line">  std::cin &gt;&gt; n &gt;&gt; m;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</span><br><span class="line">    <span class="type">int</span> j, l, r;</span><br><span class="line">    std::cin &gt;&gt; j &gt;&gt; l &gt;&gt; r;</span><br><span class="line">    region[j - <span class="number">1</span>].<span class="built_in">push_back</span>(&#123;l, r&#125;);</span><br><span class="line">    bounds.<span class="built_in">push_back</span>(l);</span><br><span class="line">    bounds.<span class="built_in">push_back</span>(r);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// make discrete</span></span><br><span class="line">  std::<span class="built_in">sort</span>(bounds.<span class="built_in">begin</span>(), bounds.<span class="built_in">end</span>());</span><br><span class="line">  bounds.<span class="built_in">erase</span>(std::<span class="built_in">unique</span>(bounds.<span class="built_in">begin</span>(), bounds.<span class="built_in">end</span>()), bounds.<span class="built_in">end</span>());</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;it : region[i]) &#123;</span><br><span class="line">      it.first = <span class="built_in">disc</span>(it.first);</span><br><span class="line">      it.second = <span class="built_in">disc</span>(it.second);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// build seg tree</span></span><br><span class="line">  seg::n = bounds.<span class="built_in">size</span>() + <span class="number">2</span>;</span><br><span class="line">  seg::<span class="built_in">build</span>();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// dp on seg tree</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">    std::pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt; last = &#123;<span class="number">0</span>, <span class="number">-1</span>&#125;;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it : region[i]) &#123;</span><br><span class="line">      <span class="keyword">auto</span> res = seg::<span class="built_in">query</span>(it.first, it.second + <span class="number">1</span>);</span><br><span class="line">      <span class="keyword">if</span> (i == <span class="number">0</span> &amp;&amp; res.second != <span class="number">-1</span>) &#123;</span><br><span class="line">        std::cout &lt;&lt; it.first &lt;&lt; <span class="string">&#x27; &#x27;</span> &lt;&lt; it.second &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">        std::cout &lt;&lt; std::<span class="built_in">max</span>(last, last).second &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      last = std::<span class="built_in">max</span>(last, res);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it : region[i]) &#123;</span><br><span class="line">      seg::<span class="built_in">add</span>(it.first, it.second + <span class="number">1</span>, &#123;last.first + <span class="number">1</span>, i&#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    prev.<span class="built_in">push_back</span>(last.second);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// output result</span></span><br><span class="line">  <span class="keyword">auto</span> res = seg::<span class="built_in">query</span>(<span class="number">0</span>, seg::n);</span><br><span class="line">  <span class="type">int</span> ptr = res.second;</span><br><span class="line">  <span class="keyword">while</span> (ptr &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">    vis[ptr] = <span class="number">1</span>;</span><br><span class="line">    ptr = prev[ptr];</span><br><span class="line">  &#125;</span><br><span class="line">  std::cout &lt;&lt; n - res.first &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!vis[i]) &#123;</span><br><span class="line">      std::cout &lt;&lt; i + <span class="number">1</span> &lt;&lt; <span class="string">&#x27; &#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="绷语言"><a href="#绷语言" class="headerlink" title="绷语言"></a>绷语言</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">Reg: Type</span><br><span class="line">reg: (l: Int) -&gt; (r: Int) -&gt; Reg</span><br><span class="line"></span><br><span class="line">sep: Reg -&gt; Reg -&gt; Bool</span><br><span class="line">sep(a, b) = a.r &lt;= a.l || b.r &lt;= b.l || a.r &lt;= b.l || b.r &lt;= a.l</span><br><span class="line"></span><br><span class="line">has: Reg -&gt; Reg -&gt; Bool</span><br><span class="line">has(large, small) = large.l &lt;= small.l &amp;&amp; small.r &lt;= large.r</span><br><span class="line"></span><br><span class="line">mid: Reg -&gt; Int</span><br><span class="line">mid(reg(l, r)) = l + (r - l) / 2</span><br><span class="line"></span><br><span class="line">left: Reg -&gt; Reg</span><br><span class="line">left(x@reg(l, r)) = reg(l, x.mid)</span><br><span class="line"></span><br><span class="line">right: Reg -&gt; Reg</span><br><span class="line">right(x@reg(l, r)) = reg(x.mid, r)</span><br><span class="line"></span><br><span class="line">BinaryOp: Type</span><br><span class="line">BinaryOp(T) = T -&gt; T -&gt; T</span><br><span class="line"></span><br><span class="line">Seg: Type</span><br><span class="line">seg: (~: BinaryOp(Int, Int)) -&gt; </span><br><span class="line">     (n: Int) -&gt; (tree: [Int, Int]) -&gt; Seg</span><br><span class="line"></span><br><span class="line">build: BinaryOp (Int, Int), Int, (Int, Int) -&gt; Seg</span><br><span class="line">build(~, n, base) = seg ~ n [base for 4n]</span><br><span class="line"></span><br><span class="line">push: Seg -&gt; Int -&gt; Seg</span><br><span class="line">push(s@seg(~, n, tree))(p) = s</span><br><span class="line">  mut _.tree[2p] ~= tree[p]</span><br><span class="line">  mut _.tree[2p + 1] ~= tree[p]</span><br><span class="line"></span><br><span class="line">pull: Seg -&gt; Int -&gt; Seg</span><br><span class="line">pull(s@seg(~, n, tree))(p) = s</span><br><span class="line">  mut _.tree[p] = tree[2p] ~ tree[2p + 1]</span><br><span class="line"></span><br><span class="line">setF: Seg -&gt; (Int, Int), Reg, Reg, Int -&gt; Seg</span><br><span class="line">setF(s@seg(~, n, tree))(x, query, focus, p) =</span><br><span class="line">  if query.sep(focus) then s else</span><br><span class="line">  if query.has(focus) then s mut _.tree[p] ~= value else</span><br><span class="line">  s.push(p).setF(x, query, focus.left).setF(x, query, focus.right).pull(p)</span><br><span class="line"></span><br><span class="line">set: Seg -&gt; (Int, Int), Reg -&gt; Seg</span><br><span class="line">set(s@seg(_, n, _))(x, query) = setF(s)(x, query, reg(0, n), 1)</span><br><span class="line">  </span><br><span class="line">getF: Seg -&gt; Reg, Reg, Int -&gt; Int, Int</span><br><span class="line">getF(s@seg(~, n, tree))(query, focus, p) =</span><br><span class="line">  if query.sep(focus) then 0, -1 else</span><br><span class="line">  if query.has(focus) then tree[p] else</span><br><span class="line">  let sp = s.push(p) in sp.getF(query, focus.left) ~ sp.getF(query, focus.right)</span><br><span class="line"></span><br><span class="line">get: Seg -&gt; Reg -&gt; (Int, Int)</span><br><span class="line">get(s@seg(_, n, _))(query) = getF(s)(query, reg(0, n), 1)</span><br><span class="line"></span><br><span class="line">main: Int</span><br><span class="line">main = </span><br><span class="line">  // make discrete</span><br><span class="line">  let n, m = input, input</span><br><span class="line">  let regs, ids, rem = [[] for n], [], m rec</span><br><span class="line">    if rem == 0 then nope else</span><br><span class="line">    let i, l, r = input, input, input + 1</span><br><span class="line">    (regs mut _[i - 1] ::= l, r), ids :: l :: r, rem - 1</span><br><span class="line">    mut regs, ids.sort(&lt;).unique, 0</span><br><span class="line">    mut regs.map(pair =&gt; pair.map(ids.find)), ids, 0</span><br><span class="line">  // dp on seg tree</span><br><span class="line">  let prev, seg, curr = [], build(max, ids.length, (0, -1)), 0 rec</span><br><span class="line">    if curr == n then nope else</span><br><span class="line">    let res = regs[curr].fold((0, -1), (reg =&gt; res =&gt; max(res, seg.get(reg))))</span><br><span class="line">    let new_res = reg(res[0] + 1, curr)</span><br><span class="line">    let new_seg = regs[curr].fold(seg, (reg =&gt; seg =&gt; seg.set(new_res, reg)))</span><br><span class="line">    prev :: res[1], new_seg, curr + 1</span><br><span class="line">  // output result</span><br><span class="line">  let res = seg.get(reg(0, seg.n))</span><br><span class="line">  let vis, curr = [0 for n], res[1] rec</span><br><span class="line">    if curr == -1 then nope else</span><br><span class="line">    vis mut _[curr] = 1, prev[curr]</span><br><span class="line">  run print(n - res[0])</span><br><span class="line">  run for i in n</span><br><span class="line">    if vis[i] then null else print(i + 1)</span><br></pre></td></tr></table></figure>
+
+<h3 id="特性说明"><a href="#特性说明" class="headerlink" title="特性说明"></a>特性说明</h3><p>本次进行了一些大改动，例如：</p>
+<ul>
+<li>为区分类型变量和值变量，提倡类型变量名采用 PascalCase，值变量采用 camelCase</li>
+<li>为遵循编程语言建模人类认知的原则，鼓励用户把所有「自然的认知过程」提取成一个单独的函数</li>
+<li>为方便用户想象函数的基本结构，强制要求对单独的函数进行独立类型标注</li>
+<li>为消除柯里化的函数给朴素直觉带来的不良影响，鼓励用户以模式匹配形式定义函数</li>
+<li>为统一「编辑」意图相关的语法，将 Lens 内置到 <code>mut</code></li>
+</ul>
+<p>目前来看，绷语言的设计哲学很清晰：让用户直接把思维中的「函数」描述出来。只是为实现这点，绷语言相比传统函数式编程语言做出了以下一点修改：</p>
+<ul>
+<li>允许函数形成自环（自己更新自己，使用 <code>mut</code> 表示单次更新，使用 <code>rec</code> 表示循环更新）</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#CF-737-D-2200"><span class="toc-number">1.</span> <span class="toc-text">CF 737 D. (*2200)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#C"><span class="toc-number">1.1.</span> <span class="toc-text">C++</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80"><span class="toc-number">1.2.</span> <span class="toc-text">绷语言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E6%80%A7%E8%AF%B4%E6%98%8E"><span class="toc-number">1.3.</span> <span class="toc-text">特性说明</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/09/29/silent-philo-4/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&text=绷语言 | 设计哲学 Pt.4"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&title=绷语言 | 设计哲学 Pt.4"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&is_video=false&description=绷语言 | 设计哲学 Pt.4"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=绷语言 | 设计哲学 Pt.4&body=Check out this article: https://blog.5eqn.top/2023/09/29/silent-philo-4/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&title=绷语言 | 设计哲学 Pt.4"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&title=绷语言 | 设计哲学 Pt.4"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&title=绷语言 | 设计哲学 Pt.4"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&title=绷语言 | 设计哲学 Pt.4"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/09/29/silent-philo-4/&name=绷语言 | 设计哲学 Pt.4&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/09/29/silent-philo-4/&t=绷语言 | 设计哲学 Pt.4"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
