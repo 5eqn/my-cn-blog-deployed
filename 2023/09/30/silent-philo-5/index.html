@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="CF 846 B. (*1100)显然本题无法对数组选段情况进行枚举，因此尝试在数学上找到公式。 由于涉及求和，GCD 在加法下亦性质良好，不难注意到应使用前缀和。 CPP1234567891011121314151617181920212223242526272829#include &lt;algorithm&gt;#include &lt;iostream&gt;#include &lt;n">
+<meta property="og:type" content="article">
+<meta property="og:title" content="绷语言 | 设计哲学 Pt.5 和一点元组语法迷思">
+<meta property="og:url" content="https://blog.5eqn.top/2023/09/30/silent-philo-5/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="CF 846 B. (*1100)显然本题无法对数组选段情况进行枚举，因此尝试在数学上找到公式。 由于涉及求和，GCD 在加法下亦性质良好，不难注意到应使用前缀和。 CPP1234567891011121314151617181920212223242526272829#include &lt;algorithm&gt;#include &lt;iostream&gt;#include &lt;n">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-09-30T06:29:59.000Z">
+<meta property="article:modified_time" content="2023-09-30T07:19:31.932Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="PL">
+<meta property="article:tag" content="绷语言">
+<meta property="article:tag" content="技术性">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>绷语言 | 设计哲学 Pt.5 和一点元组语法迷思</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/09/29/silent-philo-4/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/09/30/silent-philo-5/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&text=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&title=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&is_video=false&description=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思&body=Check out this article: https://blog.5eqn.top/2023/09/30/silent-philo-5/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&title=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&title=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&title=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&title=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&name=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/09/30/silent-philo-5/&t=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#CF-846-B-1100"><span class="toc-number">1.</span> <span class="toc-text">CF 846 B. (*1100)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CPP"><span class="toc-number">1.1.</span> <span class="toc-text">CPP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80"><span class="toc-number">1.2.</span> <span class="toc-text">绷语言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%97%E5%8F%B7%E7%BB%93%E5%90%88%E5%BE%8B%E5%93%B2%E5%AD%A6"><span class="toc-number">1.3.</span> <span class="toc-text">逗号结合律哲学</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        绷语言 | 设计哲学 Pt.5 和一点元组语法迷思
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-09-30T06:29:59.000Z" class="dt-published" itemprop="datePublished">2023-09-30</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PL/" rel="tag">PL</a>, <a class="p-category" href="/tags/%E6%8A%80%E6%9C%AF%E6%80%A7/" rel="tag">技术性</a>, <a class="p-category" href="/tags/%E7%BB%B7%E8%AF%AD%E8%A8%80/" rel="tag">绷语言</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="CF-846-B-1100"><a href="#CF-846-B-1100" class="headerlink" title="CF 846 B. (*1100)"></a>CF 846 B. (*1100)</h2><p>显然本题无法对数组选段情况进行枚举，因此尝试在数学上找到公式。</p>
+<p>由于涉及求和，GCD 在加法下亦性质良好，不难注意到应使用前缀和。</p>
+<h3 id="CPP"><a href="#CPP" class="headerlink" title="CPP"></a>CPP</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;numeric&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  std::ios::<span class="built_in">sync_with_stdio</span>(<span class="literal">false</span>);</span><br><span class="line">  std::cin.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">  std::cout.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">  <span class="type">int</span> t;</span><br><span class="line">  std::cin &gt;&gt; t;</span><br><span class="line">  <span class="keyword">while</span> (t--) &#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    std::cin &gt;&gt; n;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> a[n + <span class="number">1</span>];</span><br><span class="line">    a[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">      <span class="type">long</span> <span class="type">long</span> x;</span><br><span class="line">      std::cin &gt;&gt; x;</span><br><span class="line">      a[i] = a[i - <span class="number">1</span>] + x;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> max_g = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++) &#123;</span><br><span class="line">      <span class="type">long</span> <span class="type">long</span> g = std::<span class="built_in">gcd</span>(a[i], a[n]);</span><br><span class="line">      max_g = std::<span class="built_in">max</span>(max_g, g);</span><br><span class="line">    &#125;</span><br><span class="line">    std::cout &lt;&lt; max_g &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="绷语言"><a href="#绷语言" class="headerlink" title="绷语言"></a>绷语言</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">main : Int</span><br><span class="line">main =</span><br><span class="line">  let t = input</span><br><span class="line">  run for t</span><br><span class="line">    let n = input</span><br><span class="line">    let a = [input for n]</span><br><span class="line">    let (sum, ptr) = ([0 for n + 1], 0) rec</span><br><span class="line">      if ptr == n then nope else</span><br><span class="line">      (sum mut _[ptr + 1] = _[ptr] + a[ptr], ptr + 1)</span><br><span class="line">    let (res, ptr) = (0, 1) rec</span><br><span class="line">      if ptr == n then nope else</span><br><span class="line">      (max res (gcd sum[ptr] sum[n]), ptr + 1)</span><br><span class="line">    print(res)</span><br><span class="line">  0</span><br></pre></td></tr></table></figure>
+
+<h3 id="逗号结合律哲学"><a href="#逗号结合律哲学" class="headerlink" title="逗号结合律哲学"></a>逗号结合律哲学</h3><p>逗号结合律仅弱于各中缀运算符，只要是有字母或 <code>=</code>、<code>=&gt;</code> 的情况下，逗号结合性都更强。</p>
+<p>其实关于逗号结合性的设计，我也一直在纠结。例如假如使用传统元组格式，上面的程序会从：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let sum, ptr = [0 for n + 1], 0 rec</span><br><span class="line">  if ptr == n then nope else</span><br><span class="line">  (sum mut _[ptr + 1] = _[ptr] + a[ptr]), ptr + 1</span><br></pre></td></tr></table></figure>
+
+<p>变成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let (sum, ptr) = ([0 for n + 1], 0) rec</span><br><span class="line">  if ptr == n then nope else</span><br><span class="line">  (sum mut _[ptr + 1] = _[ptr] + a[ptr], ptr + 1)</span><br></pre></td></tr></table></figure>
+
+<p>传统元组相对无括号元组净增两对括号，但往往无括号元组容易引发歧义。例如假如写成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let sum, ptr = [0 for n + 1], 0 rec</span><br><span class="line">  if ptr == n then nope else</span><br><span class="line">  sum mut _[ptr + 1] = _[ptr] + a[ptr], ptr + 1</span><br></pre></td></tr></table></figure>
+
+<p>用户可能很难看出问题，但由于 <code>,</code> 结合性强于 <code>=</code>，该代码应被视为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let sum, ptr = [0 for n + 1], 0 rec</span><br><span class="line">  if ptr == n then nope else</span><br><span class="line">  sum mut _[ptr + 1] = (_[ptr] + a[ptr], ptr + 1)</span><br></pre></td></tr></table></figure>
+
+<p>这是不符合程序意思的。要解决这个问题，用户需要更熟悉逗号的结合律，否则容易写出有歧义的程序，从而得到未预料的编译结果，获得更差的体验。</p>
+<p>事实上，一门好的编程语言需要尽可能避免这样的设计。例如 Golang 的某框架中的某函数 <code>AbortWithStatusJSON</code> 就具有歧义，用户可能会期望其能自动起到 <code>return</code> 的效果，但实际上并没有，甚至会连续返回 JSON 文本（事实上 <code>Abort</code> 只是阻止接下来的中间件被调用），且这种歧义无法在编译期暴露，这会大大增加用户的编程成本。</p>
+<p>但有括号元组也有一个很大的缺点，考虑对函数参数进行模式匹配，若有无括号元组我们只需要：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f(x, y) = x * y</span><br></pre></td></tr></table></figure>
+
+<p>但没有的话，则需要：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f((x, y)) = x * y</span><br></pre></td></tr></table></figure>
+
+<p>往往用户只想表达 <code>f</code> 接受两个参数 <code>x</code> 和 <code>y</code>，使用双重括号会带来较差的语义性。</p>
+<p>解决这个问题需要使用 Haskell 语法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f (x, y) = x * y</span><br></pre></td></tr></table></figure>
+
+<p>但 Haskell 中函数的表达习惯和我们习以为常的大相径庭，对不熟悉 Haskell 的人来说语义性也较差。</p>
+<p>我暂时决定规避歧义优先级大于语法语义性，且不希望语法太过冗长，对类 Idris2 的类型标注形式也有一定的执念，故采用 Idris2 式的语法。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#CF-846-B-1100"><span class="toc-number">1.</span> <span class="toc-text">CF 846 B. (*1100)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CPP"><span class="toc-number">1.1.</span> <span class="toc-text">CPP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80"><span class="toc-number">1.2.</span> <span class="toc-text">绷语言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%97%E5%8F%B7%E7%BB%93%E5%90%88%E5%BE%8B%E5%93%B2%E5%AD%A6"><span class="toc-number">1.3.</span> <span class="toc-text">逗号结合律哲学</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/09/30/silent-philo-5/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&text=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&title=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&is_video=false&description=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思&body=Check out this article: https://blog.5eqn.top/2023/09/30/silent-philo-5/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&title=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&title=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&title=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&title=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/09/30/silent-philo-5/&name=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/09/30/silent-philo-5/&t=绷语言 | 设计哲学 Pt.5 和一点元组语法迷思"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
