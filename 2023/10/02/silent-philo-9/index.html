@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="SAM 本体核心思想是额外维护 endPos 的等价类和继承关系，包括：  link：等价类之父，也就是比它大一点点的等价类。比如对于 aab 加上 a 得到 aaba，aaba 的 endPos 是 &amp;#123;4&amp;#125;；link 则是 a，其 endPos 为 &amp;#123;1, 4&amp;#125; len：加新节点时需要计算其「等价类之父」，计算过程需要用 len 来判断，在下面讲解  存储">
+<meta property="og:type" content="article">
+<meta property="og:title" content="绷语言 | 设计哲学 Pt.9 和 SAM">
+<meta property="og:url" content="https://blog.5eqn.top/2023/10/02/silent-philo-9/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="SAM 本体核心思想是额外维护 endPos 的等价类和继承关系，包括：  link：等价类之父，也就是比它大一点点的等价类。比如对于 aab 加上 a 得到 aaba，aaba 的 endPos 是 &amp;#123;4&amp;#125;；link 则是 a，其 endPos 为 &amp;#123;1, 4&amp;#125; len：加新节点时需要计算其「等价类之父」，计算过程需要用 len 来判断，在下面讲解  存储">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-02T05:51:18.000Z">
+<meta property="article:modified_time" content="2023-10-02T16:10:47.433Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="草稿">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>绷语言 | 设计哲学 Pt.9 和 SAM</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/10/01/silent-philo-8/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/10/02/silent-philo-9/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&text=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&title=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&is_video=false&description=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=绷语言 | 设计哲学 Pt.9 和 SAM&body=Check out this article: https://blog.5eqn.top/2023/10/02/silent-philo-9/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&title=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&title=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&title=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&title=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&name=绷语言 | 设计哲学 Pt.9 和 SAM&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/10/02/silent-philo-9/&t=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SAM-%E6%9C%AC%E4%BD%93"><span class="toc-number">1.</span> <span class="toc-text">SAM 本体</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8-len-%E7%9A%84%E5%8A%A8%E6%9C%BA"><span class="toc-number">1.1.</span> <span class="toc-text">存储 len 的动机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.2.</span> <span class="toc-text">绷语言实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CPP-%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.</span> <span class="toc-text">CPP 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%90%E4%B8%B2%E8%AE%A1%E6%95%B0"><span class="toc-number">2.</span> <span class="toc-text">子串计数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0-1"><span class="toc-number">2.1.</span> <span class="toc-text">绷语言实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C-%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.2.</span> <span class="toc-text">C++ 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CF-846-G-2400"><span class="toc-number">3.</span> <span class="toc-text">CF 846 G. (*2400)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0-2"><span class="toc-number">3.1.</span> <span class="toc-text">绷语言实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C-%E5%AE%9E%E7%8E%B0-1"><span class="toc-number">3.2.</span> <span class="toc-text">C++ 实现</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        绷语言 | 设计哲学 Pt.9 和 SAM
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-10-02T05:51:18.000Z" class="dt-published" itemprop="datePublished">2023-10-02</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E8%8D%89%E7%A8%BF/" rel="tag">草稿</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="SAM-本体"><a href="#SAM-本体" class="headerlink" title="SAM 本体"></a>SAM 本体</h2><p>核心思想是额外维护 <code>endPos</code> 的等价类和继承关系，包括：</p>
+<ul>
+<li><code>link</code>：等价类之父，也就是比它大一点点的等价类。比如对于 <code>aab</code> 加上 <code>a</code> 得到 <code>aaba</code>，<code>aaba</code> 的 <code>endPos</code> 是 <code>&#123;4&#125;</code>；<code>link</code> 则是 <code>a</code>，其 <code>endPos</code> 为 <code>&#123;1, 4&#125;</code></li>
+<li><code>len</code>：加新节点时需要计算其「等价类之父」，计算过程需要用 <code>len</code> 来判断，在下面讲解</li>
+</ul>
+<h3 id="存储-len-的动机"><a href="#存储-len-的动机" class="headerlink" title="存储 len 的动机"></a>存储 len 的动机</h3><p>例如对于 <code>aba</code> 加上 <code>b</code>：</p>
+<ul>
+<li><code>abab</code> 的 <code>endPos</code> 是 <code>&#123;4&#125;</code></li>
+<li><code>aba</code> 的 <code>link</code> 是 <code>a</code></li>
+<li>对 <code>a</code> 转移 <code>b</code> 得 <code>ab</code></li>
+<li><code>ab</code> 的 <code>endPos</code> 是 <code>&#123;2, 4&#125;</code>，没有发生缩减</li>
+<li><code>ab</code> 是 <code>abab</code> 的 <code>link</code></li>
+</ul>
+<p>但对于 <code>aaba</code> 加上 <code>b</code>：</p>
+<ul>
+<li><code>aabab</code> 的 <code>endPos</code> 是 <code>&#123;5&#125;</code></li>
+<li><code>aaba</code> 的 <code>link</code> 是 <code>a</code></li>
+<li>对 <code>a</code> 转移 <code>b</code> 得 <code>aab</code></li>
+<li><code>aab</code> 的 <code>endPos</code> 是 <code>&#123;3&#125;</code>，相对 <code>ab</code> 的 <code>endPos = &#123;3, 5&#125;</code> 发生了缩减</li>
+<li><code>aab</code> 不是 <code>aabab</code> 的 <code>link</code>。</li>
+</ul>
+<p>判定是否发生缩减可以比较节点对应最长字符串的长度，例如 <code>len aab = 3 &gt; 2 = len a + 1</code>，可知 <code>a</code> 转移到 <code>aab</code> 时 <code>endPos</code> 发生了缩减，这时候必须复制 <code>aab</code> 节点以维持继承关系。</p>
+<h3 id="绷语言实现"><a href="#绷语言实现" class="headerlink" title="绷语言实现"></a>绷语言实现</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">SAMNode : Type</span><br><span class="line">samNode = (link : Int) -&gt; (len : Int) -&gt; (next : Map Char Int) -&gt; SAMNode</span><br><span class="line"></span><br><span class="line">SAM : Type</span><br><span class="line">sam = (nodes : [SAMNode]) -&gt; (last: Int) -&gt; SAM</span><br><span class="line"></span><br><span class="line">init : SAM</span><br><span class="line">init = sam [samNode -1 0 empty] 0</span><br><span class="line"></span><br><span class="line">.extend : SAM -&gt; Char -&gt; SAM</span><br><span class="line">.extend (sam nodes last) ch =</span><br><span class="line">  curr = len nodes</span><br><span class="line"></span><br><span class="line">  // add node and connections</span><br><span class="line">  nodes ::= samNode 0 (nodes[last].len + 1) empty</span><br><span class="line">  conn nodes state =</span><br><span class="line">    if state == -1 then (nodes, state) else</span><br><span class="line">    case nodes[state].next[ch] of</span><br><span class="line">      some x =&gt; (nodes, state)</span><br><span class="line">      none =&gt; conn (nodes[state].next[ch] &lt;- curr) nodes[state].link</span><br><span class="line">  (nodes, state) = conn nodes last</span><br><span class="line"></span><br><span class="line">  // case 1, no duplicate</span><br><span class="line">  if state == -1 then sam nodes curr else</span><br><span class="line"></span><br><span class="line">  // case 2, duplicate but contains</span><br><span class="line">  next = nodes[state].next[ch]</span><br><span class="line">  if nodes[state].len + 1 == nodes[next].len</span><br><span class="line">    then sam (nodes[curr].link &lt;- q) curr else</span><br><span class="line"></span><br><span class="line">  // case 3, duplicate and shrink</span><br><span class="line">  clone = len nodes</span><br><span class="line">  nodes ::= samNode nodes[next].link (nodes[state].len + 1) nodes[next].next</span><br><span class="line">  move nodes state =</span><br><span class="line">    if state == -1 then nodes else</span><br><span class="line">    case nodes[state].next[ch] of</span><br><span class="line">      some x if x == next =&gt; move (nodes[state].next[ch] &lt;- clone) nodes[state].link</span><br><span class="line">      none =&gt; nodes</span><br><span class="line">  nodes = move nodes state</span><br><span class="line">  sam (nodes[next].link &lt;- clone and [curr].link &lt;- clone) curr</span><br></pre></td></tr></table></figure>
+
+<h3 id="CPP-实现"><a href="#CPP-实现" class="headerlink" title="CPP 实现"></a>CPP 实现</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">sam</span> &#123;</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">sam_node</span> &#123;</span><br><span class="line">    i64 link;</span><br><span class="line">    i64 len;</span><br><span class="line">    std::map&lt;<span class="type">char</span>, i64&gt; next;</span><br><span class="line">  &#125;;</span><br><span class="line">  sam_node nodes[N * <span class="number">2</span>];</span><br><span class="line">  i64 sz;</span><br><span class="line">  i64 last;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    nodes[<span class="number">0</span>].link = <span class="number">-1</span>;</span><br><span class="line">    nodes[<span class="number">0</span>].len = <span class="number">0</span>;</span><br><span class="line">    sz++;</span><br><span class="line">    last = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">extend</span><span class="params">(<span class="type">char</span> ch)</span> </span>&#123;</span><br><span class="line">    i64 curr = sz++;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// add nodes and connections</span></span><br><span class="line">    nodes[curr].link = <span class="number">0</span>;</span><br><span class="line">    nodes[curr].len = nodes[last].len + <span class="number">1</span>;</span><br><span class="line">    i64 state = last;</span><br><span class="line">    <span class="keyword">while</span> (state != <span class="number">-1</span> &amp;&amp; !nodes[state].next.<span class="built_in">count</span>(ch)) &#123;</span><br><span class="line">      nodes[state].next[ch] = curr;</span><br><span class="line">      state = nodes[state].link;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (state != <span class="number">-1</span>) &#123;</span><br><span class="line">      i64 next = nodes[state].next[ch];</span><br><span class="line"></span><br><span class="line">      <span class="comment">// duplicate but contains</span></span><br><span class="line">      <span class="keyword">if</span> (nodes[state].len + <span class="number">1</span> == nodes[next].len) &#123;</span><br><span class="line">        nodes[curr].link = next;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// duplicate and shrink</span></span><br><span class="line">        i64 clone = sz++;</span><br><span class="line">        nodes[clone].link = nodes[next].link;</span><br><span class="line">        nodes[clone].len = nodes[state].len + <span class="number">1</span>;</span><br><span class="line">        nodes[clone].next = nodes[next].next;</span><br><span class="line">        <span class="keyword">while</span> (state != <span class="number">-1</span> &amp;&amp; nodes[state].next[ch] == next) &#123;</span><br><span class="line">          nodes[state].next[ch] = clone;</span><br><span class="line">          state = nodes[state].link;</span><br><span class="line">        &#125;</span><br><span class="line">        nodes[next].link = clone;</span><br><span class="line">        nodes[curr].link = clone;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    last = curr;</span><br><span class="line">  &#125;</span><br><span class="line">&#125; s;</span><br></pre></td></tr></table></figure>
+
+<h2 id="子串计数"><a href="#子串计数" class="headerlink" title="子串计数"></a>子串计数</h2><p>已知有两种方法可以统计某一状态 <code>v</code> 对应的子串数目：</p>
+<ul>
+<li>标记每个非 <code>clone</code> 节点的 <code>cnt</code> 为 <code>1</code>，根据 <code>len</code> 降序遍历所有状态，令 <code>cnt[link[v]] += cnt[v]</code></li>
+<li>标记每个结束结点（从 <code>last</code> 循环调用 <code>link</code>）的 <code>cnt</code> 为 <code>1</code>，使用 DFS 求出 <code>v</code> 到结束结点的不同路径条数即为 <code>cnt[v]</code></li>
+</ul>
+<p>我们采用第二种方法，因为第二种方法不需要修改 <code>extend</code> 逻辑。</p>
+<h3 id="绷语言实现-1"><a href="#绷语言实现-1" class="headerlink" title="绷语言实现"></a>绷语言实现</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">.cnt : SAM -&gt; [Int]</span><br><span class="line">.cnt (sam nodes last) =</span><br><span class="line"></span><br><span class="line">  // make cnt of terminating nodes 1</span><br><span class="line">  init cnt state =</span><br><span class="line">    if state == -1 then cnt else</span><br><span class="line">    init (cnt[state] &lt;- 1) nodes[state].link</span><br><span class="line">  cnt = init [0 for len nodes] last</span><br><span class="line"></span><br><span class="line">  // dfs path count</span><br><span class="line">  dfs cnt vis x =</span><br><span class="line">    vis = vis[x] &lt;- true</span><br><span class="line">    fold nodes[x].next (cnt, vis) ((cnt, vis) =&gt; (ch, next) =&gt;</span><br><span class="line">      (cnt, vis) = if vis[next] then (cnt, vis) else dfs cnt vis next</span><br><span class="line">      (cnt[x] &lt;- cnt[x] + cnt[next], vis))</span><br><span class="line">  (dfs cnt [false for len nodes] 0)[0]</span><br></pre></td></tr></table></figure>
+
+<h3 id="C-实现"><a href="#C-实现" class="headerlink" title="C++ 实现"></a>C++ 实现</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">i64 cnt[N * 2], vis[N * 2];</span><br><span class="line"></span><br><span class="line">void dfs(i64 x) &#123;</span><br><span class="line">  vis[x] = 1;</span><br><span class="line">  for (auto i : s.nodes[x].next) &#123;</span><br><span class="line">    if (!vis[i.second]) &#123;</span><br><span class="line">      dfs(i.second);</span><br><span class="line">    &#125;</span><br><span class="line">    cnt[x] += cnt[i.second];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void count() &#123;</span><br><span class="line">  i64 state = s.last;</span><br><span class="line">  while (state != -1) &#123;</span><br><span class="line">    cnt[state] = 1;</span><br><span class="line">    state = s.nodes[state].link;</span><br><span class="line">  &#125;</span><br><span class="line">  dfs(0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="CF-846-G-2400"><a href="#CF-846-G-2400" class="headerlink" title="CF 846 G. (*2400)"></a>CF 846 G. (*2400)</h2><p><a target="_blank" rel="noopener" href="https://codeforces.com/contest/1780/problem/G">原题</a></p>
+<p>计算出 <code>cnt</code> 和 <code>len</code> 后，只需要找 <code>[nodes[x.link].len + 1, x.len]</code> 中有几个长度是 <code>cnt</code> 的因数即可。</p>
+<h3 id="绷语言实现-2"><a href="#绷语言实现-2" class="headerlink" title="绷语言实现"></a>绷语言实现</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">firstFactor : Int -&gt; [Int]</span><br><span class="line">firstFactor n =</span><br><span class="line">  fold [2 to n] [0 for n] (arr =&gt; i =&gt;</span><br><span class="line">    if arr[i] &gt; 0 then arr else</span><br><span class="line">    fold [i to n step i] arr (arr =&gt; j =&gt;</span><br><span class="line">      arr[j] &lt;- i))</span><br><span class="line"></span><br><span class="line">factor : Int -&gt; [(Int, Int)]</span><br><span class="line">factor n =</span><br><span class="line">  ff = firstFactor (1e6 + 4)</span><br><span class="line">  genFactor arr rem =</span><br><span class="line">    if rem == 1 then arr else</span><br><span class="line">    fac = ff rem</span><br><span class="line">    if len arr == 0 || arr[-1][0] != fac</span><br><span class="line">    then genFactor (arr :: (fac, 1)) (rem / fac)</span><br><span class="line">    else genFactor (arr[-1][1] +&lt;- 1) (rem / fac)</span><br><span class="line">  genFactor [] n</span><br><span class="line"></span><br><span class="line">foldFactor : Int -&gt; T -&gt; (Int -&gt; Bool) -&gt; (T -&gt; Int -&gt; Int) -&gt; T</span><br><span class="line">foldFactor num init pred f =</span><br><span class="line">  facList = factor num</span><br><span class="line">  foldRest res base facID =</span><br><span class="line">    if facID == len facList then f res base else</span><br><span class="line">    (fac, cnt) = facList[facID]</span><br><span class="line">    foldSingle res base usingCnt =</span><br><span class="line">      if usingCnt &gt; cnt || pred base then res else</span><br><span class="line">      newRes = foldRest res base (facID + 1)</span><br><span class="line">      foldSingle newRes (base * fac) (usingCnt + 1)</span><br><span class="line">    foldSingle res base 0</span><br><span class="line">  foldRest init 1 0</span><br><span class="line"></span><br><span class="line">main : Void</span><br><span class="line">main =</span><br><span class="line">  n, str = input, input</span><br><span class="line">  s = fold str init (s =&gt; (id, ch) =&gt; s.extend ch)</span><br><span class="line">  cnt = s.cnt</span><br><span class="line">  res = fold s.nodes 0 (res =&gt; (id, node) =&gt;</span><br><span class="line">    if node.len == 0 then res else</span><br><span class="line">    l = s.nodes[node.link].len + 1</span><br><span class="line">    r = node.len</span><br><span class="line">    mul = foldFactor cnt[id] 0 (fac &lt;= r) (res =&gt; fac =&gt;</span><br><span class="line">      if fac &gt;= l &amp;&amp; fac &lt;= r then res + 1 else res))</span><br><span class="line">    res + mul * cnt[id]</span><br><span class="line">  print res</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>firstFactor</code> 需要被记忆。暂未确定是否可以自动推断是否记忆化一个变量，而且我怀疑记忆化和数组之间可以提取共性。</p>
+<p>同时，<code>foldFactor</code> 理论上可以用 Monad 改写成得更美丽一些。</p>
+<p>使用函数式编程的一大好处是能强制让用户明白一个函数操作什么数据，这样数据的更新链条不会混在一起。这也方便后续制作算法可视化工具，如果对 C++ 代码做可视化可能只是乱七八糟的修改时序，但用函数式编程则能看到树状、清晰的数据流。</p>
+<h3 id="C-实现-1"><a href="#C-实现-1" class="headerlink" title="C++ 实现"></a>C++ 实现</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">i64 ff[N];</span><br><span class="line">std::vector&lt;std::pair&lt;i64, i64&gt;&gt; factor;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">get_ff</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">for</span> (i64 i = <span class="number">2</span>; i &lt; N; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (ff[i] == <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">for</span> (i64 j = i; j &lt; N; j += i) &#123;</span><br><span class="line">        ff[j] = i;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">get_factor</span><span class="params">(i64 n)</span> </span>&#123;</span><br><span class="line">  factor.<span class="built_in">clear</span>();</span><br><span class="line">  <span class="keyword">while</span> (n &gt; <span class="number">1</span>) &#123;</span><br><span class="line">    i64 fac = ff[n];</span><br><span class="line">    <span class="keyword">if</span> (factor.<span class="built_in">empty</span>() || factor.<span class="built_in">back</span>().first != fac) &#123;</span><br><span class="line">      factor.<span class="built_in">push_back</span>(&#123;fac, <span class="number">1</span>&#125;);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      factor.<span class="built_in">back</span>().second += <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    n /= fac;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">i64 res, l, r;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">fold_factor</span><span class="params">(i64 base, i64 facID)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (facID == factor.<span class="built_in">size</span>()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (l &lt;= base) &#123;</span><br><span class="line">      res++;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">auto</span> pair = factor[facID];</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= pair.second; i++) &#123;</span><br><span class="line">      <span class="keyword">if</span> (base &gt; r) &#123;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">fold_factor</span>(base, facID + <span class="number">1</span>);</span><br><span class="line">      base *= pair.first;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  std::ios::<span class="built_in">sync_with_stdio</span>(<span class="literal">false</span>);</span><br><span class="line">  std::cin.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">  std::cout.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">  s.<span class="built_in">init</span>();</span><br><span class="line">  i64 n;</span><br><span class="line">  std::cin &gt;&gt; n;</span><br><span class="line">  std::string str;</span><br><span class="line">  std::cin &gt;&gt; str;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span> ch : str) &#123;</span><br><span class="line">    s.<span class="built_in">extend</span>(ch);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">count</span>();</span><br><span class="line">  <span class="built_in">get_ff</span>();</span><br><span class="line">  i64 ans = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span> (i64 i = <span class="number">1</span>; i &lt; s.sz; i++) &#123;</span><br><span class="line">    l = s.nodes[s.nodes[i].link].len + <span class="number">1</span>;</span><br><span class="line">    r = s.nodes[i].len;</span><br><span class="line">    <span class="built_in">get_factor</span>(cnt[i]);</span><br><span class="line">    res = <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">fold_factor</span>(<span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">    ans += res * cnt[i];</span><br><span class="line">  &#125;</span><br><span class="line">  std::cout &lt;&lt; ans &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SAM-%E6%9C%AC%E4%BD%93"><span class="toc-number">1.</span> <span class="toc-text">SAM 本体</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8-len-%E7%9A%84%E5%8A%A8%E6%9C%BA"><span class="toc-number">1.1.</span> <span class="toc-text">存储 len 的动机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.2.</span> <span class="toc-text">绷语言实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CPP-%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.</span> <span class="toc-text">CPP 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%90%E4%B8%B2%E8%AE%A1%E6%95%B0"><span class="toc-number">2.</span> <span class="toc-text">子串计数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0-1"><span class="toc-number">2.1.</span> <span class="toc-text">绷语言实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C-%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.2.</span> <span class="toc-text">C++ 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CF-846-G-2400"><span class="toc-number">3.</span> <span class="toc-text">CF 846 G. (*2400)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0-2"><span class="toc-number">3.1.</span> <span class="toc-text">绷语言实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C-%E5%AE%9E%E7%8E%B0-1"><span class="toc-number">3.2.</span> <span class="toc-text">C++ 实现</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/10/02/silent-philo-9/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&text=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&title=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&is_video=false&description=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=绷语言 | 设计哲学 Pt.9 和 SAM&body=Check out this article: https://blog.5eqn.top/2023/10/02/silent-philo-9/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&title=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&title=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&title=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&title=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/10/02/silent-philo-9/&name=绷语言 | 设计哲学 Pt.9 和 SAM&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/10/02/silent-philo-9/&t=绷语言 | 设计哲学 Pt.9 和 SAM"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
