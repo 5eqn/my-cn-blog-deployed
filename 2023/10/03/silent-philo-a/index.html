@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="本次题目：CF Edu. 142 E. (* 2400) 注意到可以对所有因数讨论，但要找到能出现的行的最小行号，则显然需要 DP。 注意到对任意一个因数，可以记忆对所有更小因数的选择，并通过质因数转移。 C++ 实现1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950">
+<meta property="og:type" content="article">
+<meta property="og:title" content="绷语言 | 设计哲学 Pt.A 和因数 DP">
+<meta property="og:url" content="https://blog.5eqn.top/2023/10/03/silent-philo-a/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="本次题目：CF Edu. 142 E. (* 2400) 注意到可以对所有因数讨论，但要找到能出现的行的最小行号，则显然需要 DP。 注意到对任意一个因数，可以记忆对所有更小因数的选择，并通过质因数转移。 C++ 实现1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-03T06:37:16.000Z">
+<meta property="article:modified_time" content="2023-10-03T14:17:39.634Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="草稿">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>绷语言 | 设计哲学 Pt.A 和因数 DP</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/10/02/silent-philo-9/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/10/03/silent-philo-a/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&text=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&title=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&is_video=false&description=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=绷语言 | 设计哲学 Pt.A 和因数 DP&body=Check out this article: https://blog.5eqn.top/2023/10/03/silent-philo-a/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&title=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&title=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&title=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&title=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&name=绷语言 | 设计哲学 Pt.A 和因数 DP&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/10/03/silent-philo-a/&t=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#C-%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">C++ 实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">绷语言实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8-Monad-%E7%AE%80%E5%8C%96%E7%A8%8B%E5%BA%8F"><span class="toc-number">2.1.</span> <span class="toc-text">用 Monad 简化程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%82%E8%AE%B0"><span class="toc-number">2.2.</span> <span class="toc-text">杂记</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        绷语言 | 设计哲学 Pt.A 和因数 DP
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-10-03T06:37:16.000Z" class="dt-published" itemprop="datePublished">2023-10-03</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E8%8D%89%E7%A8%BF/" rel="tag">草稿</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>本次题目：<a target="_blank" rel="noopener" href="https://codeforces.com/contest/1792/problem/E">CF Edu. 142 E. (* 2400)</a></p>
+<p>注意到可以对所有因数讨论，但要找到能出现的行的最小行号，则显然需要 DP。</p>
+<p>注意到对任意一个因数，可以记忆对所有更小因数的选择，并通过质因数转移。</p>
+<h2 id="C-实现"><a href="#C-实现" class="headerlink" title="C++ 实现"></a>C++ 实现</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;queue&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> dbg(x) std::cout &lt;&lt; #x &lt;&lt; <span class="string">&quot; = &quot;</span> &lt;&lt; x &lt;&lt; std::endl</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> i64 = <span class="type">long</span> <span class="type">long</span>;</span><br><span class="line"></span><br><span class="line">std::vector&lt;std::pair&lt;i64, i64&gt;&gt; factor;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">get_factor</span><span class="params">(i64 m1, i64 m2)</span> </span>&#123;</span><br><span class="line">  factor.<span class="built_in">clear</span>();</span><br><span class="line">  <span class="keyword">for</span> (i64 fac = <span class="number">2</span>; fac * fac &lt;= m1 || fac * fac &lt;= m2; fac++) &#123;</span><br><span class="line">    <span class="keyword">while</span> (m1 % fac == <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (factor.<span class="built_in">empty</span>() || factor.<span class="built_in">back</span>().first != fac) &#123;</span><br><span class="line">        factor.<span class="built_in">push_back</span>(&#123;fac, <span class="number">1</span>&#125;);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        factor.<span class="built_in">back</span>().second += <span class="number">1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      m1 /= fac;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span> (m2 % fac == <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (factor.<span class="built_in">empty</span>() || factor.<span class="built_in">back</span>().first != fac) &#123;</span><br><span class="line">        factor.<span class="built_in">push_back</span>(&#123;fac, <span class="number">1</span>&#125;);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        factor.<span class="built_in">back</span>().second += <span class="number">1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      m2 /= fac;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (m1 &gt; <span class="number">1</span>) &#123;</span><br><span class="line">    factor.<span class="built_in">push_back</span>(&#123;m1, <span class="number">1</span>&#125;);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (m2 &gt; <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (m1 == m2) &#123;</span><br><span class="line">      factor.<span class="built_in">back</span>().second += <span class="number">1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      factor.<span class="built_in">push_back</span>(&#123;m2, <span class="number">1</span>&#125;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">std::vector&lt;i64&gt; divs;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">dfs_factor</span><span class="params">(i64 base, i64 facID)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (facID == factor.<span class="built_in">size</span>()) &#123;</span><br><span class="line">    divs.<span class="built_in">push_back</span>(base);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">auto</span> [fac, cnt] = factor[facID];</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= cnt; i++) &#123;</span><br><span class="line">      <span class="built_in">dfs_factor</span>(base, facID + <span class="number">1</span>);</span><br><span class="line">      base *= fac;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  std::ios::<span class="built_in">sync_with_stdio</span>(<span class="literal">false</span>);</span><br><span class="line">  std::cin.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">  std::cout.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">  i64 t;</span><br><span class="line">  std::cin &gt;&gt; t;</span><br><span class="line">  <span class="keyword">while</span> (t--) &#123;</span><br><span class="line">    i64 n, m1, m2;</span><br><span class="line">    std::cin &gt;&gt; n &gt;&gt; m1 &gt;&gt; m2;</span><br><span class="line">    divs.<span class="built_in">clear</span>();</span><br><span class="line">    <span class="built_in">get_factor</span>(m1, m2);</span><br><span class="line">    <span class="built_in">dfs_factor</span>(<span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">    std::<span class="built_in">sort</span>(divs.<span class="built_in">begin</span>(), divs.<span class="built_in">end</span>());</span><br><span class="line">    <span class="function">std::vector&lt;i64&gt; <span class="title">dp</span><span class="params">(divs.size(), <span class="number">0</span>)</span></span>;</span><br><span class="line">    i64 cnt = <span class="number">0</span>, ans = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; divs.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">      <span class="comment">// dp</span></span><br><span class="line">      <span class="keyword">if</span> (divs[i] &lt;= n) &#123;</span><br><span class="line">        dp[i] = divs[i];</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> [fac, cnt] : factor) &#123;</span><br><span class="line">          <span class="keyword">if</span> (divs[i] % fac == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">auto</span> lb = std::<span class="built_in">lower_bound</span>(divs.<span class="built_in">begin</span>(), divs.<span class="built_in">end</span>(), divs[i] / fac);</span><br><span class="line">            dp[i] = std::<span class="built_in">max</span>(dp[i], dp[lb - divs.<span class="built_in">begin</span>()]);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// transfer result</span></span><br><span class="line">      i64 row = divs[i] / dp[i];</span><br><span class="line">      <span class="keyword">if</span> (row &lt;= n) &#123;</span><br><span class="line">        cnt++;</span><br><span class="line">        ans ^= row;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    std::cout &lt;&lt; cnt &lt;&lt; <span class="string">&#x27; &#x27;</span> &lt;&lt; ans &lt;&lt; std::endl;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="绷语言实现"><a href="#绷语言实现" class="headerlink" title="绷语言实现"></a>绷语言实现</h2><p>这题内 C++ 的实现中充斥着大量语义较差的内容。</p>
+<p>例如在 <code>get_factor</code> 函数中，多次对是否向 <code>factor</code> 数组添加元素本质上只是希望所添加的因数能够重叠在一起。如果能把这一性质封装起来，将会更符合语义性。</p>
+<p>同时，在对 <code>m1</code> 和 <code>m2</code> 分别处理时，代码也有重复逻辑。</p>
+<h3 id="用-Monad-简化程序"><a href="#用-Monad-简化程序" class="headerlink" title="用 Monad 简化程序"></a>用 Monad 简化程序</h3><p>注意到上篇博客中我提到：</p>
+<blockquote>
+<p>同时，<code>foldFactor</code> 理论上可以用 Monad 改写成得更美丽一些。</p>
+</blockquote>
+<p><code>foldFactor</code> 原本是这样，有两层 <code>fold</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">foldFactor : Int -&gt; T -&gt; (Int -&gt; Bool) -&gt; (T -&gt; Int -&gt; Int) -&gt; T</span><br><span class="line">foldFactor num init pred f =</span><br><span class="line">  facList = factor num</span><br><span class="line">  foldRest res base facID =</span><br><span class="line">    if facID == len facList then f res base else</span><br><span class="line">    (fac, cnt) = facList[facID]</span><br><span class="line">    foldSingle res base usingCnt =</span><br><span class="line">      if usingCnt &gt; cnt || pred base then res else</span><br><span class="line">      newRes = foldRest res base (facID + 1)</span><br><span class="line">      foldSingle newRes (base * fac) (usingCnt + 1)</span><br><span class="line">    foldSingle res base 0</span><br><span class="line">  foldRest init 1 0</span><br></pre></td></tr></table></figure>
+
+<p>如果只想获得所有除数，可以写成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">divs : Int -&gt; [Int]</span><br><span class="line">divs num =</span><br><span class="line">  factor num</span><br><span class="line">    .map ((fac, cnt) =&gt; fac ** [0 to cnt])</span><br><span class="line">    .fold [1] (res =&gt; next =&gt; res * next)</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>res * next</code> 可以被语法糖成 <code>res.bind (i =&gt; i * next)</code>，而 <code>i * next</code> 被进一步语法糖成 <code>next.map (j =&gt; i * j)</code>。</p>
+<p>要正确编译这玩意特别考验编译器，暂时我还没想到怎么实现。</p>
+<h3 id="杂记"><a href="#杂记" class="headerlink" title="杂记"></a>杂记</h3><p>这题我先不用绷语言写了，感觉比较累。</p>
+<p>最近关于绷语言有几个需要考虑的：</p>
+<ul>
+<li>是否要引入有语义的类型？例如引入一个 <code>Ans</code> 类型表示答案，规定该类型被构造后是线性的，通过写一个 <code>1 Ans -&gt; T</code> 的函数并自动织入来模拟仿射。<ul>
+<li>这样的好处是可以减少程序出错的可能性。当你想要构造出一个「答案」的时候，你不再是令一个名字是 <code>ans</code> 的变量为答案（这对编译器来说没有语义，因此它也不可能为你检查答案是否被正确输出），而是构造一个 <code>Ans</code> 类型的实例（这对编译器来说有语义，因为 <code>Ans</code> 类型的实例是线性的，且用户可以通过修改一个 <code>1 Ans -&gt; T</code> 的函数来丰富 <code>Ans</code> 类型的语义。</li>
+<li>然而，要获取一个线性实例，一定会需要 <code>bind</code>，这将涉及 Effects。</li>
+</ul>
+</li>
+<li>是否要引入 Effects？Effects 能否用于简化变量修改？能否配合线性资源建模？能否和自动记忆化结合？能否和编译期代码织入结合？目前使用 Effects 的最佳实践（语法，编译器实现）是什么样的？</li>
+<li>有没有希望结合 Recursion Schemes 实现一种新的递归语法？</li>
+<li>如何避免申请 $O(n)$ 的内存来模拟依照函数生成的数组？如何支持各种复杂的 <code>map</code>、<code>bind</code> 操作？这样做是否有必要？是否有更好的替代方法？</li>
+</ul>
+<p>我计划考虑一段时间这些问题，搜集一些相关资料，再尝试修改绷语言的特性。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#C-%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">C++ 实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%B7%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">绷语言实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8-Monad-%E7%AE%80%E5%8C%96%E7%A8%8B%E5%BA%8F"><span class="toc-number">2.1.</span> <span class="toc-text">用 Monad 简化程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%82%E8%AE%B0"><span class="toc-number">2.2.</span> <span class="toc-text">杂记</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/10/03/silent-philo-a/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&text=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&title=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&is_video=false&description=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=绷语言 | 设计哲学 Pt.A 和因数 DP&body=Check out this article: https://blog.5eqn.top/2023/10/03/silent-philo-a/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&title=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&title=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&title=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&title=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/10/03/silent-philo-a/&name=绷语言 | 设计哲学 Pt.A 和因数 DP&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/10/03/silent-philo-a/&t=绷语言 | 设计哲学 Pt.A 和因数 DP"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
