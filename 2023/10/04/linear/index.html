@@ -14,7 +14,7 @@
 <meta property="og:description" content="数组和 ADT 的区别如果在函数式语言中加入基于编号的数组，则该数组的实例显然是线性的。 非递归的 ADT（代数数据类型）可以在寄存器中被传递（此外对于元组，编译器还能跟踪每个变量的使用情况，尽可能避免申请额外的寄存器内存），只有递归的 ADT 需要放在堆中。注意到使用 Recursion Schemes 后递归的 ADT 必须通过组合子创建，这是否意味着可以和组合子联动？ 注意到 Koka 使用">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-10-04T03:38:02.000Z">
-<meta property="article:modified_time" content="2023-10-04T15:39:37.299Z">
+<meta property="article:modified_time" content="2023-10-04T15:48:12.251Z">
 <meta property="article:author" content="5eqn">
 <meta property="article:tag" content="草稿">
 <meta name="twitter:card" content="summary">
@@ -127,7 +127,7 @@
     
     
       <div id="toc">
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C-ADT-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">数组和 ADT 的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%B1%E5%9C%B0%E9%81%8D%E5%8E%86"><span class="toc-number">2.</span> <span class="toc-text">就地遍历</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E5%BE%85%E4%BA%86%E8%A7%A3%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="toc-number">3.</span> <span class="toc-text">有待了解的东西</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-number">4.</span> <span class="toc-text">参考文献</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C-ADT-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">数组和 ADT 的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%B1%E5%9C%B0%E9%81%8D%E5%8E%86"><span class="toc-number">2.</span> <span class="toc-text">就地遍历</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E5%BE%85%E4%BA%86%E8%A7%A3%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="toc-number">3.</span> <span class="toc-text">有待了解的东西</span></a></li></ol>
       </div>
     
   </span>
@@ -184,10 +184,10 @@
 <ul>
 <li>能否令 reuse credit 融入整个 FP 的框架，甚至只写成一个扩展包的形式？允许用户自己手搓 reuse credit<ul>
 <li>这样的话理论上也可以解决「假设顺序」的问题</li>
-<li>把 reuse credit 整成 effect 感觉理论上可行，和 Idris2 <a target="_blank" rel="noopener" href="https://www.type-driven.org.uk/edwinb/papers/idris2.pdf">^3</a> 的思路也比较接近，<code>Store</code> 中 <code>connect</code> 实质上是接受了一个 <code>%World</code>（性质和 reuse credit 类似），返回一个 <code>MkStore</code>，并自动成为线性的。如果要求 <code>Store</code> 的构造函数接受一个 <code>%World</code>，则可以反映真实内存中存在的东西</li>
+<li>把 reuse credit 整成 effect 感觉理论上可行，和 Idris2<a target="_blank" rel="noopener" href="https://www.type-driven.org.uk/edwinb/papers/idris2.pdf">^3</a> 的思路也比较接近，<code>Store</code> 中 <code>connect</code> 实质上是接受了一个 <code>%World</code>（性质和 reuse credit 类似），返回一个 <code>MkStore</code>，并自动成为线性的。如果要求 <code>Store</code> 的构造函数接受一个 <code>%World</code>，则可以反映真实内存中存在的东西</li>
 </ul>
 </li>
-<li>上述融入方式能否和 Recursion Schemes <a target="_blank" rel="noopener" href="https://link.springer.com/chapter/10.1007/3540543961_7">^2</a> 结合？具体怎么结合还得看 Recursion Schemes 才知道</li>
+<li>上述融入方式能否和 Recursion Schemes<a target="_blank" rel="noopener" href="https://link.springer.com/chapter/10.1007/3540543961_7">^2</a> 结合？具体怎么结合还得看 Recursion Schemes 才知道</li>
 </ul>
 <h2 id="就地遍历"><a href="#就地遍历" class="headerlink" title="就地遍历"></a>就地遍历</h2><p>正常而言，<code>map</code> 一个二叉树的代码是：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">map t f =</span><br><span class="line">  case t of</span><br><span class="line">    bin l r =&gt; bin (map l f) (map r f)</span><br><span class="line">    tip x =&gt; tip (f x)</span><br></pre></td></tr></table></figure>
@@ -220,7 +220,7 @@
 <li>pointer-tagging</li>
 <li>pointer-reversal</li>
 </ul>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2>
+
   </div>
 </article>
 
@@ -251,7 +251,7 @@
     
     
       <div id="toc-footer" style="display: none">
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C-ADT-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">数组和 ADT 的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%B1%E5%9C%B0%E9%81%8D%E5%8E%86"><span class="toc-number">2.</span> <span class="toc-text">就地遍历</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E5%BE%85%E4%BA%86%E8%A7%A3%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="toc-number">3.</span> <span class="toc-text">有待了解的东西</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-number">4.</span> <span class="toc-text">参考文献</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C-ADT-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">数组和 ADT 的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%B1%E5%9C%B0%E9%81%8D%E5%8E%86"><span class="toc-number">2.</span> <span class="toc-text">就地遍历</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E5%BE%85%E4%BA%86%E8%A7%A3%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="toc-number">3.</span> <span class="toc-text">有待了解的东西</span></a></li></ol>
       </div>
     
 
