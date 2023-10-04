@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="数组和 ADT 的区别如果在函数式语言中加入基于编号的数组，则该数组的实例显然是线性的。 非递归的 ADT（代数数据类型）可以在寄存器中被传递（此外对于元组，编译器还能跟踪每个变量的使用情况，尽可能避免申请额外的寄存器内存），只有递归的 ADT 需要放在堆中。注意到使用 Recursion Schemes 后递归的 ADT 必须通过组合子创建，这是否意味着可以和组合子联动？ 注意到 Koka 使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PL | 什么时候使用线性类型？">
+<meta property="og:url" content="https://blog.5eqn.top/2023/10/04/linear/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="数组和 ADT 的区别如果在函数式语言中加入基于编号的数组，则该数组的实例显然是线性的。 非递归的 ADT（代数数据类型）可以在寄存器中被传递（此外对于元组，编译器还能跟踪每个变量的使用情况，尽可能避免申请额外的寄存器内存），只有递归的 ADT 需要放在堆中。注意到使用 Recursion Schemes 后递归的 ADT 必须通过组合子创建，这是否意味着可以和组合子联动？ 注意到 Koka 使用">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-04T03:38:02.000Z">
+<meta property="article:modified_time" content="2023-10-04T15:39:37.299Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="草稿">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>PL | 什么时候使用线性类型？</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/10/03/silent-philo-a/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/10/04/linear/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/10/04/linear/&text=PL | 什么时候使用线性类型？"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/10/04/linear/&title=PL | 什么时候使用线性类型？"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/10/04/linear/&is_video=false&description=PL | 什么时候使用线性类型？"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PL | 什么时候使用线性类型？&body=Check out this article: https://blog.5eqn.top/2023/10/04/linear/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/10/04/linear/&title=PL | 什么时候使用线性类型？"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/10/04/linear/&title=PL | 什么时候使用线性类型？"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/10/04/linear/&title=PL | 什么时候使用线性类型？"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/10/04/linear/&title=PL | 什么时候使用线性类型？"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/10/04/linear/&name=PL | 什么时候使用线性类型？&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/10/04/linear/&t=PL | 什么时候使用线性类型？"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C-ADT-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">数组和 ADT 的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%B1%E5%9C%B0%E9%81%8D%E5%8E%86"><span class="toc-number">2.</span> <span class="toc-text">就地遍历</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E5%BE%85%E4%BA%86%E8%A7%A3%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="toc-number">3.</span> <span class="toc-text">有待了解的东西</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-number">4.</span> <span class="toc-text">参考文献</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        PL | 什么时候使用线性类型？
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-10-04T03:38:02.000Z" class="dt-published" itemprop="datePublished">2023-10-04</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E8%8D%89%E7%A8%BF/" rel="tag">草稿</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="数组和-ADT-的区别"><a href="#数组和-ADT-的区别" class="headerlink" title="数组和 ADT 的区别"></a>数组和 ADT 的区别</h2><p>如果在函数式语言中加入基于编号的数组，则该数组的实例显然是线性的。</p>
+<p>非递归的 ADT（代数数据类型）可以在寄存器中被传递（此外对于元组，编译器还能跟踪每个变量的使用情况，尽可能避免申请额外的寄存器内存），只有递归的 ADT 需要放在堆中。注意到使用 Recursion Schemes 后递归的 ADT 必须通过组合子创建，这是否意味着可以和组合子联动？</p>
+<p>注意到 Koka 使用 reuse credit 来对应一块内存<a target="_blank" rel="noopener" href="https://www.microsoft.com/en-us/research/publication/fp2-fully-in-place-functional-programming/">^1</a>，因此 Koka 需要形成对 reallocation 的顺序的假设。这和对数组的处理方式不同，在数组中我们直接使用 Lens 来修改。具体地，例如对于链表反转函数，我们用数组的思路可以写成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">reverseAcc xs acc =</span><br><span class="line">  case xs of</span><br><span class="line">    ls@(x :: xx) =&gt; reverseAcc xx (ls.tail &lt;- acc)</span><br><span class="line">    nil =&gt; acc</span><br></pre></td></tr></table></figure>
+
+<p>但用 reuse credit 的思路则写成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">reverseAcc xs acc =</span><br><span class="line">  case xs  of</span><br><span class="line">    x :: xx =&gt; reverseAcc xx (x :: acc)</span><br><span class="line">    nil =&gt; acc</span><br></pre></td></tr></table></figure>
+
+<p>reuse credit 的思路更符合传统函数式编程的思路，且允许更自由的操作（例如就地修改为一个类型不同但大小相同的数据结构，即使内部数据结构不一样也没问题）。私以为这种 reuse credit 的思路更本质一些，但依然有探索空间，例如：</p>
+<ul>
+<li>能否令 reuse credit 融入整个 FP 的框架，甚至只写成一个扩展包的形式？允许用户自己手搓 reuse credit<ul>
+<li>这样的话理论上也可以解决「假设顺序」的问题</li>
+<li>把 reuse credit 整成 effect 感觉理论上可行，和 Idris2 <a target="_blank" rel="noopener" href="https://www.type-driven.org.uk/edwinb/papers/idris2.pdf">^3</a> 的思路也比较接近，<code>Store</code> 中 <code>connect</code> 实质上是接受了一个 <code>%World</code>（性质和 reuse credit 类似），返回一个 <code>MkStore</code>，并自动成为线性的。如果要求 <code>Store</code> 的构造函数接受一个 <code>%World</code>，则可以反映真实内存中存在的东西</li>
+</ul>
+</li>
+<li>上述融入方式能否和 Recursion Schemes <a target="_blank" rel="noopener" href="https://link.springer.com/chapter/10.1007/3540543961_7">^2</a> 结合？具体怎么结合还得看 Recursion Schemes 才知道</li>
+</ul>
+<h2 id="就地遍历"><a href="#就地遍历" class="headerlink" title="就地遍历"></a>就地遍历</h2><p>正常而言，<code>map</code> 一个二叉树的代码是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">map t f =</span><br><span class="line">  case t of</span><br><span class="line">    bin l r =&gt; bin (map l f) (map r f)</span><br><span class="line">    tip x =&gt; tip (f x)</span><br></pre></td></tr></table></figure>
+
+<p>但该函数不是尾递归的。考虑另一种利用 <code>zipper</code> 的方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">down t f ctx =</span><br><span class="line">  case t of</span><br><span class="line">    bin l r =&gt; down l f (binL ctx r)</span><br><span class="line">    tip x =&gt; app (tip (f x)) f ctx</span><br><span class="line"></span><br><span class="line">app t f ctx =</span><br><span class="line">  case ctx of</span><br><span class="line">    top =&gt; t</span><br><span class="line">    binR l up =&gt; app (bin l t) f up</span><br><span class="line">    binL up r =&gt; down r f (binR t up)</span><br><span class="line"></span><br><span class="line">map t f =</span><br><span class="line">  down t f top</span><br></pre></td></tr></table></figure>
+
+<p>这种方式中，我们只会在二叉树中一格一格移动，不需要申请额外的栈空间。</p>
+<p>事实上，构造出这种互递归函数有通用的方法。注意到若对原本的 <code>map</code> 进行 CPS 变换，我们将得到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">map t f cont =</span><br><span class="line">  case t of</span><br><span class="line">    bin l r =&gt; map l f (l&#x27; =&gt;</span><br><span class="line">      map r f (r&#x27; =&gt;</span><br><span class="line">        cont (bin l&#x27; r&#x27;)))</span><br><span class="line">    tip x =&gt; cont (tip (f x))</span><br></pre></td></tr></table></figure>
+
+<p>可以看到经过 CPS 变换的 <code>map</code> 和 <code>down</code> 对应。而不同 <code>cont</code> 和 <code>ctx</code> 的对应是：</p>
+<ul>
+<li><code>l&#39; =&gt; map r f cont&#39;</code> 对应 <code>down r f ctx&#39;</code>，其中 <code>cont&#39;</code> 对应 <code>ctx&#39;</code></li>
+<li><code>r&#39; =&gt; cont&#39; (bin l&#39; r&#39;)</code> 对应 <code>app (bin l&#39; t) f ctx&#39;</code>，其中 <code>cont&#39;</code> 对应 <code>ctx&#39;</code><ul>
+<li><code>t</code> 是上次处理函数的返回值，故对应 <code>cont</code> 函数的参数 <code>r&#39;</code></li>
+<li><code>cont&#39;</code> 的 Application 需要写成显式，正如 <code>f x</code> 写成 <code>app f x</code></li>
+</ul>
+</li>
+<li><code>x =&gt; x</code> 对应 <code>t</code></li>
+</ul>
+<p>因此对于任意 ADT，我们可以先用 Recursion Schemes 生成其 <code>map</code> 函数，然后对 <code>map</code> 做 CPS 变换，并构造一个和 <code>cont</code> 同构的 Zipper ADT，便可以实现纯尾递归的 <code>map</code>！</p>
+<p>对于尾递归的链表排序，似乎需要创造一个很逆天的 Zipper！有没有能利用上 ADT 的更好的思路？</p>
+<p>同时，koka 的样例里似乎把 <code>(a, b)</code> 视作和 <code>a</code> 占用同等的 Reuse Token，这很混乱邪恶，但又似乎神秘地让事情工作！有没有更符合直觉的解读方式或备选理论？</p>
+<h2 id="有待了解的东西"><a href="#有待了解的东西" class="headerlink" title="有待了解的东西"></a>有待了解的东西</h2><ul>
+<li>Recursion Schemes</li>
+<li>freer monad 及相关东西，查找已有自动生成 fold &#x2F; bind 的实践</li>
+<li>Koka 是否用寄存器存储非递归 ADT 的实例</li>
+<li>FP 处理 indexed array 的最佳实践</li>
+<li>pointer-tagging</li>
+<li>pointer-reversal</li>
+</ul>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C-ADT-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">数组和 ADT 的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%B1%E5%9C%B0%E9%81%8D%E5%8E%86"><span class="toc-number">2.</span> <span class="toc-text">就地遍历</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E5%BE%85%E4%BA%86%E8%A7%A3%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="toc-number">3.</span> <span class="toc-text">有待了解的东西</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-number">4.</span> <span class="toc-text">参考文献</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/10/04/linear/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/10/04/linear/&text=PL | 什么时候使用线性类型？"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/10/04/linear/&title=PL | 什么时候使用线性类型？"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/10/04/linear/&is_video=false&description=PL | 什么时候使用线性类型？"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PL | 什么时候使用线性类型？&body=Check out this article: https://blog.5eqn.top/2023/10/04/linear/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/10/04/linear/&title=PL | 什么时候使用线性类型？"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/10/04/linear/&title=PL | 什么时候使用线性类型？"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/10/04/linear/&title=PL | 什么时候使用线性类型？"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/10/04/linear/&title=PL | 什么时候使用线性类型？"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/10/04/linear/&name=PL | 什么时候使用线性类型？&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/10/04/linear/&t=PL | 什么时候使用线性类型？"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
