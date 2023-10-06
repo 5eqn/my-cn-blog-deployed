@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="算法与结构的递归同构在上期博客里，我提到一个问题：  对于尾递归的链表排序，似乎需要创造一个很逆天的 Zipper！有没有能利用上 ADT 的更好的思路？  该论文^1 中的 Hylomorphisms 表达的差不多正是这种东西！同时，论文揭示了 Hylomorphisms 为 Catamorphisms 和 Anamorphisms 的复合。然而，原论文充斥着猫话，我选择选择看原论文比较简明的部">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PL | 递归数据结构">
+<meta property="og:url" content="https://blog.5eqn.top/2023/10/06/rec-scheme/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="算法与结构的递归同构在上期博客里，我提到一个问题：  对于尾递归的链表排序，似乎需要创造一个很逆天的 Zipper！有没有能利用上 ADT 的更好的思路？  该论文^1 中的 Hylomorphisms 表达的差不多正是这种东西！同时，论文揭示了 Hylomorphisms 为 Catamorphisms 和 Anamorphisms 的复合。然而，原论文充斥着猫话，我选择选择看原论文比较简明的部">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-06T05:34:58.000Z">
+<meta property="article:modified_time" content="2023-10-06T12:23:48.603Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="草稿">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>PL | 递归数据结构</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/10/04/linear/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/10/06/rec-scheme/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&text=PL | 递归数据结构"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&title=PL | 递归数据结构"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&is_video=false&description=PL | 递归数据结构"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PL | 递归数据结构&body=Check out this article: https://blog.5eqn.top/2023/10/06/rec-scheme/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&title=PL | 递归数据结构"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&title=PL | 递归数据结构"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&title=PL | 递归数据结构"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&title=PL | 递归数据结构"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&name=PL | 递归数据结构&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/10/06/rec-scheme/&t=PL | 递归数据结构"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E4%B8%8E%E7%BB%93%E6%9E%84%E7%9A%84%E9%80%92%E5%BD%92%E5%90%8C%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">算法与结构的递归同构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%94%B9%E8%BF%9B"><span class="toc-number">1.1.</span> <span class="toc-text">一些小改进</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bind-%E5%8F%AF%E4%BB%A5%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90"><span class="toc-number">2.</span> <span class="toc-text">bind 可以自动生成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E4%B8%80%E6%AD%A5"><span class="toc-number">3.</span> <span class="toc-text">下一步</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        PL | 递归数据结构
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-10-06T05:34:58.000Z" class="dt-published" itemprop="datePublished">2023-10-06</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E8%8D%89%E7%A8%BF/" rel="tag">草稿</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="算法与结构的递归同构"><a href="#算法与结构的递归同构" class="headerlink" title="算法与结构的递归同构"></a>算法与结构的递归同构</h2><p>在上期博客里，我提到一个问题：</p>
+<blockquote>
+<p>对于尾递归的链表排序，似乎需要创造一个很逆天的 Zipper！有没有能利用上 ADT 的更好的思路？</p>
+</blockquote>
+<p>该论文<a target="_blank" rel="noopener" href="https://link.springer.com/chapter/10.1007/3540543961_7">^1</a> 中的 Hylomorphisms 表达的差不多正是这种东西！同时，论文揭示了 Hylomorphisms 为 Catamorphisms 和 Anamorphisms 的复合。然而，原论文充斥着猫话，我选择选择看原论文比较简明的部分，再加上一些论文解读<a target="_blank" rel="noopener" href="https://reasonablypolymorphic.com/blog/recursion-schemes/index.html">^2</a>，一系列对 Recursion Schemes 的介绍博客<a target="_blank" rel="noopener" href="https://blog.sumtypeofway.com/posts/introduction-to-recursion-schemes.html">^3</a>，以及一篇 Medium 文章<a target="_blank" rel="noopener" href="https://medium.com/@jaredtobin/practical-recursion-schemes-c10648ec1c29">^4</a>。</p>
+<p>目的论地，我们可以直接整一个更适合用于排序的 ADT，这里是二叉树，也是我们整个递归函数的递归结构。这时用 Anamorphism 从数组生成二叉树，用 Catamorphism 从二叉树生成数组即可。</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">mergeSort</span> :: <span class="type">Ord</span> a =&gt; [a] -&gt; [a]</span><br><span class="line"><span class="title">mergeSort</span> = hylo alg coalg <span class="keyword">where</span></span><br><span class="line">  alg <span class="type">EmptyF</span>      = []</span><br><span class="line">  alg (<span class="type">LeafF</span> c)   = [c]</span><br><span class="line">  alg (<span class="type">NodeF</span> l r) = merge l r  coalg []  = <span class="type">EmptyF</span></span><br><span class="line">  coalg [x] = <span class="type">LeafF</span> x</span><br><span class="line">  coalg xs  = <span class="type">NodeF</span> l r <span class="keyword">where</span></span><br><span class="line">    (l, r) = splitAt (length xs `div` <span class="number">2</span>) xs</span><br></pre></td></tr></table></figure>
+
+<p>事实上，Anamorphism 是满射（这会导致部分不同的值被映射到相同的「递归结构实例」，这也是为什么记忆化<a target="_blank" rel="noopener" href="http://blog.sigfpe.com/2014/05/cofree-meets-free.html">^5</a> 只能对 Anamorphism 做），Catamorphism 是单射，观察一些自然数递归容易感受到这一规律。</p>
+<h3 id="一些小改进"><a href="#一些小改进" class="headerlink" title="一些小改进"></a>一些小改进</h3><p>介绍系列大部分讲的是关于 Catamorphisms 和 Anamorphisms 的小改进：</p>
+<ul>
+<li>Paramorphism: 保留原参数的可引用性<ul>
+<li>如果在想实现就地修改的时候，只需要使用 Ana- + Catamorphism 就够了</li>
+</ul>
+</li>
+<li>Apomorphism: 允许 break<ul>
+<li>但本来不就能 break 吗？有什么区别？</li>
+</ul>
+</li>
+<li>Histomorphism: 记录结果历史<ul>
+<li>或许可以实现自动记忆化？</li>
+</ul>
+</li>
+<li>Futumorphism: 允许树状 break<ul>
+<li>依然不太明白</li>
+</ul>
+</li>
+<li>Chrono- &#x2F; Hypomorphism: 先前东西的神秘组合</li>
+</ul>
+<h2 id="bind-可以自动生成"><a href="#bind-可以自动生成" class="headerlink" title="bind 可以自动生成"></a><code>bind</code> 可以自动生成</h2><p>上面生成的是 <code>map</code>、<code>cata</code>、<code>ana</code>、<code>fold</code> 之类的函数，但其实 <code>bind</code> 也是可以生成的。</p>
+<p>在参数化 ADT，例如 <code>Interaction next</code>，使之成为 Functor 后，Free Monad<a target="_blank" rel="noopener" href="https://www.haskellforall.com/2012/06/you-could-have-invented-free-monads.html">^6</a> 可以自动为 <code>Free Interaction r = Free (Interaction (Free Interaction)) | Pure r</code> 生成 <code>bind</code> 函数。其和 Futumorphism 的联系尚不明确。</p>
+<h2 id="下一步"><a href="#下一步" class="headerlink" title="下一步"></a>下一步</h2><ul>
+<li>尝试更多例子<ul>
+<li>找到 free monad 和 futumorphism 的关联</li>
+<li>探索记忆化的更多可能</li>
+<li>尝试改成 fully in-place 的版本</li>
+</ul>
+</li>
+<li>恶补猫论知识，了解对偶到底是什么含义</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E4%B8%8E%E7%BB%93%E6%9E%84%E7%9A%84%E9%80%92%E5%BD%92%E5%90%8C%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">算法与结构的递归同构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%94%B9%E8%BF%9B"><span class="toc-number">1.1.</span> <span class="toc-text">一些小改进</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bind-%E5%8F%AF%E4%BB%A5%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90"><span class="toc-number">2.</span> <span class="toc-text">bind 可以自动生成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E4%B8%80%E6%AD%A5"><span class="toc-number">3.</span> <span class="toc-text">下一步</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/10/06/rec-scheme/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&text=PL | 递归数据结构"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&title=PL | 递归数据结构"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&is_video=false&description=PL | 递归数据结构"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PL | 递归数据结构&body=Check out this article: https://blog.5eqn.top/2023/10/06/rec-scheme/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&title=PL | 递归数据结构"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&title=PL | 递归数据结构"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&title=PL | 递归数据结构"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&title=PL | 递归数据结构"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/10/06/rec-scheme/&name=PL | 递归数据结构&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/10/06/rec-scheme/&t=PL | 递归数据结构"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
