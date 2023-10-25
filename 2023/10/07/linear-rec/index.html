@@ -14,7 +14,7 @@
 <meta property="og:description" content="问题引入正常而言，cata 函数的实现是： 1234data Fix f &#x3D; Fix &amp;#123;unfix :: f (Fix f)&amp;#125;cata :: Functor f -&gt; (f a -&gt; a) -&gt; Fix f -&gt; acata fn x &#x3D; fn $ fmap (cata fn) $ unfix x  假设我们有： 1data Tree x next &#x3D;">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-10-07T09:57:39.000Z">
-<meta property="article:modified_time" content="2023-10-07T14:45:57.170Z">
+<meta property="article:modified_time" content="2023-10-22T08:05:56.215Z">
 <meta property="article:author" content="5eqn">
 <meta property="article:tag" content="草稿">
 <meta name="twitter:card" content="summary">
@@ -96,6 +96,8 @@
     <span id="actions">
       <ul>
         
+        <li><a class="icon" aria-label="上一篇" href="/2023/10/25/closure-vector/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
         
         <li><a class="icon" aria-label="下一篇" href="/2023/10/06/rec-scheme/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
@@ -127,7 +129,7 @@
     
     
       <div id="toc">
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%BC%95%E5%85%A5"><span class="toc-number">1.</span> <span class="toc-text">问题引入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E7%9B%B4%E6%8E%A5%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">更直接的方式</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%BC%95%E5%85%A5"><span class="toc-number">1.</span> <span class="toc-text">问题引入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E7%9B%B4%E6%8E%A5%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">更直接的方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A5%E5%85%85"><span class="toc-number">3.</span> <span class="toc-text">补充</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Indexed-DS"><span class="toc-number">3.1.</span> <span class="toc-text">Indexed DS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Index-encoded-in-Reuse-Token"><span class="toc-number">3.2.</span> <span class="toc-text">Index encoded in Reuse Token</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Indexed-DS-and-Coinductive-Types"><span class="toc-number">3.3.</span> <span class="toc-text">Indexed DS and Coinductive Types</span></a></li></ol></li></ol>
       </div>
     
   </span>
@@ -209,6 +211,64 @@
 
 <p>但这会破坏原有的数据！原先的 <code>map</code> 相当于 <code>cata</code> 的时候已经在构建一个新的 <code>Tree</code>，因此是 FIP 的，但现在这个不是！</p>
 <p>对于 <code>fold</code> 而不产生栈空间数据结构的情况，或许 Paramorphism &#x2F; Histomorphism 才是 FIP 的？</p>
+<h2 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h2><ul>
+<li><code>cata</code> 不可能 FIP，最多通过把产生的值存在栈空间实现 FBIP，内存消耗为 $O(\log n)$</li>
+<li>考虑尝试把正常的递归写成 Hylomorphism，看看是否 easier to reason about</li>
+<li>indexed DS 和 recursive DS 疑似有某种对应关系，但对于例如树的东西想不到怎么推广</li>
+</ul>
+<h3 id="Indexed-DS"><a href="#Indexed-DS" class="headerlink" title="Indexed DS"></a>Indexed DS</h3><p>如果把 Indexed Array 强行当作链表，我们可以写出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">remove ls a =</span><br><span class="line">  ls.cata</span><br><span class="line">    [] =&gt; []</span><br><span class="line">    ls :: x if x == a =&gt; ls</span><br><span class="line">    ls :: x =&gt; ls :: x</span><br></pre></td></tr></table></figure>
+
+<p>这对于 Indexed Array 显然是不合法的。</p>
+<p>如果把 Indexed Array 视为黑箱，则无法得到 cata。</p>
+<p>如果修改 <code>remove</code> 函数，保留 cata，只生成黑箱：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">remove ls a =</span><br><span class="line">  ls.cata</span><br><span class="line">    [] =&gt; [0 for ls.length]</span><br><span class="line">    ls :: x if x == a =&gt; ls</span><br><span class="line">    ls :: x =&gt; ls[i] &lt;- x</span><br></pre></td></tr></table></figure>
+
+<p>可以看到两个问题：</p>
+<ul>
+<li><code>i</code> 如何获取？</li>
+<li>该函数不 FIP</li>
+</ul>
+<p>如果再创建一个临时的 0 至 n 的链表，以此 fold over an indexed array，应当是一个可行方案。</p>
+<h3 id="Index-encoded-in-Reuse-Token"><a href="#Index-encoded-in-Reuse-Token" class="headerlink" title="Index encoded in Reuse Token"></a>Index encoded in Reuse Token</h3><p>在和 Anqur 讨论后获得一个灵感：给 Reuse Token 的 Type 添加位置参数，使其能够反映位置信息。</p>
+<p>不过这样一个 Vector 可以被 destructively matched into 很多不同的东西，这很坏。</p>
+<h3 id="Indexed-DS-and-Coinductive-Types"><a href="#Indexed-DS-and-Coinductive-Types" class="headerlink" title="Indexed DS and Coinductive Types"></a>Indexed DS and Coinductive Types</h3><p>考虑基础的 Coinductive Type，<code>Stream</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data Stream</span><br><span class="line">  hd : Stream -&gt; Nat</span><br><span class="line">  tl : Stream -&gt; Stream</span><br></pre></td></tr></table></figure>
+
+<p>如果我们纤维化一个构造函数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">data Array T n</span><br><span class="line">  get : Fin n -&gt; Array T n -&gt; T</span><br></pre></td></tr></table></figure>
+
+<p>就可以构造出一个 Indexed DS。</p>
+<p>考虑构造 Stream 的方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">stream : Nat -&gt; Stream</span><br><span class="line">stream n = make s from</span><br><span class="line">  hd s = n</span><br><span class="line">  tl s = stream (S n)</span><br></pre></td></tr></table></figure>
+
+<p>推广到数组：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">array : Array Int 3</span><br><span class="line">array = make a from</span><br><span class="line">  get i a = i.toInt</span><br></pre></td></tr></table></figure>
+
+<p>Inductive Type 添加 Token：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">data Tuple</span><br><span class="line">  Tuple : Tok -&gt; A -&gt; B -&gt; C -&gt; Tuple</span><br></pre></td></tr></table></figure>
+
+<p>Coinductive Type 添加 Token：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">data Stream</span><br><span class="line">  hd : Stream -&gt; Nat</span><br><span class="line">  tl : Stream -&gt; Stream</span><br><span class="line">  tok : Stream -&gt; Tok</span><br></pre></td></tr></table></figure>
+
+<p>对于数组：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data Array</span><br><span class="line">  get : Fin n -&gt; Array T n -&gt; T</span><br><span class="line">  tok : Array T n -&gt; Tok</span><br></pre></td></tr></table></figure>
+
+<p>FIP 的 inductive type 修改：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mod : Tuple -&gt; Tuple</span><br><span class="line">mod (Tuple tok a b c) = Tuple tok a 0 c</span><br></pre></td></tr></table></figure>
+
+<p>FBIP 的数组元素修改：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mod : Array Int n -&gt; Array Int n</span><br><span class="line">mod arr = make a from</span><br><span class="line">  get 0 a = 0</span><br><span class="line">  get i a = get i arr</span><br><span class="line">  tok a = tok arr</span><br></pre></td></tr></table></figure>
+
+<p>这种方式的缺点是判断元素是否修改太过 Ad-Hoc。但是！考虑下面的改动方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">data Array</span><br><span class="line">  get : (x : Fin n) -&gt; Array T n -&gt; (T, Tok x)</span><br><span class="line"></span><br><span class="line">mod : Array Int n -&gt; Fin n -&gt; Int -&gt; Array Int n</span><br><span class="line">mod arr index value = make a from</span><br><span class="line">  get i a = case i of</span><br><span class="line">    index =&gt;</span><br><span class="line">      let (_, tok) = get index arr in</span><br><span class="line">      (value, tok)</span><br><span class="line">    otherwise =&gt; get i arr</span><br></pre></td></tr></table></figure>
+
+<p>这样可以轻松地避免 cross-updating，从而实现线程安全！（但实际上起到的效果只是要求必须点对点 <code>map</code>）</p>
+<p>如果参数反转？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">data Array</span><br><span class="line">  content : Array T n -&gt; (x : Fin n) -&gt; (T, Tok x)</span><br><span class="line"></span><br><span class="line">mod : Array Int n -&gt; Fin n -&gt; Int -&gt; Array Int n</span><br><span class="line">mod arr index value = make a from</span><br><span class="line">  content a = \i =&gt; case i of</span><br><span class="line">    index =&gt;</span><br><span class="line">      let (_, tok) = content arr index in</span><br><span class="line">      (value, tok)</span><br><span class="line">    otherwise =&gt; content arr i</span><br></pre></td></tr></table></figure>
+
+<p>那完全可以不使用 coinductive type！</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">data Array T n = Array ((x : Fin n) -&gt; (T, Tok x))</span><br><span class="line"></span><br><span class="line">mod : Array Int n -&gt; Fin n -&gt; Int -&gt; Array Int n</span><br><span class="line">mod (Array arr) index value = Array (</span><br><span class="line">  \i =&gt; case i of</span><br><span class="line">    index =&gt;</span><br><span class="line">      let (_, tok) = arr index</span><br><span class="line">      (value, tok)</span><br><span class="line">    otherwise =&gt; arr i</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
 
   </div>
 </article>
@@ -240,7 +300,7 @@
     
     
       <div id="toc-footer" style="display: none">
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%BC%95%E5%85%A5"><span class="toc-number">1.</span> <span class="toc-text">问题引入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E7%9B%B4%E6%8E%A5%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">更直接的方式</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%BC%95%E5%85%A5"><span class="toc-number">1.</span> <span class="toc-text">问题引入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E7%9B%B4%E6%8E%A5%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">更直接的方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A5%E5%85%85"><span class="toc-number">3.</span> <span class="toc-text">补充</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Indexed-DS"><span class="toc-number">3.1.</span> <span class="toc-text">Indexed DS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Index-encoded-in-Reuse-Token"><span class="toc-number">3.2.</span> <span class="toc-text">Index encoded in Reuse Token</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Indexed-DS-and-Coinductive-Types"><span class="toc-number">3.3.</span> <span class="toc-text">Indexed DS and Coinductive Types</span></a></li></ol></li></ol>
       </div>
     
 
