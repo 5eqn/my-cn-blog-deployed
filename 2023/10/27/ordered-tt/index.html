@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="目标使用一种尽可能不 ad hoc 的方法建模 Vector。根据「奥卡姆剃刀原则」，这能更本质地把握「Vector 实质上是什么」，从而得到对人类相关直觉更简洁、直观的表述方法。 当前所有研究内容只是「将算法直观化」的基建，真正要直观化还需要一种好的可视化手段，因此本文暂不考虑做通俗化表述。 启发式推导考虑大家都熟悉的 List： 123data List T  Nil : List T  Co">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PL | 使用顺序类型系统建模 Vector">
+<meta property="og:url" content="https://blog.5eqn.top/2023/10/27/ordered-tt/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="目标使用一种尽可能不 ad hoc 的方法建模 Vector。根据「奥卡姆剃刀原则」，这能更本质地把握「Vector 实质上是什么」，从而得到对人类相关直觉更简洁、直观的表述方法。 当前所有研究内容只是「将算法直观化」的基建，真正要直观化还需要一种好的可视化手段，因此本文暂不考虑做通俗化表述。 启发式推导考虑大家都熟悉的 List： 123data List T  Nil : List T  Co">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-27T01:46:20.000Z">
+<meta property="article:modified_time" content="2023-10-27T07:40:35.467Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="草稿">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>PL | 使用顺序类型系统建模 Vector</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/10/25/closure-vector/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/10/27/ordered-tt/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&text=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&title=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&is_video=false&description=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PL | 使用顺序类型系统建模 Vector&body=Check out this article: https://blog.5eqn.top/2023/10/27/ordered-tt/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&title=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&title=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&title=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&title=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&name=PL | 使用顺序类型系统建模 Vector&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/10/27/ordered-tt/&t=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8F%91%E5%BC%8F%E6%8E%A8%E5%AF%BC"><span class="toc-number">2.</span> <span class="toc-text">启发式推导</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E5%BA%94"><span class="toc-number">2.1.</span> <span class="toc-text">对应</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90"><span class="toc-number">3.</span> <span class="toc-text">例子</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        PL | 使用顺序类型系统建模 Vector
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-10-27T01:46:20.000Z" class="dt-published" itemprop="datePublished">2023-10-27</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E8%8D%89%E7%A8%BF/" rel="tag">草稿</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>使用一种尽可能不 ad hoc 的方法建模 Vector。根据「奥卡姆剃刀原则」，这能更本质地把握「Vector 实质上是什么」，从而得到对人类相关直觉更简洁、直观的表述方法。</p>
+<p>当前所有研究内容只是「将算法直观化」的基建，真正要直观化还需要一种好的可视化手段，因此本文暂不考虑做通俗化表述。</p>
+<h2 id="启发式推导"><a href="#启发式推导" class="headerlink" title="启发式推导"></a>启发式推导</h2><p>考虑大家都熟悉的 <code>List</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data List T</span><br><span class="line">  Nil : List T</span><br><span class="line">  Cons : T -&gt; List T -&gt; List T</span><br></pre></td></tr></table></figure>
+
+<p>使用 Reuse Token，其中 <code>Tok</code> 的所有出现均为 Quantitive 的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data List T</span><br><span class="line">  Nil : List T</span><br><span class="line">  Cons : Tok -&gt; T -&gt; List T -&gt; List T</span><br></pre></td></tr></table></figure>
+
+<p>考虑移除元素（这里省略 effect）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">remove : T -&gt; List T -&gt; List T</span><br><span class="line">remove t ls =</span><br><span class="line">  case ls of</span><br><span class="line">    Nil =&gt; Nil</span><br><span class="line">    Cons tok t tl =&gt; free tok; remove t tl</span><br><span class="line">    Cons tok hd tl =&gt; Cons tok hd (remove t tl)</span><br></pre></td></tr></table></figure>
+
+<p>移除元素会导致无法线性索引，我们希望我们的类型系统能禁止实现这个函数。</p>
+<p>考虑禁用对 <code>List</code> 的 <code>Tok</code> 执行 <code>free</code>，这样基于仿射类型只有整个 <code>List T</code> 的实例能被回收，只要拆开之后都必然需要拼接上。这样 <code>Tok</code> 和 <code>Cons</code> 都可以视为和 <code>Nat</code> 相似的，因此可以采用和 <code>Nat</code> 类似的优化方法，从而实现随机访问。</p>
+<p>不过，这样的类型系统可以被破解：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">swap : List T -&gt; List T -&gt; (List T, List T)</span><br><span class="line">swap ls ls&#x27; =</span><br><span class="line">  case (ls, ls&#x27;) of</span><br><span class="line">    (Cons tok hd tl, Cons tok&#x27; hd&#x27; tl&#x27;) =&gt; (Cons tok hd tl&#x27;, Cons tok&#x27; hd&#x27; tl)</span><br><span class="line">    _ =&gt; (ls, ls&#x27;)</span><br></pre></td></tr></table></figure>
+
+<p>我们只希望用户拿到一个 <code>Cons tok hd tl</code> 之后改变 <code>hd</code>、对 <code>tl</code> 进行一个原位、保持位置的操作之后装回去，但现在用户可以随意改变 <code>tl</code>（因为在这样的语义下 <code>tl</code> 的表现更像是一个指针）。事实上 <code>tok</code> 和 <code>tl</code> 都本应只表示一个运行时擦除的 Index。</p>
+<p>参考 <a target="_blank" rel="noopener" href="https://www.cs.cmu.edu/~rwh/papers/ordered/popl.pdf">Ordered Type Theory</a>，考虑在语境中添加「顺序」。具体地，原先在给 <code>ls</code> 解构出 <code>Cons tok hd tl</code> 的时候，语境中只有线性的 <code>tok</code> 和 <code>tl</code>。现在，我们希望强制要求 <code>tok</code> 和 <code>tl</code> 必须在一个相同的构造函数中被以相同顺序应用。</p>
+<p>不过由于内存只能是线性的，这个限制不能被推广到其他数据结构，例如树（除非我们现实中有树状的内存）。这意味着目前而言这一限制只能被应用于数组。因此考虑把这一规则直接施加在一个 built-in 的数组类型上。</p>
+<h3 id="对应"><a href="#对应" class="headerlink" title="对应"></a>对应</h3><p>为方便和现实内存对应，考虑把 <code>hd</code> 写到后面。虽然这样写应该叫 <code>init</code> 和 <code>last</code>，但看起来很怪，所以还是 <code>Cons tl hd</code> 罢。</p>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>归并排序，这里 <code>[A, B]</code> 表示有序对，在参数被解构时要求以相同顺序被塞回去。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">cut : List T -&gt; Nat -&gt; [List T, List T]</span><br><span class="line">cut ls n =</span><br><span class="line">  case (ls, n) of</span><br><span class="line">    (ls, Z) =&gt; [Nil, ls]</span><br><span class="line">    (Cons tl hd, S m) =&gt;</span><br><span class="line">      [lhs, rhs] = cut tl m</span><br><span class="line">      [lhs, Cons rhs hd]</span><br><span class="line"></span><br><span class="line">sort : List T -&gt; List T</span><br><span class="line">sort ls =</span><br><span class="line">  [lhs, rhs] = cur ls (len ls / 2)</span><br><span class="line">  lhs = sort lhs</span><br><span class="line">  rhs = sort rhs</span><br><span class="line">  -- merge...</span><br></pre></td></tr></table></figure>
+
+<p><code>cut</code> 要优化成直接索引较为困难，暂时只知道可以参考对 <code>Nat</code> 的优化方式，但不知道具体怎么做。对 <code>Nat</code> 的优化和避免为不可变 <code>List</code> 申请内存的优化或许有相似之处，这些都是以后可调研的课题。</p>
+<p>同时相比令 <code>Cons : List T -&gt; Tok -&gt; T -&gt; List T</code>，改为 <code>Cons : List T -&gt; (Tok T, T) -&gt; List T</code> 或许更好一些，这样可以直观地看出每个变量都是线性且有序的，只是对多层 Pattern Match 的需求变强了（但这反正本来也要做）。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8F%91%E5%BC%8F%E6%8E%A8%E5%AF%BC"><span class="toc-number">2.</span> <span class="toc-text">启发式推导</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E5%BA%94"><span class="toc-number">2.1.</span> <span class="toc-text">对应</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90"><span class="toc-number">3.</span> <span class="toc-text">例子</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/10/27/ordered-tt/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&text=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&title=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&is_video=false&description=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PL | 使用顺序类型系统建模 Vector&body=Check out this article: https://blog.5eqn.top/2023/10/27/ordered-tt/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&title=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&title=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&title=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&title=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/10/27/ordered-tt/&name=PL | 使用顺序类型系统建模 Vector&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/10/27/ordered-tt/&t=PL | 使用顺序类型系统建模 Vector"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
