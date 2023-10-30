@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-    <meta name="description" content="正片你希望实现这样一个计数器：  四次点击，一个组件首先从组件库里点击文本组件拾取，双击屏幕中央以放置在屏幕中间：  移动鼠标，组件的大小会随着鼠标位置改变。支持预先定义「网格」，来避免取到类似于 16.3724px 的大小。大小合适时单击，表示确认：  从组件库里点击圆形组件拾取，单击屏幕中央，向左移动一段距离，组件的位置会随鼠标位置改变。同样支持预先定义网格，防止取到不规范的位移大小。位置合适">
+    <meta name="description" content="你希望实现这样一个计数器：  四次点击，一个组件首先从组件库里点击文本组件拾取，双击屏幕中央以放置在屏幕中间：  移动鼠标，组件的大小会随着鼠标位置改变。支持预先定义「网格」，来避免取到类似于 16.3724px 的大小。大小合适时单击，表示确认：  从组件库里点击圆形组件拾取，单击屏幕中央，向左移动一段距离，组件的位置会随鼠标位置改变。同样支持预先定义网格，防止取到不规范的位移大小。位置合适时单">
 <meta property="og:type" content="article">
 <meta property="og:title" content="前端 | 用「立方设计」实现一个计数器">
 <meta property="og:url" content="https://blog.5eqn.top/2023/10/30/design-visual/index.html">
 <meta property="og:site_name" content="5eqn 的博客">
-<meta property="og:description" content="正片你希望实现这样一个计数器：  四次点击，一个组件首先从组件库里点击文本组件拾取，双击屏幕中央以放置在屏幕中间：  移动鼠标，组件的大小会随着鼠标位置改变。支持预先定义「网格」，来避免取到类似于 16.3724px 的大小。大小合适时单击，表示确认：  从组件库里点击圆形组件拾取，单击屏幕中央，向左移动一段距离，组件的位置会随鼠标位置改变。同样支持预先定义网格，防止取到不规范的位移大小。位置合适">
+<meta property="og:description" content="你希望实现这样一个计数器：  四次点击，一个组件首先从组件库里点击文本组件拾取，双击屏幕中央以放置在屏幕中间：  移动鼠标，组件的大小会随着鼠标位置改变。支持预先定义「网格」，来避免取到类似于 16.3724px 的大小。大小合适时单击，表示确认：  从组件库里点击圆形组件拾取，单击屏幕中央，向左移动一段距离，组件的位置会随鼠标位置改变。同样支持预先定义网格，防止取到不规范的位移大小。位置合适时单">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/counter.png">
 <meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/drag.png">
@@ -24,8 +24,17 @@
 <meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/fn-output.png">
 <meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/fn-relation.png">
 <meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/fn-dest.png">
+<meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/event.png">
+<meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/edit-event.png">
+<meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/event-relation.png">
+<meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/event-zero.png">
+<meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/event-start.png">
+<meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/event-end.png">
+<meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/event-mid.png">
+<meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/event-formula.png">
+<meta property="og:image" content="https://blog.5eqn.top/2023/10/30/design-visual/event-calculate.png">
 <meta property="article:published_time" content="2023-10-30T06:42:38.000Z">
-<meta property="article:modified_time" content="2023-10-30T09:13:06.396Z">
+<meta property="article:modified_time" content="2023-10-30T13:46:06.346Z">
 <meta property="article:author" content="5eqn">
 <meta property="article:tag" content="草稿">
 <meta name="twitter:card" content="summary">
@@ -139,7 +148,7 @@
     
     
       <div id="toc">
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E7%89%87"><span class="toc-number">1.</span> <span class="toc-text">正片</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E6%AC%A1%E7%82%B9%E5%87%BB%EF%BC%8C%E4%B8%80%E4%B8%AA%E7%BB%84%E4%BB%B6"><span class="toc-number">1.1.</span> <span class="toc-text">四次点击，一个组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E9%97%AE%E9%A2%98%EF%BC%8C%E4%B8%80%E9%A1%B9%E7%8A%B6%E6%80%81"><span class="toc-number">1.2.</span> <span class="toc-text">一个问题，一项状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E6%AC%A1%E7%82%B9%E5%87%BB%EF%BC%8C%E4%B8%80%E6%AC%A1%E7%8A%B6%E6%80%81%E7%BB%91%E5%AE%9A"><span class="toc-number">1.3.</span> <span class="toc-text">四次点击，一次状态绑定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TODO"><span class="toc-number">1.4.</span> <span class="toc-text">TODO</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8A%B1%E7%B5%AE"><span class="toc-number">2.</span> <span class="toc-text">花絮</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E6%AC%A1%E7%82%B9%E5%87%BB%EF%BC%8C%E4%B8%80%E4%B8%AA%E7%BB%84%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">四次点击，一个组件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E9%97%AE%E9%A2%98%EF%BC%8C%E4%B8%80%E9%A1%B9%E7%8A%B6%E6%80%81"><span class="toc-number">2.</span> <span class="toc-text">一个问题，一项状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E6%AC%A1%E7%82%B9%E5%87%BB%EF%BC%8C%E4%B8%80%E6%AC%A1%E7%8A%B6%E6%80%81%E7%BB%91%E5%AE%9A"><span class="toc-number">3.</span> <span class="toc-text">四次点击，一次状态绑定</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E4%BA%8B%E4%BB%B6%E5%B0%B1%E5%83%8F%E7%BB%91%E7%8A%B6%E6%80%81"><span class="toc-number">4.</span> <span class="toc-text">写事件就像绑状态</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%EF%BC%9A%E6%B8%85%E9%9B%B6%E6%8C%89%E9%92%AE"><span class="toc-number">4.1.</span> <span class="toc-text">例：清零按钮</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%EF%BC%9A%E5%95%A5%E4%B9%9F%E4%B8%8D%E5%81%9A%E7%9A%84%E6%8C%89%E9%92%AE"><span class="toc-number">4.2.</span> <span class="toc-text">例：啥也不做的按钮</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%EF%BC%9A%E5%87%8F%E4%B8%80%E6%8C%89%E9%92%AE"><span class="toc-number">4.3.</span> <span class="toc-text">例：减一按钮</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8A%B1%E7%B5%AE"><span class="toc-number">5.</span> <span class="toc-text">花絮</span></a></li></ol>
       </div>
     
   </span>
@@ -184,9 +193,9 @@
   
 
   <div class="content e-content" itemprop="articleBody">
-    <h2 id="正片"><a href="#正片" class="headerlink" title="正片"></a>正片</h2><p>你希望实现这样一个计数器：</p>
+    <p>你希望实现这样一个计数器：</p>
 <p><img src="/2023/10/30/design-visual/counter.png"></p>
-<h3 id="四次点击，一个组件"><a href="#四次点击，一个组件" class="headerlink" title="四次点击，一个组件"></a>四次点击，一个组件</h3><p>首先从组件库里点击文本组件拾取，双击屏幕中央以放置在屏幕中间：</p>
+<h2 id="四次点击，一个组件"><a href="#四次点击，一个组件" class="headerlink" title="四次点击，一个组件"></a>四次点击，一个组件</h2><p>首先从组件库里点击文本组件拾取，双击屏幕中央以放置在屏幕中间：</p>
 <p><img src="/2023/10/30/design-visual/drag.png"></p>
 <p>移动鼠标，组件的大小会随着鼠标位置改变。支持预先定义「网格」，来避免取到类似于 <code>16.3724px</code> 的大小。大小合适时单击，表示确认：</p>
 <p><img src="/2023/10/30/design-visual/resize.png"></p>
@@ -196,18 +205,36 @@
 <p><img src="/2023/10/30/design-visual/resize-circle.png"></p>
 <p>支持设置组件各项属性数值。可设置的数值从组件库 API 爬取，实时渲染真实效果。</p>
 <p><img src="/2023/10/30/design-visual/info.png"></p>
-<h3 id="一个问题，一项状态"><a href="#一个问题，一项状态" class="headerlink" title="一个问题，一项状态"></a>一个问题，一项状态</h3><p>写好了组件排列，你将目光从 UI 视图移动到状态视图：</p>
+<h2 id="一个问题，一项状态"><a href="#一个问题，一项状态" class="headerlink" title="一个问题，一项状态"></a>一个问题，一项状态</h2><p>写好了组件排列，你将目光从 UI 视图移动到状态视图：</p>
 <p><img src="/2023/10/30/design-visual/double.png"></p>
-<p>你问自己「页面的状态」是否有可以变动的部分，得到的答案是「中间的数字会变」，因此在 <code>State</code> 中加入 <code>count</code> 字段表示中间的数字：</p>
+<p>你问自己，「成品页面里是否有能变动的部分」，得到的答案是「中间显示的数字能变」，因此在 <code>State</code> 中加入 <code>count</code> 字段表示中间的数字：</p>
 <p><img src="/2023/10/30/design-visual/state.png"></p>
-<p>你问自己 <code>count</code> 固定的情况下，页面的状态是否还有可以变动的部分，得到的答案是没有，这说明你已经写好了状态！</p>
-<h3 id="四次点击，一次状态绑定"><a href="#四次点击，一次状态绑定" class="headerlink" title="四次点击，一次状态绑定"></a>四次点击，一次状态绑定</h3><p>为了将 <code>count</code> 状态同步到 UI 视图，你首先在状态视图点击 <code>count</code> 的「输出端子」：</p>
+<p>你问自己 <code>count</code> 固定的情况下，「成品页面里是否还有能变动的部分」，得到的答案是没有，这说明你已经写好了状态！</p>
+<h2 id="四次点击，一次状态绑定"><a href="#四次点击，一次状态绑定" class="headerlink" title="四次点击，一次状态绑定"></a>四次点击，一次状态绑定</h2><p>为了将 <code>count</code> 状态同步到 UI 视图，你首先在状态视图点击 <code>count</code> 的「输出端子」：</p>
 <p><img src="/2023/10/30/design-visual/fn-output.png"></p>
 <p>然后切换到「纵切视图」，选择 UI 视图：</p>
 <p><img src="/2023/10/30/design-visual/fn-relation.png"></p>
 <p>最后在 UI 视图选择目标组件的目标变量的「输入端子」：</p>
 <p><img src="/2023/10/30/design-visual/fn-dest.png"></p>
-<h3 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h3><p>TODO</p>
+<h2 id="写事件就像绑状态"><a href="#写事件就像绑状态" class="headerlink" title="写事件就像绑状态"></a>写事件就像绑状态</h2><p>你希望点击按钮之后，<code>count</code> 能改变。因此你首先选择按钮框，然后点击 <code>+</code> 来添加事件：</p>
+<p><img src="/2023/10/30/design-visual/event.png"></p>
+<p>默认事件是 <code>onTap</code>，即点击事件，正合你意。因此你直接点击右侧立方体编辑事件：</p>
+<p><img src="/2023/10/30/design-visual/edit-event.png"></p>
+<p>你进入到一个和状态绑定时很相似的「纵切视图」，但注意到另一张视图并不是 UI 视图，而是「新状态视图」：</p>
+<p><img src="/2023/10/30/design-visual/event-relation.png"></p>
+<p>这里「新状态」就是点击按钮之后状态会变成的样子。</p>
+<h3 id="例：清零按钮"><a href="#例：清零按钮" class="headerlink" title="例：清零按钮"></a>例：清零按钮</h3><p>假如你希望点击按钮之后数字清零，你可以把新状态视图设置成这样：</p>
+<p><img src="/2023/10/30/design-visual/event-zero.png"></p>
+<h3 id="例：啥也不做的按钮"><a href="#例：啥也不做的按钮" class="headerlink" title="例：啥也不做的按钮"></a>例：啥也不做的按钮</h3><p>假如你希望点击按钮后新状态 <code>count</code> 等于旧状态 <code>count</code>，你当然可以不加点击事件。但你也可以先切换到旧状态视图，点击 <code>count</code> 的输出端子：</p>
+<p><img src="/2023/10/30/design-visual/event-start.png"></p>
+<p>你希望使其决定新状态 <code>count</code>，所以你切换到新状态视图，点击 <code>count</code> 的输入端子：</p>
+<p><img src="/2023/10/30/design-visual/event-end.png"></p>
+<h3 id="例：减一按钮"><a href="#例：减一按钮" class="headerlink" title="例：减一按钮"></a>例：减一按钮</h3><p>事实上，你希望新状态 <code>count</code> 等于旧状态 <code>count - 1</code>。你灵光一现，决定在旧状态层和新状态层之间创建一个「减一层」：</p>
+<p><img src="/2023/10/30/design-visual/event-mid.png"></p>
+<p>在减一层，你输入了你所期望的公式：</p>
+<p><img src="/2023/10/30/design-visual/event-formula.png"></p>
+<p>然后你把一切连接起来，便大功告成：</p>
+<p><img src="/2023/10/30/design-visual/event-calculate.png"></p>
 <h2 id="花絮"><a href="#花絮" class="headerlink" title="花絮"></a>花絮</h2><p>我本来想把软件叫 CuCl2（氯化铜），因为软件的特色是立方（Cube），人要用两只手（2 Claws）做设计，但似乎太过谜语人，故作为花絮放在这里。</p>
 
   </div>
@@ -240,7 +267,7 @@
     
     
       <div id="toc-footer" style="display: none">
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E7%89%87"><span class="toc-number">1.</span> <span class="toc-text">正片</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E6%AC%A1%E7%82%B9%E5%87%BB%EF%BC%8C%E4%B8%80%E4%B8%AA%E7%BB%84%E4%BB%B6"><span class="toc-number">1.1.</span> <span class="toc-text">四次点击，一个组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E9%97%AE%E9%A2%98%EF%BC%8C%E4%B8%80%E9%A1%B9%E7%8A%B6%E6%80%81"><span class="toc-number">1.2.</span> <span class="toc-text">一个问题，一项状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E6%AC%A1%E7%82%B9%E5%87%BB%EF%BC%8C%E4%B8%80%E6%AC%A1%E7%8A%B6%E6%80%81%E7%BB%91%E5%AE%9A"><span class="toc-number">1.3.</span> <span class="toc-text">四次点击，一次状态绑定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TODO"><span class="toc-number">1.4.</span> <span class="toc-text">TODO</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8A%B1%E7%B5%AE"><span class="toc-number">2.</span> <span class="toc-text">花絮</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E6%AC%A1%E7%82%B9%E5%87%BB%EF%BC%8C%E4%B8%80%E4%B8%AA%E7%BB%84%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">四次点击，一个组件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E9%97%AE%E9%A2%98%EF%BC%8C%E4%B8%80%E9%A1%B9%E7%8A%B6%E6%80%81"><span class="toc-number">2.</span> <span class="toc-text">一个问题，一项状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E6%AC%A1%E7%82%B9%E5%87%BB%EF%BC%8C%E4%B8%80%E6%AC%A1%E7%8A%B6%E6%80%81%E7%BB%91%E5%AE%9A"><span class="toc-number">3.</span> <span class="toc-text">四次点击，一次状态绑定</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E4%BA%8B%E4%BB%B6%E5%B0%B1%E5%83%8F%E7%BB%91%E7%8A%B6%E6%80%81"><span class="toc-number">4.</span> <span class="toc-text">写事件就像绑状态</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%EF%BC%9A%E6%B8%85%E9%9B%B6%E6%8C%89%E9%92%AE"><span class="toc-number">4.1.</span> <span class="toc-text">例：清零按钮</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%EF%BC%9A%E5%95%A5%E4%B9%9F%E4%B8%8D%E5%81%9A%E7%9A%84%E6%8C%89%E9%92%AE"><span class="toc-number">4.2.</span> <span class="toc-text">例：啥也不做的按钮</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%EF%BC%9A%E5%87%8F%E4%B8%80%E6%8C%89%E9%92%AE"><span class="toc-number">4.3.</span> <span class="toc-text">例：减一按钮</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8A%B1%E7%B5%AE"><span class="toc-number">5.</span> <span class="toc-text">花絮</span></a></li></ol>
       </div>
     
 
