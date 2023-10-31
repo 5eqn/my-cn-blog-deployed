@@ -13,13 +13,13 @@
 <meta property="og:site_name" content="5eqn 的博客">
 <meta property="og:description" content="作为一种动物，人很自然地拥有「反射」： 火代表危险。 用火烤肉，肉就会变熟。 你的舍友在打游戏，Ta 跟你说 Ta 血残了，你知道他手机上显示的血条一定是个窄而红的矩形。 如果你认为第三条很自然，那么恭喜你：原来你也会前端！ 规范化表述上述内容所有以「学术上」开头的句子如果看不懂请忽略，但你需要知道这样的句子实际上表达的意思跟前面大白话表述一模一样。 「x 代表的东西」中，「x」的类型是「自然元素">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://blog.5eqn.top/game.png">
+<meta property="og:image" content="https://blog.5eqn.top/2023/10/29/design-concept/game.png">
 <meta property="article:published_time" content="2023-10-29T02:00:01.000Z">
-<meta property="article:modified_time" content="2023-10-30T08:50:12.851Z">
+<meta property="article:modified_time" content="2023-10-31T13:38:56.126Z">
 <meta property="article:author" content="5eqn">
-<meta property="article:tag" content="草稿">
+<meta property="article:tag" content="前端">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://blog.5eqn.top/game.png">
+<meta name="twitter:image" content="https://blog.5eqn.top/2023/10/29/design-concept/game.png">
     
     
       
@@ -167,7 +167,7 @@
       
     <div class="article-tag">
         <i class="fa-solid fa-tag"></i>
-        <a class="p-category" href="/tags/%E8%8D%89%E7%A8%BF/" rel="tag">草稿</a>
+        <a class="p-category" href="/tags/%E5%89%8D%E7%AB%AF/" rel="tag">前端</a>
     </div>
 
 
@@ -203,7 +203,7 @@
 
 <h2 id="但是前端不止这些……"><a href="#但是前端不止这些……" class="headerlink" title="但是前端不止这些……"></a>但是前端不止这些……</h2><p>有趣的部分要来了！</p>
 <p>请你先访问<a target="_blank" rel="noopener" href="https://dccxi.com/trust/">这个网站</a>玩一会，对决完 5 名 NPC 对手就行（这大概需要花费 5 分钟时间），这对理解后面的内容有帮助。</p>
-<p><img src="/game.png" alt="游戏截图"></p>
+<p><img src="/2023/10/29/design-concept/game.png" alt="游戏截图"></p>
 <h3 id="你的总分"><a href="#你的总分" class="headerlink" title="你的总分"></a>你的总分</h3><p>假设你知道你的总分是 x，你应当能立刻反应过来「总分文本框」会显示什么。</p>
 <p>正是「你的总分：x」这些文本。翻译成编程语言就是：</p>
 <figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">render</span> : <span class="type">Score</span> -&gt; <span class="type">Widget</span></span><br><span class="line"><span class="title">render</span> x =</span><br><span class="line">  <span class="type">Text</span></span><br><span class="line">    text = <span class="string">&quot;你的总分：&quot;</span> + x</span><br></pre></td></tr></table></figure>
@@ -305,9 +305,37 @@
 <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><ul>
 <li>嵌套组件的状态如何处理？<ul>
 <li>考虑 <code>rendered : UseState Widget = st &lt;- useState; render st</code><ul>
-<li>合理性<ul>
 <li>对于固定的 <code>st</code> 内存占用情况固定，就和一次性算法一样</li>
-<li>对于改变的 <code>st</code> 则需要垃圾回收（考虑阅读垃圾回收 + FP 相关论文）</li>
+<li>对于改变的 <code>st</code> 则需要垃圾回收<ul>
+<li>考虑阅读垃圾回收 + FP 相关论文<ul>
+<li>有没有类似于「垃圾回收只在反复运行的程序中有意义」的表述？</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>只有第一次调用 <code>useState</code> 才会申请内存，使用 Effect 管理内存也和需要 GC 对应<ul>
+<li>否则可以手动管理</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>能不能不使用 GC？<ul>
+<li>思考<ul>
+<li>需要更深刻地了解前端回调机制<ul>
+<li>只是普通的过程式 Data Pipeline</li>
+</ul>
+</li>
+<li>看起来用 Dart 就是为了轻量 GC</li>
+<li>感觉 Key 是关键</li>
+</ul>
+</li>
+<li>结论<ul>
+<li>如果不 GC，必然是只有全局状态，然后子组件用 Lens 处理自己的状态<ul>
+<li>状态的递归结构都会变来变去，只是和「当前渲染状态」同构</li>
+<li>如果要显式管理状态，查重需要的算力显然大于 GC 消耗的算力</li>
+</ul>
+</li>
+<li>Key 可以作为调用 Effect 的参数</li>
 </ul>
 </li>
 </ul>
@@ -316,7 +344,7 @@
 </li>
 <li>列表的可视化怎么做？<ul>
 <li>向 <code>if</code> 一样采用中间层</li>
-<li>层数对应表达式语法树层数</li>
+<li>层数对应表达式语法树层数，后续计划写一篇讲对应关系</li>
 </ul>
 </li>
 </ul>
