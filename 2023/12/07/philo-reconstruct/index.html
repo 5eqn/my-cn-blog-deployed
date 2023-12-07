@@ -15,7 +15,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://blog.5eqn.top/2023/12/07/philo-reconstruct/failed.jpg">
 <meta property="article:published_time" content="2023-12-07T00:10:56.000Z">
-<meta property="article:modified_time" content="2023-12-07T08:20:18.456Z">
+<meta property="article:modified_time" content="2023-12-07T08:22:38.892Z">
 <meta property="article:author" content="5eqn">
 <meta property="article:tag" content="草稿">
 <meta property="article:tag" content="哲学">
@@ -206,7 +206,8 @@
 <p>「那……该怎么办呢？」</p>
 <p>「这时我们可以转变一下思维的参考系：原先我们想象取的每个点的位置从左往右，现在我们先忽略限制条件，想象取出来的每条线段不断变长，而不受其他线段影响。这 $n$ 条线段的长度是独立的，大幅便利了分析。不过限制条件终究还是要考虑的，也就是 $n$ 条线段长度和为 $1$ 的限制，依然比较难顶。」</p>
 <p>「咔咔，你的思路和过山车一样，一会有希望，一会没希望的。所以下一步怎么整嘛！」</p>
-<p>「这时不妨动用我们的拆分思维：注意到对于 $n!$ 种线段长度的排列结果，分析的手法都是一模一样的，我们也管这叫对称性。因此不妨只考虑 $x_1 &gt; x_2 &gt; … &gt; x_n$ 的情况。例如对于 $n &#x3D; 3$，这一情况意味着 $(x_1, x_2, x_3)$ 在由 $(1, 0, 0)$, $(\frac{1}{2}, \frac{1}{2}, 0)$, $(\frac{1}{3}, \frac{1}{3}, \frac{1}{3})$ 构成的三角形中，而这个三角形所有的点在三个坐标轴上的平均值分别为：<br>3<br>$$<br>\begin{aligned}<br>\overline{x_1} &amp;&#x3D; \frac{1}{3} \cdot (\frac{1}{3} + \frac{1}{2} + \frac{1}{1}) \\<br>\overline{x_2} &amp;&#x3D; \frac{1}{3} \cdot (\frac{1}{3} + \frac{1}{2} + 0) \\<br>\overline{x_3} &amp;&#x3D; \frac{1}{3} \cdot (\frac{1}{3} + 0 + 0)<br>\end{aligned}<br>$$</p>
+<p>「这时不妨动用我们的拆分思维：注意到对于 $n!$ 种线段长度的排列结果，分析的手法都是一模一样的，我们也管这叫对称性。因此不妨只考虑 $x_1 &gt; x_2 &gt; … &gt; x_n$ 的情况。例如对于 $n &#x3D; 3$，这一情况意味着 $(x_1, x_2, x_3)$ 在由 $(1, 0, 0)$, $(\frac{1}{2}, \frac{1}{2}, 0)$, $(\frac{1}{3}, \frac{1}{3}, \frac{1}{3})$ 构成的三角形中，而这个三角形所有的点在三个坐标轴上的平均值分别为：</p>
+<p>$$<br>\begin{aligned}<br>\overline{x_1} &amp;&#x3D; \frac{1}{3} \cdot (\frac{1}{3} + \frac{1}{2} + \frac{1}{1}) \\<br>\overline{x_2} &amp;&#x3D; \frac{1}{3} \cdot (\frac{1}{3} + \frac{1}{2} + 0) \\<br>\overline{x_3} &amp;&#x3D; \frac{1}{3} \cdot (\frac{1}{3} + 0 + 0)<br>\end{aligned}<br>$$</p>
 <p>对于更高维的情况，也容易进行推广。」</p>
 <p>「嗯……这个思路好妙！但我要怎么样才能自己洞见这样的思路呢？」</p>
 <p>「纱布，还记得我前面说的话吗？现象并不是扁平化的信息，而是有一定结构的。这种概率论题目对于大部分未经训练的人而言，应当是无从下手的。经过训练，人拥有了归纳能力、变换能力和拆分能力，从而得以解决这样的问题。」</p>
