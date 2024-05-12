@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="从例子开始：寻找一篇为大模型设计专用编程语言的文章我将该问题翻译为： 1Can you find me some papers about designing a new programming language for LLM model?  Perplexity.ai 的表现Perplexity.ai 是 AI 搜索行业的龙头企业之一，其搜索服务分为普通模式和 Pro 模式，其中 Pro 模式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我搭建了一个 24h 运行的 AI 助理来收集信息">
+<meta property="og:url" content="https://blog.5eqn.top/2024/05/12/info-gap/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="从例子开始：寻找一篇为大模型设计专用编程语言的文章我将该问题翻译为： 1Can you find me some papers about designing a new programming language for LLM model?  Perplexity.ai 的表现Perplexity.ai 是 AI 搜索行业的龙头企业之一，其搜索服务分为普通模式和 Pro 模式，其中 Pro 模式">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.5eqn.top/2024/05/12/info-gap/graph.svg">
+<meta property="article:published_time" content="2024-05-12T08:17:42.000Z">
+<meta property="article:modified_time" content="2024-05-12T14:21:49.189Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.5eqn.top/2024/05/12/info-gap/graph.svg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>我搭建了一个 24h 运行的 AI 助理来收集信息</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/12/07/philo-reconstruct/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2024/05/12/info-gap/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2024/05/12/info-gap/&text=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2024/05/12/info-gap/&title=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2024/05/12/info-gap/&is_video=false&description=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=我搭建了一个 24h 运行的 AI 助理来收集信息&body=Check out this article: https://blog.5eqn.top/2024/05/12/info-gap/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2024/05/12/info-gap/&title=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2024/05/12/info-gap/&title=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2024/05/12/info-gap/&title=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2024/05/12/info-gap/&title=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2024/05/12/info-gap/&name=我搭建了一个 24h 运行的 AI 助理来收集信息&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2024/05/12/info-gap/&t=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E4%BE%8B%E5%AD%90%E5%BC%80%E5%A7%8B%EF%BC%9A%E5%AF%BB%E6%89%BE%E4%B8%80%E7%AF%87%E4%B8%BA%E5%A4%A7%E6%A8%A1%E5%9E%8B%E8%AE%BE%E8%AE%A1%E4%B8%93%E7%94%A8%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E7%9A%84%E6%96%87%E7%AB%A0"><span class="toc-number">1.</span> <span class="toc-text">从例子开始：寻找一篇为大模型设计专用编程语言的文章</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Perplexity-ai-%E7%9A%84%E8%A1%A8%E7%8E%B0"><span class="toc-number">1.1.</span> <span class="toc-text">Perplexity.ai 的表现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%88%91%E7%9A%84-AI-%E5%8A%A9%E7%90%86%E7%9A%84%E8%A1%A8%E7%8E%B0"><span class="toc-number">1.2.</span> <span class="toc-text">我的 AI 助理的表现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%88%91%E6%98%AF%E6%80%8E%E4%B9%88%E5%81%9A%E5%88%B0%E7%9A%84%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">我是怎么做到的？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E5%A4%B4%E8%84%91%E9%A3%8E%E6%9A%B4%E4%BA%A7%E7%94%9F%E6%90%9C%E7%B4%A2%E5%85%B3%E9%94%AE%E5%AD%97"><span class="toc-number">2.1.</span> <span class="toc-text">通过头脑风暴产生搜索关键字</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E5%AD%97%E6%A0%A1%E9%AA%8C"><span class="toc-number">2.2.</span> <span class="toc-text">关键字校验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BA%E6%96%87%E6%90%9C%E7%B4%A2"><span class="toc-number">2.3.</span> <span class="toc-text">论文搜索</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E5%8D%A1%E7%89%87%E6%92%B0%E5%86%99"><span class="toc-number">2.4.</span> <span class="toc-text">推荐卡片撰写</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8%EF%BC%9F"><span class="toc-number">3.</span> <span class="toc-text">如何开始使用？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%BE%E5%88%B0%E5%A4%A7%E6%A8%A1%E5%9E%8B%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">3.1.</span> <span class="toc-text">找到大模型解决方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2"><span class="toc-number">3.2.</span> <span class="toc-text">本地部署</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        我搭建了一个 24h 运行的 AI 助理来收集信息
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-05-12T08:17:42.000Z" class="dt-published" itemprop="datePublished">2024-05-12</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/LLM/" rel="tag">LLM</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="从例子开始：寻找一篇为大模型设计专用编程语言的文章"><a href="#从例子开始：寻找一篇为大模型设计专用编程语言的文章" class="headerlink" title="从例子开始：寻找一篇为大模型设计专用编程语言的文章"></a>从例子开始：寻找一篇为大模型设计专用编程语言的文章</h2><p>我将该问题翻译为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Can you find me some papers about designing a new programming language for LLM model?</span><br></pre></td></tr></table></figure>
+
+<h3 id="Perplexity-ai-的表现"><a href="#Perplexity-ai-的表现" class="headerlink" title="Perplexity.ai 的表现"></a>Perplexity.ai 的表现</h3><p>Perplexity.ai 是 AI 搜索行业的龙头企业之一，其搜索服务分为普通模式和 Pro 模式，其中 Pro 模式更强大，但限制了免费体验的次数。</p>
+<p>下面是普通模式的表现：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Unfortunately...</span><br></pre></td></tr></table></figure>
+
+<p>嗯，先帝创业未半而骈死于槽枥之间了。看看后面说了什么：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Unfortunately, I could not find any papers specifically about designing a new programming language for LLM models in the given search results.</span><br><span class="line"></span><br><span class="line">... However, the search results do provide some relevant information that could be useful for designing a programming language for LLMs:</span><br><span class="line"></span><br><span class="line">1. The paper &quot;Low-code LLM: Graphical User Interface over Large Language Models&quot; [4] introduces a framework for interacting with LLMs through a graphical user interface and low-code visual programming. This could potentially be extended or adapted to design a programming language for LLMs...</span><br></pre></td></tr></table></figure>
+
+<p>全回答中只有低代码论文勉强和「代码」和「大语言模型」相关，但显然不是给大语言模型用的编程语言。</p>
+<p>如果使用 Pro 模式，则会得到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">The query you&#x27;ve posed about finding papers on designing new programming languages for Large Language Models (LLMs) is addressed by two significant contributions in the field:</span><br><span class="line"></span><br><span class="line">1. **&quot;Prompting Is Programming: A Query Language for Large Language Models&quot;** - This paper introduces the concept of Language Model Programming (LMP), which extends the idea of prompting LLMs with a combination of text prompts and scripting...</span><br><span class="line"></span><br><span class="line">2. **&quot;Efficiently Programming Large Language Models using SGLang&quot;** - This paper presents SGLang, a domain-specific language tailored for programming LLMs...</span><br></pre></td></tr></table></figure>
+
+<p>这里得到了两篇真正相关的论文，一篇是设计提示词的编程语言 LMP，一篇是编排大模型的 SGLang，效果比基础版好一些。</p>
+<p>注意到 Pro 模式的步骤中有一步是谷歌搜索 <code>site:arxiv.org programming language for large language models</code>，搜索得到的前两个结果正是回答中推荐的两篇文章。但 Pro 模式亦止步于此。</p>
+<h3 id="我的-AI-助理的表现"><a href="#我的-AI-助理的表现" class="headerlink" title="我的 AI 助理的表现"></a>我的 AI 助理的表现</h3><p>我的 <a target="_blank" rel="noopener" href="https://github.com/info-gap/info-gap-server">本地搜索助理</a>（怎么没人 Star 呢？）用 1 小时得到了 18 篇可能相关的文章，其中多数文章也并不符合要求，但得到的部分文章比传统 AI 搜索更符合需求。下面的文章推荐按照生成时间排序，最先生成的在最上面：</p>
+<ul>
+<li>CuMo: Scaling Multimodal LLM with Co-Upcycled Mixture-of-Experts<ul>
+<li>不相关，但大模型把减少计算消耗和新编程语言联系在一起</li>
+</ul>
+</li>
+<li>Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations?<ul>
+<li>不相关，但大模型幻觉出 LLM-Script</li>
+</ul>
+</li>
+<li>Lumina-T2X: Transforming Text into Any Modality, Resolution, and Duration via Flow-based Large Diffusion Transformers<ul>
+<li>不相关，但大模型把框架理解为编程语言</li>
+</ul>
+</li>
+<li>Learned harmonic mean estimation of the Bayesian evidence with normalizing flows<ul>
+<li>不相关，但这是一篇纯数学文章，LLM 认为这为编程语言奠定基础</li>
+</ul>
+</li>
+<li>Quantum Communication and Mixed-State Order in Decohered Symmetry-Protected Topological States<ul>
+<li>不相关，但大模型认为这为硬件实现提供基础</li>
+</ul>
+</li>
+<li>SPML: A DSL for Defending Language Models Against Prompt Attacks<ul>
+<li>和新编程语言、LLM 同时相关，专用于抵御提示词攻击的编程语言</li>
+</ul>
+</li>
+<li>Designing LLM Chains by Adapting Techniques from Crowdsourcing Workflows<ul>
+<li>不相关，LLM 也知道不直接相关，但还是推荐了</li>
+</ul>
+</li>
+<li>TypeFly: Flying Drones with Large Language Model<ul>
+<li>和新编程语言、LLM 同时相关，让大模型能控制无人机</li>
+</ul>
+</li>
+<li>What Algorithms can Transformers Learn? A Study in Length Generalization<ul>
+<li>和新编程语言、LLM 同时相关，并且大模型可以被解释为在使用这个编程语言</li>
+</ul>
+</li>
+<li>AutoScrum: Automating Project Planning Using Large Language Models<ul>
+<li>不相关，但大模型幻觉出 LLM-Script</li>
+</ul>
+</li>
+<li>Prompting Is Programming: A Query Language for Large Language Models<ul>
+<li>和新编程语言、LLM 同时相关，前面 Perplexity.ai 推荐过</li>
+</ul>
+</li>
+<li>Efficient LLM Comparative Assessment: a Product of Experts Framework for Pairwise Comparisons<ul>
+<li>不相关，但大模型幻觉出 LLM-Script</li>
+</ul>
+</li>
+<li>A Survey on Visualization Approaches in Political Science for Social and Political Factors: Progress to Date and Future Opportunities<ul>
+<li>不相关，LLM 没说相关，但还是推荐了</li>
+</ul>
+</li>
+<li>A Controlled Experiment on the Energy Efficiency of the Source Code Generated by Code Llama<ul>
+<li>不相关，但大模型幻觉出 LLM-Script</li>
+</ul>
+</li>
+<li>Large Language Models Synergize with Automated Machine Learning<ul>
+<li>不相关，但大模型幻觉出 LlamaScript</li>
+</ul>
+</li>
+<li>Generating Situated Reflection Triggers about Alternative Solution Paths: A Case Study of Generative AI for Computer-Supported Collaborative Learning<ul>
+<li>不相关，但这是一篇辅助思考的文章，LLM 认为这可以辅助构思新编程语言</li>
+</ul>
+</li>
+<li>AI Coders Are Among Us: Rethinking Programming Language Grammar Towards Efficient Code Generation<ul>
+<li>和新编程语言、LLM 同时相关，是对原有编程语言适配大模型的改良</li>
+</ul>
+</li>
+<li>Evaluating LLMs for Hardware Design and Test<ul>
+<li>不相关，但里面涉及 HDL（硬件设计语言）使得大模型认为相关</li>
+</ul>
+</li>
+</ul>
+<p>虽然大部分文章都不相关，但找到的相关文章也更多！要知道在「信息检索」的场景下，得到一些无关信息是无伤大雅的，但漏掉真正相关的信息则是大问题！</p>
+<p>同时你会注意到，其实很多无关信息大模型本完全可以筛选掉，比如那些幻觉。<strong>但是！</strong> 我其实是做了筛选的，而且事实上有 90% 左右的无关文章会被筛掉，但有关文章被筛掉的概率几乎为 0。剩下的文章以无关文章为主，是因为关键词检索出来的无关文章太多了……</p>
+<p>你可能注意到 SGLang 没有被推荐，这是因为我还没实现分页查询的功能（昨天才开始写这玩意的代码……），所以比较早的文章不会被查询到。这个问题会在后面被讨论。</p>
+<p>你可能会发现，几篇相关的文章几乎是连在一起出现的，这是因为对于同一个「检索词想法」搜索到的论文会被放在一起被判断。好的检索词想法更容易带来相关的文章。</p>
+<h2 id="我是怎么做到的？"><a href="#我是怎么做到的？" class="headerlink" title="我是怎么做到的？"></a>我是怎么做到的？</h2><p><img src="/2024/05/12/info-gap/graph.svg" alt="架构图"></p>
+<h3 id="通过头脑风暴产生搜索关键字"><a href="#通过头脑风暴产生搜索关键字" class="headerlink" title="通过头脑风暴产生搜索关键字"></a>通过头脑风暴产生搜索关键字</h3><p>这个节点会源源不断地产生新的搜索想法。怎么确保产生的想法都是新的？</p>
+<p>我在实践中发现，如果把已经生成过的关键字放到提示词里面，反而会让大模型倾向于重复已有的内容。只需把模型温度设置为 1，并在提示词中引导「要有创意」，便能获得足够多样的关键字。</p>
+<h3 id="关键字校验"><a href="#关键字校验" class="headerlink" title="关键字校验"></a>关键字校验</h3><p>一次正常的和大模型的对话大概长这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">user:</span><br><span class="line"></span><br><span class="line">你要搜索关于为大模型设计编程语言的 arXiv 论文，你会用什么关键字收集？</span><br><span class="line"></span><br><span class="line">llama3-cn:</span><br><span class="line"></span><br><span class="line">如果你想要在arXiv上搜索关于大型（或深度）学习模型设计和编程语言的研究论文，以下是一些可能有用的关键词：</span><br><span class="line"></span><br><span class="line">1. Deep Learning</span><br><span class="line">2. Large-scale Models</span><br><span class="line">3. Model Design</span><br><span class="line">4. Programming Languages</span><br><span class="line">5. Neural Networks</span><br><span class="line">6. Distributed Training</span><br><span class="line">7. Scalable Models</span><br><span class="line">8. Big Data</span><br><span class="line">9. Parallel Computing</span><br><span class="line">10. High-Performance Computing (HPC)</span><br><span class="line">11. GPU Acceleration</span><br><span class="line">12. TensorFlow</span><br><span class="line">13. PyTorch</span><br><span class="line">14. Keras</span><br><span class="line">15. Model Optimization</span><br><span class="line">16. Efficient Algorithms</span><br><span class="line">17. Model Serving</span><br><span class="line">18. Deployment Techniques</span><br><span class="line"></span><br><span class="line">你可以使用这些关键词单独或组合起来进行搜索，以便找到与大型模型设计相关的论文。例如，如果你特别感兴趣的是TensorFlow，你可以将“TensorFlow”和其他上述关键词结合使用来过滤结果。</span><br></pre></td></tr></table></figure>
+
+<p>这个回答人能看得懂，但如果直接把这个回答交给搜索 arXiv 论文的程序，这个程序怎么知道实际上应该搜索什么关键词呢？即使知道搜索什么关键词，程序也需要能校验关键词的格式，如果错误的话则需要让大模型重新输出一份。</p>
+<p>产生这个问题是因为，目前设定的大模型的输出类型是宽泛的「文本」，而不是具体的「合法的搜索关键字」。我使用了 <a target="_blank" rel="noopener" href="https://python.useinstructor.com/">Instructor</a> 库来解决这个问题，这个库允许我定义「合法的搜索关键字」需要满足的要求，即符合 arXiv 的检索格式，并要求大模型输出这一类型的回复。如果不满足，校验者则会先尝试修复格式，如果无法修复则会告诉大模型为什么不合法，并且请求重新生成。</p>
+<p>校验者事实上也是大模型，这里就用到了多智能体的思想。</p>
+<h3 id="论文搜索"><a href="#论文搜索" class="headerlink" title="论文搜索"></a>论文搜索</h3><p>直接使用 <a target="_blank" rel="noopener" href="https://github.com/lukasschwab/arxiv.py">arxiv.py</a> 库即可。</p>
+<p>我计划加入通过搜索引擎搜索的功能，但目前还在调研各 API 的价格和性能。由于 API 调用次数将较多，我希望能尽可能减少消费。</p>
+<p>目前对于论文我暂未实现分页查询，因此每次只是查询某关键字下最近发表的 10 篇论文。下一次迭代中，我计划使用任务池架构，对于所有搜索关键字，由调度器根据其结果接纳率决定「翻页」还是「产生新的搜索想法」。</p>
+<h3 id="推荐卡片撰写"><a href="#推荐卡片撰写" class="headerlink" title="推荐卡片撰写"></a>推荐卡片撰写</h3><p>这里我令大模型尝试输出一份对「文章符合用户要求」的证明，包括相关段落、相关理由和相关度打分。其中，相关段落会被校验是否引自原始文章，相关理由则会被校验是否能证明文章和用户要求相关，并且不包含幻觉。正如前面提到，这种校验在大部分情况下有效，但仍有少量情况下无法检验出幻觉。</p>
+<p>要解决这个问题，需要在完善提示工程和提高模型质量之间权衡。我可能会尝试以下方案：</p>
+<ul>
+<li>允许用户为「文章符合要求」的证明添加更多字段，以加入更有针对性的校验</li>
+<li>允许大模型生成「不推荐」的推荐卡片（虽然直接给推荐卡片加 <code>Optional</code> 没用）</li>
+<li>完善提示工程……（这玩意没数据集，不太方便测试性能，只能自己感觉了）</li>
+</ul>
+<h2 id="如何开始使用？"><a href="#如何开始使用？" class="headerlink" title="如何开始使用？"></a>如何开始使用？</h2><h3 id="找到大模型解决方案"><a href="#找到大模型解决方案" class="headerlink" title="找到大模型解决方案"></a>找到大模型解决方案</h3><p>随便找个和 OpenAI API 兼容的即可，不兼容的话用 <a target="_blank" rel="noopener" href="https://github.com/BerriAI/litellm">LiteLLM</a> 反向代理一下就行。找不到的话可以看看下面的建议：</p>
+<p>如果你有一张显存在 4.7 GB 以上的显卡，可以通过 <a target="_blank" rel="noopener" href="https://ollama.com/library/llama3">Ollama</a> 下载 LLaMA3-8b 模型并在本地运行。此时，你的 <code>OPENAI_API_URL</code> 是 <code>http://localhost:11434/v1</code>，<code>OPENAI_API_KEY</code> 是任意。我的上述测试结果是使用该模型得到的。</p>
+<p>如果你能接受 1 天约 10 元的 API 调用费，可以考虑使用 <a target="_blank" rel="noopener" href="https://www.deepseek.com/zh">深度求索</a> 平台提供的 deepseek-chat-v2 模型。该模型的价格为每 1,000,000 令牌 1 元钱。上述消费估计假设了 1 分钟发送 6 次 API 请求，但该速率只是我的直觉估计，我无法保证准确。此时，你的 <code>OPENAI_API_URL</code> 是 <code>https://api.deepseek.com/v1</code>，<code>OPENAI_API_KEY</code> 是控制台中显示的 API Key。</p>
+<p><strong>但是，</strong> 我测试发现该模型和 Instructor 库的相性并不好，经常给出错误的 JSON 格式导致不断重试，因此如果你需要使用本模型，可能会需要手动调整提示词。</p>
+<h3 id="本地部署"><a href="#本地部署" class="headerlink" title="本地部署"></a>本地部署</h3><p>欢迎 Star <a target="_blank" rel="noopener" href="https://github.com/info-gap/info-gap-server">本仓库</a>！</p>
+<p>本 AI 助理目前正在频繁开发的阶段，暂时没有封装 Docker 版本，建议通过克隆本仓库的方式部署。如果使用 <a target="_blank" rel="noopener" href="https://docs.anaconda.com/free/miniconda/index.html">Miniconda</a>，使用下面的命令来配置开发环境：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 克隆仓库</span><br><span class="line">git clone git@github.com:info-gap/info-gap-server.git</span><br><span class="line">cd info-gap-server</span><br><span class="line"></span><br><span class="line"># 安装依赖</span><br><span class="line">conda env create -f environment.yml</span><br><span class="line">conda activate info-gap</span><br><span class="line"></span><br><span class="line"># 设置环境变量，记得根据实际情况修改</span><br><span class="line">echo &quot;OPENAI_API_URL=http://localhost:11434/v1&quot; &gt;&gt; .env</span><br><span class="line">echo &quot;OPENAI_API_KEY=ollama&quot; &gt;&gt; .env</span><br><span class="line"></span><br><span class="line"># 运行程序，输出会放到 ./log/ 中</span><br><span class="line">python main.py</span><br></pre></td></tr></table></figure>
+
+<p>亦可以手动安装需要的包，然后使用相似的方法部署：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># 克隆仓库</span><br><span class="line">git clone git@github.com:info-gap/info-gap-server.git</span><br><span class="line">cd info-gap-server</span><br><span class="line"></span><br><span class="line"># 安装依赖</span><br><span class="line">pip install instructor arxiv</span><br><span class="line"></span><br><span class="line"># 设置环境变量，记得根据实际情况修改</span><br><span class="line">echo &quot;OPENAI_API_URL=http://localhost:11434/v1&quot; &gt;&gt; .env</span><br><span class="line">echo &quot;OPENAI_API_KEY=ollama&quot; &gt;&gt; .env</span><br><span class="line"></span><br><span class="line"># 运行程序，输出会放到 ./log/ 中</span><br><span class="line">python main.py</span><br></pre></td></tr></table></figure>
+
+<p>如果需要更新仓库，使用 <code>git pull</code> 即可。</p>
+<p>如果部署遇到问题，请提交 <a target="_blank" rel="noopener" href="https://github.com/info-gap/info-gap-server/issues/new/choose">Issue</a>。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E4%BE%8B%E5%AD%90%E5%BC%80%E5%A7%8B%EF%BC%9A%E5%AF%BB%E6%89%BE%E4%B8%80%E7%AF%87%E4%B8%BA%E5%A4%A7%E6%A8%A1%E5%9E%8B%E8%AE%BE%E8%AE%A1%E4%B8%93%E7%94%A8%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E7%9A%84%E6%96%87%E7%AB%A0"><span class="toc-number">1.</span> <span class="toc-text">从例子开始：寻找一篇为大模型设计专用编程语言的文章</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Perplexity-ai-%E7%9A%84%E8%A1%A8%E7%8E%B0"><span class="toc-number">1.1.</span> <span class="toc-text">Perplexity.ai 的表现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%88%91%E7%9A%84-AI-%E5%8A%A9%E7%90%86%E7%9A%84%E8%A1%A8%E7%8E%B0"><span class="toc-number">1.2.</span> <span class="toc-text">我的 AI 助理的表现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%88%91%E6%98%AF%E6%80%8E%E4%B9%88%E5%81%9A%E5%88%B0%E7%9A%84%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">我是怎么做到的？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E5%A4%B4%E8%84%91%E9%A3%8E%E6%9A%B4%E4%BA%A7%E7%94%9F%E6%90%9C%E7%B4%A2%E5%85%B3%E9%94%AE%E5%AD%97"><span class="toc-number">2.1.</span> <span class="toc-text">通过头脑风暴产生搜索关键字</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E5%AD%97%E6%A0%A1%E9%AA%8C"><span class="toc-number">2.2.</span> <span class="toc-text">关键字校验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BA%E6%96%87%E6%90%9C%E7%B4%A2"><span class="toc-number">2.3.</span> <span class="toc-text">论文搜索</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E5%8D%A1%E7%89%87%E6%92%B0%E5%86%99"><span class="toc-number">2.4.</span> <span class="toc-text">推荐卡片撰写</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8%EF%BC%9F"><span class="toc-number">3.</span> <span class="toc-text">如何开始使用？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%BE%E5%88%B0%E5%A4%A7%E6%A8%A1%E5%9E%8B%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">3.1.</span> <span class="toc-text">找到大模型解决方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2"><span class="toc-number">3.2.</span> <span class="toc-text">本地部署</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2024/05/12/info-gap/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2024/05/12/info-gap/&text=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2024/05/12/info-gap/&title=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2024/05/12/info-gap/&is_video=false&description=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=我搭建了一个 24h 运行的 AI 助理来收集信息&body=Check out this article: https://blog.5eqn.top/2024/05/12/info-gap/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2024/05/12/info-gap/&title=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2024/05/12/info-gap/&title=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2024/05/12/info-gap/&title=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2024/05/12/info-gap/&title=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2024/05/12/info-gap/&name=我搭建了一个 24h 运行的 AI 助理来收集信息&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2024/05/12/info-gap/&t=我搭建了一个 24h 运行的 AI 助理来收集信息"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2024
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
