@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="在上期博客中，我演示了我的 info-gap 信息收集助理，但实际运行性能较差（1 小时才能获得 18 条候选，其中只有 5 篇真正符合要求）。在查看 AI 对话日志后，我发现我所运行的 LLaMA3-8b 模型把握不住 Instructor 库所强制的 JSON 格式的输出，因此我尝试 手动设计所有的提示，想看看性能会发生什么变化。没想到…… 性能展示题目和上次一样，依然是寻找一篇为大模型设计专">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍">
+<meta property="og:url" content="https://blog.5eqn.top/2024/05/14/info-gap-v2/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="在上期博客中，我演示了我的 info-gap 信息收集助理，但实际运行性能较差（1 小时才能获得 18 条候选，其中只有 5 篇真正符合要求）。在查看 AI 对话日志后，我发现我所运行的 LLaMA3-8b 模型把握不住 Instructor 库所强制的 JSON 格式的输出，因此我尝试 手动设计所有的提示，想看看性能会发生什么变化。没想到…… 性能展示题目和上次一样，依然是寻找一篇为大模型设计专">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-05-14T08:06:52.000Z">
+<meta property="article:modified_time" content="2024-05-14T09:08:26.468Z">
+<meta property="article:author" content="5eqn">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2024/05/12/info-gap/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2024/05/14/info-gap-v2/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&text=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&title=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&is_video=false&description=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍&body=Check out this article: https://blog.5eqn.top/2024/05/14/info-gap-v2/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&title=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&title=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&title=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&title=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&name=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2024/05/14/info-gap-v2/&t=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E5%B1%95%E7%A4%BA"><span class="toc-number">1.</span> <span class="toc-text">性能展示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E7%A7%98%E8%AF%80"><span class="toc-number">2.</span> <span class="toc-text">优化秘诀</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-05-14T08:06:52.000Z" class="dt-published" itemprop="datePublished">2024-05-14</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>在上期博客中，我演示了我的 <a target="_blank" rel="noopener" href="https://github.com/info-gap/info-gap-server">info-gap</a> 信息收集助理，但实际运行性能较差（1 小时才能获得 18 条候选，其中只有 5 篇真正符合要求）。在查看 AI 对话日志后，我发现我所运行的 LLaMA3-8b 模型把握不住 Instructor 库所强制的 JSON 格式的输出，因此我尝试 <strong>手动设计所有的提示</strong>，想看看性能会发生什么变化。没想到……</p>
+<h2 id="性能展示"><a href="#性能展示" class="headerlink" title="性能展示"></a>性能展示</h2><p>题目和上次一样，依然是寻找一篇为大模型设计专用编程语言的文章。<strong>但是，</strong> 这次我要求大模型输出论文中提到的新语言的名字，用户可以根据这个名字快速排除掉一些不合法的推荐。下面展示的结果中，我排除掉了 9 个编程语言名为 None 的，以及 2 个提到已有语言的。</p>
+<p>仅运行 <strong>5 分钟</strong> 后，AI 助理收集到了 13 条相关信息：</p>
+<ul>
+<li>CoRE: LLM as Interpreter for Natural Language Programming, Pseudo-Code Programming, and Flow Programming of AI Agents<ul>
+<li>和新编程语言、大模型同时相关，用于基于大模型的自然语言编程</li>
+</ul>
+</li>
+<li>Aptly: Making Mobile Apps from Natural Language<ul>
+<li>没有涉及编程语言，Aptly 是框架</li>
+</ul>
+</li>
+<li>AI Coders Are Among Us: Rethinking Programming Language Grammar Towards Efficient Code Generation<ul>
+<li>和新编程语言、大模型同时相关，是对原有编程语言适配大模型的改良</li>
+</ul>
+</li>
+<li>TypeFly: Flying Drones with Large Language Model<ul>
+<li>和新编程语言、大模型同时相关，让大模型能控制无人机</li>
+</ul>
+</li>
+<li>Prompting Is Programming: A Query Language for Large Language Models<ul>
+<li>和新编程语言、大模型同时相关，用于设计提示词</li>
+</ul>
+</li>
+<li>Ansible Lightspeed: A Code Generation Service for IT Automation<ul>
+<li>和新编程语言、大模型同时相关，用于工业自动化</li>
+</ul>
+</li>
+<li>Semantic Parsing for Complex Data Retrieval: Targeting Query Plans vs. SQL for No-Code Access to Relational Databases<ul>
+<li>和新编程语言、大模型同时相关，用于有计划的数据库检索</li>
+</ul>
+</li>
+<li>ReactGenie: A Development Framework for Complex Multimodal Interactions Using Large Language Models<ul>
+<li>和新编程语言、大模型同时相关，作为多模态用户输入和编程语言的桥梁</li>
+</ul>
+</li>
+<li>LLMs as Compiler for Arabic Programming Language<ul>
+<li>和新编程语言、大模型同时相关，让大模型处理阿拉伯语编程语言</li>
+</ul>
+</li>
+<li>LangGPT: Rethinking Structured Reusable Prompt Design Framework for LLMs from the Programming Language<ul>
+<li>和新编程语言、大模型同时相关，用于结构化地生成提示词</li>
+</ul>
+</li>
+<li>SPML: A DSL for Defending Language Models Against Prompt Attacks<ul>
+<li>和新编程语言、大模型同时相关，用于防卫提示词攻击</li>
+</ul>
+</li>
+<li>MoTCoder: Elevating Large Language Models with Modular of Thought for Challenging Programming Tasks<ul>
+<li>没有涉及编程语言，MoTCoder 是个框架</li>
+</ul>
+</li>
+<li>Efficiently Programming Large Language Models using SGLang<ul>
+<li>和新编程语言、大模型同时相关，用于编排大模型</li>
+</ul>
+</li>
+</ul>
+<p>这次 13 篇中有 11 篇都符合要求！！</p>
+<p>用表格对比一下各搜索方案的性能：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>时间</th>
+<th>有关篇数</th>
+<th>无关篇数</th>
+<th>准确率</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>pplx.ai</td>
+<td>30s</td>
+<td>0</td>
+<td>1</td>
+<td>0%</td>
+</tr>
+<tr>
+<td>pplx.ai (Pro)</td>
+<td>1 min</td>
+<td>2</td>
+<td>0</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>info-gap v1</td>
+<td>60 min</td>
+<td>5</td>
+<td>13</td>
+<td>28%</td>
+</tr>
+<tr>
+<td>info-gap v2</td>
+<td>5 min</td>
+<td>11</td>
+<td>2</td>
+<td>85%</td>
+</tr>
+</tbody></table>
+<p>注意 info-gap 是可以随时间扩展的！跑得越久，找到的信息越多。如果是常规的 AI 搜索引擎，很可能每次询问找到的都是相近的结果。</p>
+<p>细心的读者可能会注意到，上次找到的 “What Algorithms can Transformers Learn?” 在这次并没有被找到。我在日志中发现，这篇文章被认为和新编程语言无关，因为文中涉及的编程语言 RASP 并不是被新发明的，所以上次连我自己都误判了？！</p>
+<h2 id="优化秘诀"><a href="#优化秘诀" class="headerlink" title="优化秘诀"></a>优化秘诀</h2><p>本段可以结合 <a target="_blank" rel="noopener" href="https://github.com/info-gap/info-gap-server">源码</a> 理解。</p>
+<p>提示词上，我借鉴了论文 “Prompting Is Programming: A Query Language for Large Language Models” 的思想，虽然是篇 2023 的论文，但意外地适合我现在使用的 LLaMA3-8b 模型。这可能是因为 GPT-4 出来后，大家都更倾向于探索 GPT-4 能力的极限，因此会在工作方法中更多地采用复杂的提示词，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">你的输出要符合以下 JSON 模板：</span><br><span class="line"></span><br><span class="line">```json</span><br><span class="line">&#123;\n  &quot;description&quot;: &quot;Model of a proof of relevancy.&quot;,\n  &quot;examples&quot;: [\n    &#123;\n      &quot;language_name&quot;: &quot;&quot;,\n      &quot;relation&quot;: &quot;Although the article is about LLM, \\n                        there is no mention of a programming language.&quot;\n    &#125;,\n    &#123;\n      &quot;language_name&quot;: &quot;PythonPlus&quot;,\n      &quot;relation&quot;: &quot;PythonPlus helps LLM to generate more accurate results.&quot;\n    &#125;,\n    &#123;\n      &quot;language_name&quot;: &quot;RLHF-Script&quot;,\n      &quot;relation&quot;: &quot;RLHF-Script is a new programming language that helps \\n                        with the training of LLMs.&quot;\n    &#125;\n  ],\n  &quot;properties&quot;: &#123;\n    &quot;language_name&quot;: &#123;\n      &quot;description&quot;: &quot;Name of the proposed programming language. Leave empty if not proposed.&quot;,\n      &quot;title&quot;: &quot;Language Name&quot;,\n      &quot;type&quot;: &quot;string&quot;\n    &#125;,\n    &quot;relation&quot;: &#123;\n      &quot;description&quot;: &quot;Relation between the language and LLM.&quot;,\n      &quot;title&quot;: &quot;Relation&quot;,\n      &quot;type&quot;: &quot;string&quot;\n    &#125;\n  &#125;,\n  &quot;required&quot;: [\n    &quot;language_name&quot;,\n    &quot;relation&quot;\n  ],\n  &quot;title&quot;: &quot;Proof&quot;,\n  &quot;type&quot;: &quot;object&quot;\n&#125;\n\n</span><br><span class="line">```</span><br><span class="line"></span><br><span class="line">请确保返回一个上述 JSON 的实例，而不是模板本身。</span><br></pre></td></tr></table></figure>
+
+<p>而我选择了「大道至简」：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">这篇论文符合用户要求吗？如果符合，请回答：</span><br><span class="line"></span><br><span class="line">&#x27;符合，涉及的编程语言名字是 `name`，设计这个语言的目的是 `purpose`。&#x27;</span><br><span class="line"></span><br><span class="line">如果不符合，请回答：</span><br><span class="line"></span><br><span class="line">&#x27;不符合，因为 `reason`。&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>事实证明，按照这种风格修改提示词可以大大提高 LLaMA3-8b 模型的响应质量。</p>
+<p>同时，我实现了任务池架构，来搜索到更旧的论文（这也使得 SGLang 的论文被搜索到）。形象来说就是，我给了 AI 助理一个浏览器，可以打开一个新的标签页来搜索不同的关键字，也可以在现有的标签页里面翻页。</p>
+<p>任务池架构是昨天写的，提示词优化是今天写的。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E5%B1%95%E7%A4%BA"><span class="toc-number">1.</span> <span class="toc-text">性能展示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E7%A7%98%E8%AF%80"><span class="toc-number">2.</span> <span class="toc-text">优化秘诀</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2024/05/14/info-gap-v2/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&text=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&title=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&is_video=false&description=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍&body=Check out this article: https://blog.5eqn.top/2024/05/14/info-gap-v2/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&title=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&title=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&title=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&title=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2024/05/14/info-gap-v2/&name=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2024/05/14/info-gap-v2/&t=Agent | 手工提示工程，让我的 AI 信息收集助理变强 10 倍"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2024
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
