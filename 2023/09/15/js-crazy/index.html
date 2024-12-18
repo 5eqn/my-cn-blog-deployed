@@ -8,17 +8,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
     <meta name="description" content="Scene 1用 pbkdf2 写好密码哈希模块部署之后，网站整个打不开了。网站加载时就直接报错： 1TypeError: can&amp;#x27;t access property &quot;from&quot;, n is undefined  我尝试从 ChatGPT 和 StackOverflow 寻找答案，但我一点思路都没有！所以我摆烂了一会。 在几分钟后，我突然想到我或许应该在本地跑一下，">
 <meta property="og:type" content="article">
-<meta property="og:title" content="前端 | JavaScript 让我为之癫狂">
+<meta property="og:title" content="JavaScript 让我为之癫狂">
 <meta property="og:url" content="https://blog.5eqn.top/2023/09/15/js-crazy/index.html">
 <meta property="og:site_name" content="5eqn 的博客">
 <meta property="og:description" content="Scene 1用 pbkdf2 写好密码哈希模块部署之后，网站整个打不开了。网站加载时就直接报错： 1TypeError: can&amp;#x27;t access property &quot;from&quot;, n is undefined  我尝试从 ChatGPT 和 StackOverflow 寻找答案，但我一点思路都没有！所以我摆烂了一会。 在几分钟后，我突然想到我或许应该在本地跑一下，">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-09-15T07:59:42.000Z">
-<meta property="article:modified_time" content="2023-09-18T02:12:22.299Z">
+<meta property="article:modified_time" content="2024-12-15T13:19:24.414Z">
 <meta property="article:author" content="5eqn">
 <meta property="article:tag" content="JavaScript">
 <meta property="article:tag" content="前端">
-<meta property="article:tag" content="痛苦">
+<meta property="article:tag" content="编程">
 <meta name="twitter:card" content="summary">
     
     
@@ -39,7 +39,7 @@
       
     
     <!-- title -->
-    <title>前端 | JavaScript 让我为之癫狂</title>
+    <title>JavaScript 让我为之癫狂</title>
     <!-- async scripts -->
     <!-- Google Analytics -->
 
@@ -98,10 +98,8 @@
     <span id="actions">
       <ul>
         
-        <li><a class="icon" aria-label="上一篇" href="/2023/09/15/silent-array/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="上一篇" href="/2023/11/03/why-original/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
         
-        
-        <li><a class="icon" aria-label="下一篇" href="/2023/09/14/edu-motivation/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
         <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
         <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
@@ -115,16 +113,16 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/09/15/js-crazy/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/09/15/js-crazy/&text=前端 | JavaScript 让我为之癫狂"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=前端 | JavaScript 让我为之癫狂"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/09/15/js-crazy/&is_video=false&description=前端 | JavaScript 让我为之癫狂"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=前端 | JavaScript 让我为之癫狂&body=Check out this article: https://blog.5eqn.top/2023/09/15/js-crazy/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=前端 | JavaScript 让我为之癫狂"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=前端 | JavaScript 让我为之癫狂"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=前端 | JavaScript 让我为之癫狂"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=前端 | JavaScript 让我为之癫狂"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/09/15/js-crazy/&name=前端 | JavaScript 让我为之癫狂&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/09/15/js-crazy/&t=前端 | JavaScript 让我为之癫狂"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/09/15/js-crazy/&text=JavaScript 让我为之癫狂"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=JavaScript 让我为之癫狂"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/09/15/js-crazy/&is_video=false&description=JavaScript 让我为之癫狂"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=JavaScript 让我为之癫狂&body=Check out this article: https://blog.5eqn.top/2023/09/15/js-crazy/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=JavaScript 让我为之癫狂"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=JavaScript 让我为之癫狂"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=JavaScript 让我为之癫狂"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=JavaScript 让我为之癫狂"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/09/15/js-crazy/&name=JavaScript 让我为之癫狂&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/09/15/js-crazy/&t=JavaScript 让我为之癫狂"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -144,7 +142,7 @@
   <header>
     
     <h1 class="posttitle p-name" itemprop="name headline">
-        前端 | JavaScript 让我为之癫狂
+        JavaScript 让我为之癫狂
     </h1>
 
 
@@ -167,7 +165,7 @@
       
     <div class="article-tag">
         <i class="fa-solid fa-tag"></i>
-        <a class="p-category" href="/tags/JavaScript/" rel="tag">JavaScript</a>, <a class="p-category" href="/tags/%E5%89%8D%E7%AB%AF/" rel="tag">前端</a>, <a class="p-category" href="/tags/%E7%97%9B%E8%8B%A6/" rel="tag">痛苦</a>
+        <a class="p-category" href="/tags/JavaScript/" rel="tag">JavaScript</a>, <a class="p-category" href="/tags/%E5%89%8D%E7%AB%AF/" rel="tag">前端</a>, <a class="p-category" href="/tags/%E7%BC%96%E7%A8%8B/" rel="tag">编程</a>
     </div>
 
 
@@ -248,16 +246,16 @@
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/09/15/js-crazy/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/09/15/js-crazy/&text=前端 | JavaScript 让我为之癫狂"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=前端 | JavaScript 让我为之癫狂"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/09/15/js-crazy/&is_video=false&description=前端 | JavaScript 让我为之癫狂"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=前端 | JavaScript 让我为之癫狂&body=Check out this article: https://blog.5eqn.top/2023/09/15/js-crazy/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=前端 | JavaScript 让我为之癫狂"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=前端 | JavaScript 让我为之癫狂"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=前端 | JavaScript 让我为之癫狂"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=前端 | JavaScript 让我为之癫狂"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/09/15/js-crazy/&name=前端 | JavaScript 让我为之癫狂&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/09/15/js-crazy/&t=前端 | JavaScript 让我为之癫狂"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/09/15/js-crazy/&text=JavaScript 让我为之癫狂"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=JavaScript 让我为之癫狂"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/09/15/js-crazy/&is_video=false&description=JavaScript 让我为之癫狂"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=JavaScript 让我为之癫狂&body=Check out this article: https://blog.5eqn.top/2023/09/15/js-crazy/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=JavaScript 让我为之癫狂"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=JavaScript 让我为之癫狂"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=JavaScript 让我为之癫狂"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/09/15/js-crazy/&title=JavaScript 让我为之癫狂"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/09/15/js-crazy/&name=JavaScript 让我为之癫狂&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/09/15/js-crazy/&t=JavaScript 让我为之癫狂"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
