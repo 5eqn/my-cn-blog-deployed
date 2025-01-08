@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="2025.1.8 注这是当时我对「理想编程语言」这个大问题的一点思考，后续在尝试实现的时候遇到了难以逾越的问题，说明我当时把问题想简单了。 正文前面看了很多 Idris2 的内容，就是在给这篇陈述铺垫。我在 4 月末到 5 月末几乎一直在写 Aevum 这门语言的词法分析、语法分析和语义分析，虽然没有涉及代码生成，但光是类型检查已经很困难了。最终 384 行的程序，虽然没有用依值类型来给类型检查的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我理想中的编程语言">
+<meta property="og:url" content="https://blog.5eqn.top/2023/06/17/aevum/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="2025.1.8 注这是当时我对「理想编程语言」这个大问题的一点思考，后续在尝试实现的时候遇到了难以逾越的问题，说明我当时把问题想简单了。 正文前面看了很多 Idris2 的内容，就是在给这篇陈述铺垫。我在 4 月末到 5 月末几乎一直在写 Aevum 这门语言的词法分析、语法分析和语义分析，虽然没有涉及代码生成，但光是类型检查已经很困难了。最终 384 行的程序，虽然没有用依值类型来给类型检查的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-17T00:04:19.000Z">
+<meta property="article:modified_time" content="2025-01-08T09:54:35.900Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="PL">
+<meta property="article:tag" content="编程">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>我理想中的编程语言</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/06/19/circ/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/06/16/phy/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/17/aevum/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/17/aevum/&text=我理想中的编程语言"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/17/aevum/&title=我理想中的编程语言"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/17/aevum/&is_video=false&description=我理想中的编程语言"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=我理想中的编程语言&body=Check out this article: https://blog.5eqn.top/2023/06/17/aevum/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/17/aevum/&title=我理想中的编程语言"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/17/aevum/&title=我理想中的编程语言"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/17/aevum/&title=我理想中的编程语言"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/17/aevum/&title=我理想中的编程语言"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/17/aevum/&name=我理想中的编程语言&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/17/aevum/&t=我理想中的编程语言"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#2025-1-8-%E6%B3%A8"><span class="toc-number">1.</span> <span class="toc-text">2025.1.8 注</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E6%96%87"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E7%9A%84%E8%AF%AD%E8%A8%80%E5%BA%94%E8%AF%A5%E6%98%AF%E5%87%BD%E6%95%B0%E5%BC%8F%E7%9A%84"><span class="toc-number">3.</span> <span class="toc-text">好的语言应该是函数式的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E7%9A%84%E8%AF%AD%E8%A8%80%E8%A6%81%E8%83%BD%E5%AF%B9%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%E5%BB%BA%E6%A8%A1"><span class="toc-number">4.</span> <span class="toc-text">好的语言要能对其他语言建模</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%88%91%E7%9A%84%E8%AE%BE%E6%83%B3"><span class="toc-number">5.</span> <span class="toc-text">我的设想</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        我理想中的编程语言
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-06-17T00:04:19.000Z" class="dt-published" itemprop="datePublished">2023-06-17</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PL/" rel="tag">PL</a>, <a class="p-category" href="/tags/%E7%BC%96%E7%A8%8B/" rel="tag">编程</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="2025-1-8-注"><a href="#2025-1-8-注" class="headerlink" title="2025.1.8 注"></a>2025.1.8 注</h2><p>这是当时我对「理想编程语言」这个大问题的一点思考，后续在尝试实现的时候遇到了难以逾越的问题，说明我当时把问题想简单了。</p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>前面看了很多 Idris2 的内容，就是在给这篇陈述铺垫。我在 4 月末到 5 月末几乎一直在写 Aevum 这门语言的词法分析、语法分析和语义分析，虽然没有涉及代码生成，但光是类型检查已经很困难了。最终 384 行的程序，虽然没有用依值类型来给类型检查的正确性添加证明，但已经足够简洁、清晰、有效。但对于下一阶段的代码生成，我需要先回答一些问题来确定编码方向：我要把 Aevum 的语法树编译成什么语言？只允许编译成 LLVM，还是允许用户对各类主流语言进行建模，然后直接输出目标语言？如何处理对线性资源和不确定性的建模？如何处理好 Monad 和 Linear Types 的关系？在对 Idris2 的 QTT 进行初步学习后，我对这些问题也形成了初步的答案。</p>
+<h2 id="好的语言应该是函数式的"><a href="#好的语言应该是函数式的" class="headerlink" title="好的语言应该是函数式的"></a>好的语言应该是函数式的</h2><p>人的思维方式是非常函数式的。例如如果让你思考如何交换两个内存地址的数据，假如你从未学过编程，同时浅显地把「内存地址」理解成常识意义上的「地址」，你首先想到的大概率是「两坨数据直接互相交换位置」的场景。但经过 C 语言的洗脑后，你所想到的就变成了「开一个临时地址，把前一个数据放到临时地址，后一个放到前一个的位置，临时地址的数据放到后一个的位置」。这是违反直觉的。从起因直接「映射」到结果，才是更符合人类直觉的思维方式。</p>
+<p>函数式语言被人诟病在于不能良好地对内存进行建模，且依赖「自函子范畴的幺半群」（Monad）之类的神秘概念对逻辑进行精简，因此通常被认为是更不符合人类直觉的那一方。但我认为在利用依值类型和线性类型对常用的「外部资源」，例如内存、输入输出（IO）、数据库等建模后，函数式语言比面向过程、面向对象的语言更符合人类直觉，这也是为什么我曾说 C 系语言（包括 C, C++, C#, Java, JS, Python, Rust…）都是对人类思维的绑架。至于具体如何建模，我后面会给出例子。</p>
+<p>值得一提的是，Rust 里面用到了 Affine Types，除了允许凭空 free 掉一个变量，和 Linear Types 并没有不同（Linear Types 就是一个线性变量在一个函数中一定被使用正好一次）。同时 Rust 里面有大量函数式语言里的特性，例如模式匹配（高级 switch case）。这也是为什么在所有 C 系语言中，我最欣赏的语言是 Rust.</p>
+<p>大部分语言（C#, Java, Python…）都会使用一种叫「垃圾回收」的机制（GC），简而言之就是不像 C 里面一样 malloc 了什么都要 free，有了 GC 之后你只管 malloc 就行，malloc 出来的东西会被「引用计数」，程序定期检查哪些变量没被引用，然后把这些内存批量回收。和 Rust 的不同在于，Rust 相当于通过所有权和生命周期之类的机制，自动算出来哪里需要调用 free. 我认为 GC 这种机制虽然降低了认知压力，但我不认为这些语言使用 GC 能给其带来优越性，理由有三点：</p>
+<p>首先这种机制不能让你逃避对引用变量（你在一个函数里修改了这个值，出了函数之后你的改动还留着，类似于 C 里面的指针指向的变量）和值变量（你在函数里只能修改它的「拷贝」，出了函数之后值还是原来的，类似于 C 里面的无指针结构体）的区分，因此你还是要对内存进行建模，而你凭借直觉产生的建模方式应该和 Rust 的建模方式差不了多少（新人学习 Rust 容易把所有权、生命周期这些玩意当作 brand new 的概念来学，就像学习课内知识一样，但这是被 Matrix 使用学分绩荼毒了学习观导致的，实际上这些只是人类直觉的一部分），GC 不逼迫你写出对内存的建模反而容易让人在不熟悉语言的内存分配机制的情况下产生错误的假设，且不能像在 Rust 里一样得到编译器提醒。</p>
+<p>其次在函数式语言中，修改对内存的建模方式理论上就能实现 GC，而其建模方式不像 Rust 和语言直接绑定，在函数式语言中可以利用 Linear Types 等类型机制手动拼出来，其对应的编译器后端也可以开放修改接口，允许用户实现对语言的高度自定义。</p>
+<p>最后 GC 在我看来很没素质，GC 直接导致语言的实际运行流程和看代码得出的运行流程不同，虽然在工程意义上没什么影响，但由于我是一个高度感性的人，我就认为 GC 很没素质。</p>
+<h2 id="好的语言要能对其他语言建模"><a href="#好的语言要能对其他语言建模" class="headerlink" title="好的语言要能对其他语言建模"></a>好的语言要能对其他语言建模</h2><p>一个语言若要被「应用」，必须要有匹配的生态。例如 Golang 中有完善的 ORM，可以用简洁的 Golang 代码去操作各类数据库，ORM 可以帮忙生成 SQL 语句。JS &#x2F; TS 本身作为浏览器使用的默认脚本语言，也有 React、Vue 等前端框架，在这些前端框架的基础上还有大量的组件库。这些生态如果要全靠自己组建，是相当不现实的。但如果直接写这些语言的代码，难免有一种搬砖感，因为要处理大量的重复逻辑，尤其是在客户端和服务端语言不同的时候。理想状况下，我们应该有一套对这些语言建模的方法，把高阶的逻辑转化成这些具体的语言。</p>
+<h2 id="我的设想"><a href="#我的设想" class="headerlink" title="我的设想"></a>我的设想</h2><p>以一个简单的 CRUD （增删改查）服务器为例，接受 HTTP 协议的增删改查请求，给出回复并和数据库对接。如果用 Golang 写内容将相当多，这里首先用我计划完成的 Aevum 语言写出逻辑框架，然后展示如何对语言本身建模。</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">data</span> <span class="type">HTTPMode</span> = <span class="type">Create</span> | <span class="type">Read</span> | <span class="type">Update</span> | <span class="type">Delete</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- Other type definitions...</span></span><br><span class="line"></span><br><span class="line"><span class="title">run</span> : <span class="type">IO</span> <span class="number">0</span> -&gt; <span class="type">IO</span> <span class="number">1</span> &amp; <span class="type">Server</span> addr</span><br><span class="line"><span class="title">run</span> io@void -&gt; <span class="keyword">let</span> srv = newServer addr <span class="keyword">in</span> ++io@<span class="string">&quot;Server listening on &#123;addr&#125;&quot;</span> &amp; srv@[]</span><br><span class="line"></span><br><span class="line"><span class="title">register</span> : m : <span class="type">HTTPMode</span> -&gt; <span class="type">Server</span> addr -&gt; <span class="type">Server</span> addr</span><br><span class="line"><span class="title">register</span> m srv@ls = <span class="keyword">let</span> ls&#x27; = handle m :: ls <span class="keyword">in</span> srv@ls&#x27;</span><br><span class="line"></span><br><span class="line"><span class="title">create</span> : <span class="type">HTTP</span> <span class="type">Create</span> <span class="number">0</span> &amp; <span class="type">DB</span> <span class="type">Data</span> <span class="type">New</span> <span class="number">0</span> -&gt; <span class="type">HTTP</span> <span class="type">Create</span> <span class="number">1</span> &amp; <span class="type">DB</span> <span class="type">Data</span> <span class="type">New</span> <span class="number">1</span></span><br><span class="line"><span class="title">create</span> io@req &amp; db@id = ++io@id &amp; ++db@req.dat</span><br><span class="line"></span><br><span class="line"><span class="title">read</span> : io@req : <span class="type">HTTP</span> <span class="type">Read</span> <span class="number">0</span> &amp; <span class="type">DB</span> <span class="type">Data</span> req.id -&gt; <span class="type">HTTP</span> <span class="type">Read</span> <span class="number">1</span> &amp; <span class="type">DB</span> <span class="type">Data</span> req.id</span><br><span class="line"><span class="title">read</span> io@req &amp; db@dat = ++io@dat &amp; db@dat</span><br><span class="line"></span><br><span class="line"><span class="title">update</span> : io@req : <span class="type">HTTP</span> <span class="type">Update</span> <span class="number">0</span> &amp; <span class="type">DB</span> <span class="type">Data</span> req.id -&gt; <span class="type">HTTP</span> <span class="type">Update</span> <span class="number">1</span> &amp; <span class="type">DB</span> <span class="type">Data</span> req.id</span><br><span class="line"><span class="title">update</span> io@req &amp; db@dat = ++io@dat &amp; db@req.dat</span><br><span class="line"></span><br><span class="line"><span class="title">delete</span> : io@req : <span class="type">HTTP</span> <span class="type">Delete</span> <span class="number">0</span> &amp; <span class="type">DB</span> <span class="type">Data</span> req.id -&gt; <span class="type">HTTP</span> <span class="type">Delete</span> <span class="number">1</span> &amp; <span class="type">DB</span> <span class="type">Data</span> req.id</span><br><span class="line"><span class="title">delete</span> io@req &amp; db@dat = ++io@dat &amp; db@void</span><br></pre></td></tr></table></figure>
+
+<p>以 update 函数为例，输入 req 中包含编号 id 和数据 dat，同时初始状态下数据库 db 在 req.id 的位置下是旧数据 dat. 这个程序直接指定 update 结束后，返回的数据是旧数据 dat，数据库 db 在 req.id 的位置下是请求中的新数据 req.dat，只描述了一个映射关系而不是传值的过程。这种描述方式是高度符合人类直觉的。</p>
+<p>注意这里形如 io 的 Linear Token 和类型都能表示形如 req 的数据的「位置」，但在人类直觉中，Linear Token 表示的部分处在空间上不可重合的维度，类型则处在可以重合的维度。对于 Linear Token，写在类型签名里面没有意义，因为在运算的每个过程都要去追踪，每个值都要带上 Token，因此在类型签名里面再写就重复了。对于类型，写在值旁边没有意义，因为每个值不能变化类型（注意 Linear Token 则可以变化），其类型可以被编译器推断出来。这些因素叠加，就导致了虽然它们同为「位置」信息，但写在截然不同的地方的结果。</p>
+<p>对于建模其他语言，我可能需要了解更多编译原理再来仔细思考……</p>
+<p>我想到一种「代码嵌入」的形式：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">newServer</span> : addr : <span class="type">Addr</span> -&gt; <span class="type">Server</span> addr</span><br><span class="line"><span class="title">newServer</span> addr = <span class="keyword">let</span> srv = go#<span class="string">&quot;gin.Default()&quot;</span> <span class="keyword">in</span> srv@[]</span><br></pre></td></tr></table></figure>
+
+<p>但可能效果不好，理想状况下应该是给编译器开出一个可编程代码生成模块，在里面对其他语言进行建模。</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#2025-1-8-%E6%B3%A8"><span class="toc-number">1.</span> <span class="toc-text">2025.1.8 注</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E6%96%87"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E7%9A%84%E8%AF%AD%E8%A8%80%E5%BA%94%E8%AF%A5%E6%98%AF%E5%87%BD%E6%95%B0%E5%BC%8F%E7%9A%84"><span class="toc-number">3.</span> <span class="toc-text">好的语言应该是函数式的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E7%9A%84%E8%AF%AD%E8%A8%80%E8%A6%81%E8%83%BD%E5%AF%B9%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%E5%BB%BA%E6%A8%A1"><span class="toc-number">4.</span> <span class="toc-text">好的语言要能对其他语言建模</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%88%91%E7%9A%84%E8%AE%BE%E6%83%B3"><span class="toc-number">5.</span> <span class="toc-text">我的设想</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/17/aevum/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/17/aevum/&text=我理想中的编程语言"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/17/aevum/&title=我理想中的编程语言"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/17/aevum/&is_video=false&description=我理想中的编程语言"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=我理想中的编程语言&body=Check out this article: https://blog.5eqn.top/2023/06/17/aevum/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/17/aevum/&title=我理想中的编程语言"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/17/aevum/&title=我理想中的编程语言"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/17/aevum/&title=我理想中的编程语言"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/17/aevum/&title=我理想中的编程语言"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/17/aevum/&name=我理想中的编程语言&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/17/aevum/&t=我理想中的编程语言"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

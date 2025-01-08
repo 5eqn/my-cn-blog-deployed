@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="猜猜这个标题的灵感取自哪里？ 微积分 B 的特点实际上微积分 B 的概念少于大学物理 II，并且仅有的概念本身都很符合人类直觉。例如在所有定义里最逆天的「旋度」，可以用「力矩」来直观理解，在给定旋转轴极微小的情况下，由于可以去掉所有平动量（把目标点的矢量标准化到 0），力矩可以理想化地被认为是力场的顺时针旋转方向的导数导致的，叠加三个旋转轴后自然得到 nabla 叉乘 f 这种规则。难度主要在于定">
+<meta property="og:type" content="article">
+<meta property="og:title" content="挫折就像微积分一样，踩爆了就没事了">
+<meta property="og:url" content="https://blog.5eqn.top/2023/06/22/calculus/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="猜猜这个标题的灵感取自哪里？ 微积分 B 的特点实际上微积分 B 的概念少于大学物理 II，并且仅有的概念本身都很符合人类直觉。例如在所有定义里最逆天的「旋度」，可以用「力矩」来直观理解，在给定旋转轴极微小的情况下，由于可以去掉所有平动量（把目标点的矢量标准化到 0），力矩可以理想化地被认为是力场的顺时针旋转方向的导数导致的，叠加三个旋转轴后自然得到 nabla 叉乘 f 这种规则。难度主要在于定">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-21T22:33:40.000Z">
+<meta property="article:modified_time" content="2025-01-08T09:54:50.900Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="课内">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>挫折就像微积分一样，踩爆了就没事了</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/06/22/iced-again/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/06/21/iced/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/22/calculus/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/22/calculus/&text=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/22/calculus/&title=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/22/calculus/&is_video=false&description=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=挫折就像微积分一样，踩爆了就没事了&body=Check out this article: https://blog.5eqn.top/2023/06/22/calculus/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/22/calculus/&title=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/22/calculus/&title=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/22/calculus/&title=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/22/calculus/&title=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/22/calculus/&name=挫折就像微积分一样，踩爆了就没事了&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/22/calculus/&t=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E7%A7%AF%E5%88%86-B-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="toc-number">1.</span> <span class="toc-text">微积分 B 的特点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B2%E9%9D%A2%E7%A7%AF%E5%88%86"><span class="toc-number">2.</span> <span class="toc-text">曲面积分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E5%85%AC%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">关于公式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%BC%93%E5%8A%B1%E4%B8%80%E4%B8%8B%E8%87%AA%E5%B7%B1"><span class="toc-number">4.</span> <span class="toc-text">鼓励一下自己</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%82%E7%BA%A7%E6%95%B0%E8%BD%AC%E5%8F%98%E6%88%90%E5%92%8C%E5%87%BD%E6%95%B0"><span class="toc-number">5.</span> <span class="toc-text">幂级数转变成和函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%82%85%E9%87%8C%E5%8F%B6%E7%BA%A7%E6%95%B0"><span class="toc-number">6.</span> <span class="toc-text">傅里叶级数</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        挫折就像微积分一样，踩爆了就没事了
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-06-21T22:33:40.000Z" class="dt-published" itemprop="datePublished">2023-06-22</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E8%AF%BE%E5%86%85/" rel="tag">课内</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>猜猜这个标题的灵感取自哪里？</p>
+<h2 id="微积分-B-的特点"><a href="#微积分-B-的特点" class="headerlink" title="微积分 B 的特点"></a>微积分 B 的特点</h2><p>实际上微积分 B 的概念少于大学物理 II，并且仅有的概念本身都很符合人类直觉。例如在所有定义里最逆天的「旋度」，可以用「力矩」来直观理解，在给定旋转轴极微小的情况下，由于可以去掉所有平动量（把目标点的矢量标准化到 0），力矩可以理想化地被认为是力场的顺时针旋转方向的导数导致的，叠加三个旋转轴后自然得到 nabla 叉乘 f 这种规则。难度主要在于定积分和一些巧思，有的题型如果没遇过，想一个小时都想不出来，我选择把锅推给 Matrix 及其评价体系。</p>
+<h2 id="曲面积分"><a href="#曲面积分" class="headerlink" title="曲面积分"></a>曲面积分</h2><p>尝试去掉对称性的部分，看是否能利用起斜率信息，如果不能尝试高斯定理。例如对于某圆锥面的题目，首先发现对 y 轴有对称性去掉 xy + yz + zx，然后斜率可求就直接转化成二重积分。</p>
+<h2 id="关于公式"><a href="#关于公式" class="headerlink" title="关于公式"></a>关于公式</h2><p>由于我学的真的太少了，建议自己暂时不要用回忆起来的随机公式，大概率是错的。</p>
+<h2 id="鼓励一下自己"><a href="#鼓励一下自己" class="headerlink" title="鼓励一下自己"></a>鼓励一下自己</h2><p>2018 春期末第四题曲线积分，我竟然能独立找到一个比标准答案更简单的方法！答案在知道积分和路径无关时，直接选择了比较平凡的折线段路径，需要算一些很抽象的积分，但我选择圆路径之后发现几乎没有计算量！</p>
+<p>对了，昨天睡着花的时间不超过 20 分钟，今天 4 点半起，实现了健康的 7 个半小时睡眠，现在一点都不困！但变量太多了，一个是没喝瑞幸，一个是没睡午觉，还有一个是前两天晚上没有和舍友玩「蛋仔派对」但是昨天有，到底哪个才是加速我睡着的原因呢？</p>
+<p>做题的时候尽可能以一个直观的视角去看待纯的数学概念！例如对于曲面积分中 f_x dy dz + f_y dx dz + f_z dx dy 的结构，可以把 f 理解成类似于「电场强度」的东西，dy dz 是当前考虑的平面，f_x dy dz 则是在 x 轴方向上的电通量微元。用这种视角的好处是不容易犯非常弱智的错误，例如把非常简单的曲面积分直接当 0！</p>
+<h2 id="幂级数转变成和函数"><a href="#幂级数转变成和函数" class="headerlink" title="幂级数转变成和函数"></a>幂级数转变成和函数</h2><p>先求收敛域，然后尝试变形成两个基本形式之一：e^x, 1 &#x2F; 1-x，一个分母有指数，一个没有。注意可以带上任意的等比系数，而倍增、交错之类的都可以被拟合。同时，由于可以积分或微分，规律的 p 项式可以被拟合；可以乘法，因此可以做一些凑次数和错位相减之类的事情……</p>
+<p>2018 春期末第六题答案先微分再进行可加性分解，我先分解、抽离乘法再微分（其实已经到模板了），计算量也瞬间比答案变小很多。</p>
+<h2 id="傅里叶级数"><a href="#傅里叶级数" class="headerlink" title="傅里叶级数"></a>傅里叶级数</h2><p>读题，有可能只需要求正弦级数或余弦级数！</p>
+<p>傅里叶级数里面补偿系数是 1&#x2F;pi 但积分范围是 2pi 基于三角函数的正交性，但三角函数平方之后平均值是 1&#x2F;2, 而需要积分范围 * 平均值 * 补偿系数为 1, 因此补偿系数是 1&#x2F;pi. 理论上是比较好记的。</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E7%A7%AF%E5%88%86-B-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="toc-number">1.</span> <span class="toc-text">微积分 B 的特点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B2%E9%9D%A2%E7%A7%AF%E5%88%86"><span class="toc-number">2.</span> <span class="toc-text">曲面积分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E5%85%AC%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">关于公式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%BC%93%E5%8A%B1%E4%B8%80%E4%B8%8B%E8%87%AA%E5%B7%B1"><span class="toc-number">4.</span> <span class="toc-text">鼓励一下自己</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%82%E7%BA%A7%E6%95%B0%E8%BD%AC%E5%8F%98%E6%88%90%E5%92%8C%E5%87%BD%E6%95%B0"><span class="toc-number">5.</span> <span class="toc-text">幂级数转变成和函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%82%85%E9%87%8C%E5%8F%B6%E7%BA%A7%E6%95%B0"><span class="toc-number">6.</span> <span class="toc-text">傅里叶级数</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/22/calculus/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/22/calculus/&text=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/22/calculus/&title=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/22/calculus/&is_video=false&description=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=挫折就像微积分一样，踩爆了就没事了&body=Check out this article: https://blog.5eqn.top/2023/06/22/calculus/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/22/calculus/&title=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/22/calculus/&title=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/22/calculus/&title=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/22/calculus/&title=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/22/calculus/&name=挫折就像微积分一样，踩爆了就没事了&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/22/calculus/&t=挫折就像微积分一样，踩爆了就没事了"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

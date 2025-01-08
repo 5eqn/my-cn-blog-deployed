@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="同伦类型论里面 Univance Axiom 以 Axiom 的形式存在，不符合构造主义的追求，立方类型论通过一个很神奇的方法解决了这个问题：直接把「路径」看成「函数」。但在看成函数之后如何保持路径本身应有的性质、在 Martin-Löf 类型论的基础上修改或添加了什么规则、能够实现什么有趣的事情、在软件工程的模型中对应什么，则是本次博客需要探索的问题。 路径的性质Cubical Agda 的原论">
+<meta property="og:type" content="article">
+<meta property="og:title" content="尝试理解立方类型论">
+<meta property="og:url" content="https://blog.5eqn.top/2023/07/07/cubical/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="同伦类型论里面 Univance Axiom 以 Axiom 的形式存在，不符合构造主义的追求，立方类型论通过一个很神奇的方法解决了这个问题：直接把「路径」看成「函数」。但在看成函数之后如何保持路径本身应有的性质、在 Martin-Löf 类型论的基础上修改或添加了什么规则、能够实现什么有趣的事情、在软件工程的模型中对应什么，则是本次博客需要探索的问题。 路径的性质Cubical Agda 的原论">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-07-07T07:54:08.000Z">
+<meta property="article:modified_time" content="2025-01-08T09:56:18.916Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="PL">
+<meta property="article:tag" content="编程">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>尝试理解立方类型论</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/09/15/js-crazy/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/07/05/ai-gesture/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/07/07/cubical/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/07/07/cubical/&text=尝试理解立方类型论"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/07/07/cubical/&title=尝试理解立方类型论"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/07/07/cubical/&is_video=false&description=尝试理解立方类型论"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=尝试理解立方类型论&body=Check out this article: https://blog.5eqn.top/2023/07/07/cubical/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/07/07/cubical/&title=尝试理解立方类型论"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/07/07/cubical/&title=尝试理解立方类型论"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/07/07/cubical/&title=尝试理解立方类型论"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/07/07/cubical/&title=尝试理解立方类型论"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/07/07/cubical/&name=尝试理解立方类型论&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/07/07/cubical/&t=尝试理解立方类型论"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%AF%E5%BE%84%E7%9A%84%E6%80%A7%E8%B4%A8"><span class="toc-number">1.</span> <span class="toc-text">路径的性质</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%BD%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%BA%8B%E6%83%85"><span class="toc-number">2.</span> <span class="toc-text">能实现的事情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E6%95%B4%E7%9A%84%E8%A7%84%E5%88%99"><span class="toc-number">3.</span> <span class="toc-text">调整的规则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E6%A8%A1%E5%9E%8B%E5%AF%B9%E5%BA%94%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="toc-number">4.</span> <span class="toc-text">在软件工程模型对应的东西</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        尝试理解立方类型论
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-07-07T07:54:08.000Z" class="dt-published" itemprop="datePublished">2023-07-07</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PL/" rel="tag">PL</a>, <a class="p-category" href="/tags/%E7%BC%96%E7%A8%8B/" rel="tag">编程</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>同伦类型论里面 Univance Axiom 以 Axiom 的形式存在，不符合构造主义的追求，立方类型论通过一个很神奇的方法解决了这个问题：直接把「路径」看成「函数」。但在看成函数之后如何保持路径本身应有的性质、在 Martin-Löf 类型论的基础上修改或添加了什么规则、能够实现什么有趣的事情、在软件工程的模型中对应什么，则是本次博客需要探索的问题。</p>
+<h2 id="路径的性质"><a href="#路径的性质" class="headerlink" title="路径的性质"></a>路径的性质</h2><p>Cubical Agda 的原论文先介绍了他们的 ua 函数是可计算的（但没有讲具体是怎么实现的），然后引出了 dependent path 和 nondependent path, 分别对应 heterogeneous 和 homogeneous 的情况，同时可以看出 Agda 里面用 l 指定 universe level, 疑似用 Set l 代表正常意义上的 Type 或者 U.</p>
+<p>这样，路径的形成规则便是 PathP : (A : I -&gt; Set l) -&gt; A i0 -&gt; A i1 -&gt; Set l, 也可以视为 Set l 的一条引入规则。由于把路径定义成函数，路径的其余四条规则都比较好处理，例如对于非 HIT (Higher Inductive Types, not Harbin Institute of Technology) 的引入规则 refl 则可以被定义出来，refl : \i &#x3D;&gt; x. </p>
+<p>在讲涉及消去规则的 transp 的时候感觉有点模糊的地方，暂时放着。例如，论文前面说 transp 的用法是 transp (λ i → p i) i0 a, 但后面又出现了 transp A r a, A 是一个类型而 (λ i → p i) 是一个函数，感觉有点奇怪。论文后面用 transp 构造出 transport 和 subst, 可以认为是路径消去规则的几种不同理解方式。同时，transp 的纯构造定义论文暂时也没有讲。</p>
+<h2 id="能实现的事情"><a href="#能实现的事情" class="headerlink" title="能实现的事情"></a>能实现的事情</h2><p>利用可计算的 transport 函数可以实现把我们认为比较直观的「等价关系」投射到 Agda 这种定理证明验证器中，例如可以利用这个特性在证明中结合自然数的一进制和二进制表示方式，在涉及大数计算的时候用二进制，涉及递推的时候使用一进制（当然因为证明本身是模块化的就显然可以这样做），同时规避二进制规则复杂和一进制计算效率低的缺点。</p>
+<p>同时上述思路对其他 inductive types, coinductive types 和 higher inductive types 也适用，虽然我感觉 coinductive types 就是允许懒求值的 inductive types, 这样可以搞一些无穷长的变量。在 higher inductive types 里面，虽然 path 本身不是值，但是由于其可以被视为 I 到值的函数，定义的时候直接使用类似于 cons (p i) &#x3D; … 的形式即可。</p>
+<p>自然地，可以利用 CuTT 实现对代数拓扑的内容进行建模。在甜甜圈的定义上，HoTT 采用了 base, l1, l2, sphere : l1+l2&#x3D;l2+l1 的定义，而 CuTT 采用了 base, l1, l2, square : PathP (λ i → l1 i ≡ l1 i) l2 l2 的定义，或许更适合用于推理一些，同时也更方便理解为什么这玩意会形成甜甜圈。理解的关键在于先把无论它形成什么妖魔鬼怪展开，注意展开和收回去都会保持拓扑的性质，这样容易发现 square 会形成一个对边需要重合的方形，收回去的时候就变成甜甜圈了。通过计算可以很容易发现甜甜圈和两个圈的笛卡儿积等价。</p>
+<h2 id="调整的规则"><a href="#调整的规则" class="headerlink" title="调整的规则"></a>调整的规则</h2><p>似乎 Path 的单点固定消去规则是可以证明的，但是 for details see the lecture notes or the paper.</p>
+<p>在 ctt 的 blog 里面出现了不知道怎么定义的 comp, 又阻碍了我理解 path 的消去规则的实现，悲。5:05 PM, 先去吃饭力！</p>
+<p>我的评价是，要理解 CuTT 可以从 ctt 的 haskell 源码开始，这玩意似乎包含了整个 parser 和 typecheck，好像就一两千行，比较符合我梦想中的样子。</p>
+<p>在暑校群里看到一个中文 CuTT 讲义，我打算先看下这个讲义能不能解决我的问题，不过 ctt 的源码还是想看。</p>
+<h2 id="在软件工程模型对应的东西"><a href="#在软件工程模型对应的东西" class="headerlink" title="在软件工程模型对应的东西"></a>在软件工程模型对应的东西</h2><p>根据我一天的思考，这玩意对应的「等价关系」能够解决很多细微的问题。</p>
+<p>例如，之前一直感觉束手无策的「逻辑和算法优化解耦」，似乎使用等价关系就能实现，参考一进制和二进制转换的例子，这样可以把常用的算法建模起来，但在实际使用的时候选择天真的数据结构。</p>
+<p>不过如果目标只是「实现一个功能」，似乎不会出现相等的类型，便在这方面用不上 CuTT 了。但使用 CuTT 可以方便证明程序中存在的一些性质，不过我感觉不是特别重要。</p>
+<p>或许这玩意的优势正在于构建人的思维模式和计算机思维模式之间的「同伦桥梁」，如果只求架构的话自然不需要 CuTT, 但往往在现实问题中有些天真的算法会过于缓慢，换言之使用 CuTT 允许我们使用比现有习惯「更」天真的数据结构，而不仅是节约一些极端的性能优化时间。CuTT 或将允许我们「完全」使用符合人类思维方式的思路进行顶层逻辑设计，让 AI 负责优化底层算法（或许能够把 AI 里面的思路提取出来然后造出更逆天的 AI！）</p>
+<p>更难的理论往往能让事情更简单，以退为进，或许 CuTT 就是个好的例子。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>前面的 CuTT 以后再来探索吧！</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%AF%E5%BE%84%E7%9A%84%E6%80%A7%E8%B4%A8"><span class="toc-number">1.</span> <span class="toc-text">路径的性质</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%BD%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%BA%8B%E6%83%85"><span class="toc-number">2.</span> <span class="toc-text">能实现的事情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E6%95%B4%E7%9A%84%E8%A7%84%E5%88%99"><span class="toc-number">3.</span> <span class="toc-text">调整的规则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E6%A8%A1%E5%9E%8B%E5%AF%B9%E5%BA%94%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="toc-number">4.</span> <span class="toc-text">在软件工程模型对应的东西</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/07/07/cubical/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/07/07/cubical/&text=尝试理解立方类型论"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/07/07/cubical/&title=尝试理解立方类型论"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/07/07/cubical/&is_video=false&description=尝试理解立方类型论"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=尝试理解立方类型论&body=Check out this article: https://blog.5eqn.top/2023/07/07/cubical/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/07/07/cubical/&title=尝试理解立方类型论"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/07/07/cubical/&title=尝试理解立方类型论"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/07/07/cubical/&title=尝试理解立方类型论"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/07/07/cubical/&title=尝试理解立方类型论"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/07/07/cubical/&name=尝试理解立方类型论&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/07/07/cubical/&t=尝试理解立方类型论"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

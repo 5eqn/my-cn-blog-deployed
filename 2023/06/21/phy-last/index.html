@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="主要还是读题上的问题。 题目表述看 2020 一个题，人在圆盘上面走，相对地面速度为 v，我直接把圆盘理解成地面了。如果真题上面有图会好一些。 单缝衍射单缝衍射最终亮度由 sin |x| 的积分决定，这样想就不反直觉了。 接地在静电感应这种模拟场景下的对应负电荷靠近电中性的导体 A 后，将导体 A 靠近点电荷的一段接地，求导体上电荷产生的变化趋势。相当于拿了个从最远处延伸的导体连接，虽然局部可能更">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大雾最后一战">
+<meta property="og:url" content="https://blog.5eqn.top/2023/06/21/phy-last/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="主要还是读题上的问题。 题目表述看 2020 一个题，人在圆盘上面走，相对地面速度为 v，我直接把圆盘理解成地面了。如果真题上面有图会好一些。 单缝衍射单缝衍射最终亮度由 sin |x| 的积分决定，这样想就不反直觉了。 接地在静电感应这种模拟场景下的对应负电荷靠近电中性的导体 A 后，将导体 A 靠近点电荷的一段接地，求导体上电荷产生的变化趋势。相当于拿了个从最远处延伸的导体连接，虽然局部可能更">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-21T01:00:14.000Z">
+<meta property="article:modified_time" content="2025-01-08T10:51:47.072Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="课内">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>大雾最后一战</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/06/21/iced/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/06/21/phy-nonde/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/21/phy-last/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/21/phy-last/&text=大雾最后一战"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/21/phy-last/&title=大雾最后一战"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/21/phy-last/&is_video=false&description=大雾最后一战"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=大雾最后一战&body=Check out this article: https://blog.5eqn.top/2023/06/21/phy-last/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/21/phy-last/&title=大雾最后一战"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/21/phy-last/&title=大雾最后一战"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/21/phy-last/&title=大雾最后一战"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/21/phy-last/&title=大雾最后一战"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/21/phy-last/&name=大雾最后一战&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/21/phy-last/&t=大雾最后一战"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E8%A1%A8%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">题目表述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%95%E7%BC%9D%E8%A1%8D%E5%B0%84"><span class="toc-number">2.</span> <span class="toc-text">单缝衍射</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E5%9C%B0%E5%9C%A8%E9%9D%99%E7%94%B5%E6%84%9F%E5%BA%94%E8%BF%99%E7%A7%8D%E6%A8%A1%E6%8B%9F%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E5%AF%B9%E5%BA%94"><span class="toc-number">3.</span> <span class="toc-text">接地在静电感应这种模拟场景下的对应</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A2%E5%8A%A8%E6%96%B9%E7%A8%8B%E5%92%8C%E5%90%84%E7%A7%8D%E7%89%A9%E7%90%86%E9%87%8F%E7%9A%84%E5%AF%B9%E5%BA%94"><span class="toc-number">4.</span> <span class="toc-text">波动方程和各种物理量的对应</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%9B%E7%9F%A9%E8%BD%AC%E8%BD%B4%E7%9A%84%E9%80%89%E5%8F%96"><span class="toc-number">5.</span> <span class="toc-text">力矩转轴的选取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%B5%E5%8A%BF"><span class="toc-number">6.</span> <span class="toc-text">电势</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%89%9B%E9%A1%BF%E7%8E%AF"><span class="toc-number">7.</span> <span class="toc-text">牛顿环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%AF%B9%E8%AE%BA"><span class="toc-number">8.</span> <span class="toc-text">相对论</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%89%E6%A0%85"><span class="toc-number">9.</span> <span class="toc-text">光栅</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%B7%E6%99%AE%E9%A1%BF%E6%95%A3%E5%B0%84"><span class="toc-number">10.</span> <span class="toc-text">康普顿散射</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        大雾最后一战
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-06-21T01:00:14.000Z" class="dt-published" itemprop="datePublished">2023-06-21</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E8%AF%BE%E5%86%85/" rel="tag">课内</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>主要还是读题上的问题。</p>
+<h2 id="题目表述"><a href="#题目表述" class="headerlink" title="题目表述"></a>题目表述</h2><p>看 2020 一个题，人在圆盘上面走，相对地面速度为 v，我直接把圆盘理解成地面了。如果真题上面有图会好一些。</p>
+<h2 id="单缝衍射"><a href="#单缝衍射" class="headerlink" title="单缝衍射"></a>单缝衍射</h2><p>单缝衍射最终亮度由 sin |x| 的积分决定，这样想就不反直觉了。</p>
+<h2 id="接地在静电感应这种模拟场景下的对应"><a href="#接地在静电感应这种模拟场景下的对应" class="headerlink" title="接地在静电感应这种模拟场景下的对应"></a>接地在静电感应这种模拟场景下的对应</h2><p>负电荷靠近电中性的导体 A 后，将导体 A 靠近点电荷的一段接地，求导体上电荷产生的变化趋势。相当于拿了个从最远处延伸的导体连接，虽然局部可能更靠近负电荷（导致正电荷向大地流去），但这部分流的量是无穷小的，真正有在流的是无穷远处的正电荷也跑过来凑热闹，所以说负电荷流向大地。</p>
+<h2 id="波动方程和各种物理量的对应"><a href="#波动方程和各种物理量的对应" class="headerlink" title="波动方程和各种物理量的对应"></a>波动方程和各种物理量的对应</h2><p>令波值一定得到的方程就是波传播时时间和距离的关系，这应当是非常符合直觉的。这样可以立即导出波动方程的两种形式：波速形式 A sin (w (t-x&#x2F;v) + phase) 和波长形式 A sin (wt - 2 pi x&#x2F;len + phase).</p>
+<h2 id="力矩转轴的选取"><a href="#力矩转轴的选取" class="headerlink" title="力矩转轴的选取"></a>力矩转轴的选取</h2><p>在平动和转动混合的情况，在两种情况下刚体转动定律的式子成立：在给定旋转轴下刚体的平动加速度与转动加速度之比趋于 0，或给定旋转轴经过刚体的质心。考虑对所有的质点应用牛顿第二定律并乘以质心到质点的位矢的结果，由于总加速度等于角加速度乘到转轴的距离加上平动加速度，最终会得到 sum m_i r_i * a_平动 一项，显然为了消除这一项，要么平动加速度为 0，要么质心在给定旋转轴上。所以旋转轴不能乱取，是有迹可循的！</p>
+<p>圆柱在斜面上滚动，看似是平动和滚动的混合，但如果选择和斜面的接触线作为旋转轴，则由于 a_平 &#x3D; 1 - sqrt(1 - beta^2), 在 beta &#x3D; 0 时其值和导数都为 0，应用洛必达法则可以得到平动加速度和转动加速度之比趋于 0. 如果选择质心作为旋转轴，也显然符合要求，但可能改卷时不会判分，但至少可以帮你算对答案。</p>
+<h2 id="电势"><a href="#电势" class="headerlink" title="电势"></a>电势</h2><p>用数学拟合直觉，而不是用直觉拟合数学。有些东西如果用数学考虑的话有一大堆定义域之类的问题，用直觉的话可以直接秒。</p>
+<h2 id="牛顿环"><a href="#牛顿环" class="headerlink" title="牛顿环"></a>牛顿环</h2><p>牛顿环是直接用透镜和光学平面形成的近似抛物面来形成的！我懒得去记了，要是考到就认栽然后现场推吧。</p>
+<h2 id="相对论"><a href="#相对论" class="headerlink" title="相对论"></a>相对论</h2><p>注意除以根号下那一坨的式子一般都出现在旧坐标系到新坐标系的变化法则，对于尺缩效应这种新坐标系到旧坐标系的变换则需要反过来。</p>
+<h2 id="光栅"><a href="#光栅" class="headerlink" title="光栅"></a>光栅</h2><p>光栅之间间隔很细，中间不透光，所以必须要满足 (a+b) sin phi &#x3D; k lambda; 单缝中间透光，所以可以多一个周期。</p>
+<h2 id="康普顿散射"><a href="#康普顿散射" class="headerlink" title="康普顿散射"></a>康普顿散射</h2><p>纯玄学，记一下 (h &#x2F; m_e c) * (1 - cos phi).</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E8%A1%A8%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">题目表述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%95%E7%BC%9D%E8%A1%8D%E5%B0%84"><span class="toc-number">2.</span> <span class="toc-text">单缝衍射</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E5%9C%B0%E5%9C%A8%E9%9D%99%E7%94%B5%E6%84%9F%E5%BA%94%E8%BF%99%E7%A7%8D%E6%A8%A1%E6%8B%9F%E5%9C%BA%E6%99%AF%E4%B8%8B%E7%9A%84%E5%AF%B9%E5%BA%94"><span class="toc-number">3.</span> <span class="toc-text">接地在静电感应这种模拟场景下的对应</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A2%E5%8A%A8%E6%96%B9%E7%A8%8B%E5%92%8C%E5%90%84%E7%A7%8D%E7%89%A9%E7%90%86%E9%87%8F%E7%9A%84%E5%AF%B9%E5%BA%94"><span class="toc-number">4.</span> <span class="toc-text">波动方程和各种物理量的对应</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%9B%E7%9F%A9%E8%BD%AC%E8%BD%B4%E7%9A%84%E9%80%89%E5%8F%96"><span class="toc-number">5.</span> <span class="toc-text">力矩转轴的选取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%B5%E5%8A%BF"><span class="toc-number">6.</span> <span class="toc-text">电势</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%89%9B%E9%A1%BF%E7%8E%AF"><span class="toc-number">7.</span> <span class="toc-text">牛顿环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%AF%B9%E8%AE%BA"><span class="toc-number">8.</span> <span class="toc-text">相对论</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%89%E6%A0%85"><span class="toc-number">9.</span> <span class="toc-text">光栅</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%B7%E6%99%AE%E9%A1%BF%E6%95%A3%E5%B0%84"><span class="toc-number">10.</span> <span class="toc-text">康普顿散射</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/21/phy-last/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/21/phy-last/&text=大雾最后一战"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/21/phy-last/&title=大雾最后一战"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/21/phy-last/&is_video=false&description=大雾最后一战"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=大雾最后一战&body=Check out this article: https://blog.5eqn.top/2023/06/21/phy-last/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/21/phy-last/&title=大雾最后一战"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/21/phy-last/&title=大雾最后一战"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/21/phy-last/&title=大雾最后一战"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/21/phy-last/&title=大雾最后一战"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/21/phy-last/&name=大雾最后一战&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/21/phy-last/&t=大雾最后一战"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

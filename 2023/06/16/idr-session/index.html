@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="上一篇博客中我提到 fork 函数可以用于创建多线程，那么在 Idris2 中实现多线程通信是否可能呢？在官方的集成测试文档里面，我找到一个例子，这篇博客我们结合论文研究一下这个例子。 Protocol要在线程间类型安全地通信，我们首先需要指定发送的包的类型，例如是整数还是字符串。但有时候我们会希望根据收到回复的「值」来决定下一步送什么。指定这样的「类型序列」可以理解成客户端和服务端之间达成了某种">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在 Idris2 中实现多线程会话">
+<meta property="og:url" content="https://blog.5eqn.top/2023/06/16/idr-session/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="上一篇博客中我提到 fork 函数可以用于创建多线程，那么在 Idris2 中实现多线程通信是否可能呢？在官方的集成测试文档里面，我找到一个例子，这篇博客我们结合论文研究一下这个例子。 Protocol要在线程间类型安全地通信，我们首先需要指定发送的包的类型，例如是整数还是字符串。但有时候我们会希望根据收到回复的「值」来决定下一步送什么。指定这样的「类型序列」可以理解成客户端和服务端之间达成了某种">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-16T01:54:43.000Z">
+<meta property="article:modified_time" content="2025-01-08T10:48:48.553Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="PL">
+<meta property="article:tag" content="编程">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>在 Idris2 中实现多线程会话</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/06/16/phy/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/06/15/idr-app/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/16/idr-session/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/16/idr-session/&text=在 Idris2 中实现多线程会话"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/16/idr-session/&title=在 Idris2 中实现多线程会话"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/16/idr-session/&is_video=false&description=在 Idris2 中实现多线程会话"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=在 Idris2 中实现多线程会话&body=Check out this article: https://blog.5eqn.top/2023/06/16/idr-session/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/16/idr-session/&title=在 Idris2 中实现多线程会话"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/16/idr-session/&title=在 Idris2 中实现多线程会话"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/16/idr-session/&title=在 Idris2 中实现多线程会话"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/16/idr-session/&title=在 Idris2 中实现多线程会话"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/16/idr-session/&name=在 Idris2 中实现多线程会话&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/16/idr-session/&t=在 Idris2 中实现多线程会话"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Protocol"><span class="toc-number">1.</span> <span class="toc-text">Protocol</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92"><span class="toc-number">2.</span> <span class="toc-text">消息传递</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Action"><span class="toc-number">3.</span> <span class="toc-text">Action</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B6%E5%B1%82%E8%AE%BE%E8%AE%A1"><span class="toc-number">4.</span> <span class="toc-text">顶层设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%98%A8%E5%A4%A9%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">5.</span> <span class="toc-text">昨天的问题</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        在 Idris2 中实现多线程会话
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-06-16T01:54:43.000Z" class="dt-published" itemprop="datePublished">2023-06-16</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PL/" rel="tag">PL</a>, <a class="p-category" href="/tags/%E7%BC%96%E7%A8%8B/" rel="tag">编程</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>上一篇博客中我提到 fork 函数可以用于创建多线程，那么在 Idris2 中实现多线程通信是否可能呢？在官方的集成测试文档里面，我找到一个例子，这篇博客我们结合论文研究一下这个例子。</p>
+<h2 id="Protocol"><a href="#Protocol" class="headerlink" title="Protocol"></a>Protocol</h2><p>要在线程间类型安全地通信，我们首先需要指定发送的包的类型，例如是整数还是字符串。但有时候我们会希望根据收到回复的「值」来决定下一步送什么。指定这样的「类型序列」可以理解成客户端和服务端之间达成了某种「协议」。但根据值而变化的类型序列，在没有依值类型的语言中是不可能不利用反射来描述的，但由于 Idris2 恰好有依值类型，我们看看 Idris2 是如何实现的：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">public</span> <span class="keyword">export</span></span><br><span class="line"><span class="class"><span class="keyword">data</span> <span class="type">Protocol</span> : <span class="type">Type</span> -&gt; <span class="type">Type</span> where</span></span><br><span class="line">     <span class="type">Request</span> : (a : <span class="type">Type</span>) -&gt; <span class="type">Protocol</span> a</span><br><span class="line">     <span class="type">Respond</span> : (a : <span class="type">Type</span>) -&gt; <span class="type">Protocol</span> a</span><br><span class="line">     <span class="type">Bind</span> : <span class="type">Protocol</span> a -&gt; (a -&gt; <span class="type">Protocol</span> b) -&gt; <span class="type">Protocol</span> b</span><br><span class="line">     <span class="type">Loop</span> : <span class="type">Inf</span> (<span class="type">Protocol</span> a) -&gt; <span class="type">Protocol</span> a</span><br><span class="line">     <span class="type">Done</span> : <span class="type">Protocol</span> ()</span><br></pre></td></tr></table></figure>
+
+<p>注意如果发送的类型序列不能根据值改变，那么 Bind 本应是 Protocol a -&gt; Protocol b -&gt; Protocol b. 现在的 Bind 相比原来的区别就是中间变成了一个关于 a 的「函数」，这也恰巧使得它变成了 Monad Bind 的形式，因此可以使用 do notation 来定义 Protocol:</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">TestProto</span> : <span class="type">Protocol</span> ()</span><br><span class="line"><span class="type">TestProto</span></span><br><span class="line">    = <span class="keyword">do</span> b &lt;- <span class="type">Request</span> <span class="type">Bool</span></span><br><span class="line">         <span class="keyword">if</span> b</span><br><span class="line">            <span class="keyword">then</span> <span class="keyword">do</span> <span class="type">Respond</span> <span class="type">Char</span>; <span class="type">Done</span></span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">do</span> <span class="type">Respond</span> <span class="type">String</span>; <span class="type">Done</span></span><br></pre></td></tr></table></figure>
+
+<p>有 Monad 就有回合制，注意这里每一步相当于给定零个或一个值，由值来决定下一步回复或接受什么类型。而回合制的另一方就是客户端或服务端的具体实现，知道要发送或接受什么类型的值，然后把这个值具体地计算出来。</p>
+<h2 id="消息传递"><a href="#消息传递" class="headerlink" title="消息传递"></a>消息传递</h2><p>这个实现的整体机制和 go channel 非常相似，以 send 为例：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">export</span></span><br><span class="line"><span class="title">send</span> : (<span class="number">1</span> chan : <span class="type">Channel</span> &#123;p&#125; (<span class="type">Send</span> ty next)) -&gt; (val : ty) -&gt;</span><br><span class="line">       <span class="type">One</span> <span class="type">IO</span> (<span class="type">Channel</span> &#123;p&#125; (next val))</span><br><span class="line"><span class="title">send</span> (<span class="type">MkChannel</span> lock cond_lock cond local remote) val</span><br><span class="line">    = <span class="keyword">do</span> lift $ mutexAcquire lock</span><br><span class="line">         q &lt;- lift $ readIORef remote</span><br><span class="line">         lift $ writeIORef remote (enqueue val q)</span><br><span class="line">         lift $ mutexRelease lock</span><br><span class="line"></span><br><span class="line">         lift $ mutexAcquire cond_lock</span><br><span class="line">         lift $ conditionSignal cond</span><br><span class="line">         lift $ mutexRelease cond_lock</span><br><span class="line">         pure (<span class="type">MkChannel</span> lock cond_lock cond local remote)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到基本就是先原子地往队列里面加一个 val，然后原子地给 cond 发一个信号。</p>
+<p>对于 recv，自然也是接受信号、从队列中取值：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">export</span></span><br><span class="line"><span class="title">recv</span> : (<span class="number">1</span> chan : <span class="type">Channel</span> &#123;p&#125; (<span class="type">Recv</span> ty next)) -&gt;</span><br><span class="line">       <span class="type">One</span> <span class="type">IO</span> (<span class="type">Res</span> ty (\val =&gt; <span class="type">Channel</span> &#123;p&#125; (next val)))</span><br><span class="line"><span class="title">recv</span> (<span class="type">MkChannel</span> lock cond_lock cond local remote)</span><br><span class="line">    = <span class="keyword">do</span> lift $ mutexAcquire lock</span><br><span class="line">         rq &lt;- lift $ readIORef local</span><br><span class="line">         <span class="keyword">case</span> dequeue rq <span class="keyword">of</span></span><br><span class="line">              <span class="type">Nothing</span> =&gt; <span class="comment">-- ... no message, so wait for condition and try again</span></span><br><span class="line">                  <span class="keyword">do</span> lift $ mutexRelease lock</span><br><span class="line">                     lift $ mutexAcquire cond_lock</span><br><span class="line">                     lift $ conditionWait cond cond_lock</span><br><span class="line">                     lift $ mutexRelease cond_lock</span><br><span class="line">                     recv (<span class="type">MkChannel</span> lock cond_lock cond local remote)</span><br><span class="line">              <span class="type">Just</span> (rq&#x27;, <span class="type">Entry</span> &#123;a=any&#125; val) =&gt;</span><br><span class="line">                  <span class="keyword">do</span> lift $ writeIORef local rq&#x27;</span><br><span class="line">                     lift $ mutexRelease lock</span><br><span class="line">                     pure (believe_me &#123;a=any&#125; val #</span><br><span class="line">                           <span class="type">MkChannel</span> lock cond_lock cond local remote)</span><br></pre></td></tr></table></figure>
+
+<p>注意 recv 里面有个不断重试的过程。同时，考虑到有多次写然后多次读的情况（注意队列是有缓冲区的），不能每次读都去等信号，应该直接先尝试能不能读取到值。</p>
+<h2 id="Action"><a href="#Action" class="headerlink" title="Action"></a>Action</h2><p>注意上面 send 和 recv 的 Channel 类型签名里面有 Send 和 Recv，这个实际上是 Action 序列，相当于「还有剩下哪些操作要做」。如果说 Protocol 是用于统一 Client 和 Server 的运行逻辑，Action 则是用于给下一步的操作提供类型提示。</p>
+<p>Protocol 可以转化成初始的 Action:</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">public</span> <span class="keyword">export</span></span><br><span class="line"><span class="type">ClientK</span> : <span class="type">Protocol</span> a -&gt; (a -&gt; <span class="type">Actions</span> b) -&gt; <span class="type">Actions</span> b</span><br><span class="line"><span class="type">ClientK</span> (<span class="type">Request</span> a) k = <span class="type">Send</span> a k</span><br><span class="line"><span class="type">ClientK</span> (<span class="type">Respond</span> a) k = <span class="type">Recv</span> a k</span><br><span class="line"><span class="type">ClientK</span> (<span class="type">Bind</span> act next) k = <span class="type">ClientK</span> act (\res =&gt; <span class="type">ClientK</span> (next res) k)</span><br><span class="line"><span class="type">ClientK</span> (<span class="type">Loop</span> proto) k = <span class="type">ClientK</span> proto k</span><br><span class="line"><span class="type">ClientK</span> <span class="type">Done</span> k = k ()</span><br></pre></td></tr></table></figure>
+
+<h2 id="顶层设计"><a href="#顶层设计" class="headerlink" title="顶层设计"></a>顶层设计</h2><p>在有了上面的工作之后，顶层的程序就很清晰了：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">testClient</span> : (<span class="number">1</span> chan : <span class="type">Client</span> <span class="type">TestProto</span>) -&gt; <span class="type">Any</span> <span class="type">IO</span> ()</span><br><span class="line"><span class="title">testClient</span> chan</span><br><span class="line">    = <span class="keyword">do</span> lift $ putStrLn <span class="string">&quot;Starting client&quot;</span></span><br><span class="line">         lift $ sleep <span class="number">1</span></span><br><span class="line">         lift $ putStrLn <span class="string">&quot;Sending value&quot;</span></span><br><span class="line">         chan &lt;- send chan <span class="type">False</span></span><br><span class="line">         lift $ putStrLn <span class="string">&quot;Sent&quot;</span></span><br><span class="line">         c # chan &lt;- recv chan</span><br><span class="line">         lift $ putStrLn (<span class="string">&quot;Result: &quot;</span> ++ c)</span><br><span class="line">         close chan</span><br></pre></td></tr></table></figure>
+
+<p>注意由于 chan 携带了一些信息（例如各种锁），IO 没有能力封装这些信息，因此整个程序写成了 IO Monad 的降级形式，如果忽略 close 的话整体上形如 (1 chan : Channel …) -&gt; (A, chan : Channel …). 不过这里有一个细节，因为 Channel 的类型签名里面有 Action 的实例，每个步骤之后 Channel 的类型签名会有所变化，因此用到了 Dependent Pair:</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- A dependent variant of LPair, pairing a result value with a resource</span></span><br><span class="line"><span class="comment">-- that depends on the result value</span></span><br><span class="line"><span class="title">public</span> <span class="keyword">export</span></span><br><span class="line"><span class="class"><span class="keyword">data</span> <span class="type">Res</span> : (<span class="title">a</span> : <span class="type">Type</span>) -&gt; (<span class="title">a</span> -&gt; <span class="type">Type</span>) -&gt; <span class="type">Type</span> where</span></span><br><span class="line">     (#) : (val : a) -&gt; (<span class="number">1</span> r : t val) -&gt; <span class="type">Res</span> a t</span><br></pre></td></tr></table></figure>
+
+<p>同时注意 Idris2 官方写的语法糖形式和我之前自己使用的 chan# -&gt; chan#a 的形式非常相似。</p>
+<h2 id="昨天的问题"><a href="#昨天的问题" class="headerlink" title="昨天的问题"></a>昨天的问题</h2><p>我在 tests 里面还找到 Store 的例子，里面有两种对 Store 这种有状态对象的处理方法：</p>
+<p>一种是带着跑：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">storeProg</span></span><br><span class="line">    = app1 $ <span class="keyword">do</span></span><br><span class="line">         s &lt;- connect</span><br><span class="line">         app $ putStr <span class="string">&quot;Password: &quot;</span></span><br><span class="line">         pwd &lt;- app $ getLine</span><br><span class="line">         <span class="type">True</span> # s &lt;- login s pwd</span><br><span class="line">              | <span class="type">False</span> # s =&gt; <span class="keyword">do</span> app $ putStrLn <span class="string">&quot;Login failed&quot;</span></span><br><span class="line">                                app $ disconnect s</span><br><span class="line">         app $ putStrLn <span class="string">&quot;Logged in&quot;</span></span><br><span class="line">         secret # s &lt;- readSecret s</span><br><span class="line">         app $ putStrLn (<span class="string">&quot;Secret: &quot;</span> ++ secret)</span><br><span class="line">         s &lt;- logout s</span><br><span class="line">         app $ putStrLn <span class="string">&quot;Logged out&quot;</span></span><br><span class="line">         app $ disconnect s</span><br></pre></td></tr></table></figure>
+
+<p>这里 connect 之后直接得到 Store 的线性实例，带着跑就行了，简单直接。同时注意 login 和 readSecret 的语法，这里由于使用的是 App Monad，回合制没有产生效用，所以玄学效应直接由 login 和 readSecret 函数产生。可以看看 login 的类型签名和实现：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">login</span> : (<span class="number">1</span> d : <span class="type">Store</span> <span class="type">LoggedOut</span>) -&gt; (password : <span class="type">String</span>) -&gt;</span><br><span class="line">    <span class="type">App1</span> e (<span class="type">Res</span> <span class="type">Bool</span> (\ok =&gt; <span class="type">Store</span> (<span class="keyword">if</span> ok <span class="keyword">then</span> <span class="type">LoggedIn</span> <span class="keyword">else</span> <span class="type">LoggedOut</span>)))</span><br><span class="line"><span class="title">login</span> (<span class="type">MkStore</span> str) pwd</span><br><span class="line">    = <span class="keyword">if</span> pwd == <span class="string">&quot;Mornington Crescent&quot;</span></span><br><span class="line">        <span class="keyword">then</span> pure1 (<span class="type">True</span> # <span class="type">MkStore</span> str)</span><br><span class="line">        <span class="keyword">else</span> pure1 (<span class="type">False</span> # <span class="type">MkStore</span> str)</span><br></pre></td></tr></table></figure>
+
+<p>其类型签名里面有 App，但在实际判断的时候 Idris2 选择了将密码硬编码，就没有玄学效应了。即使有，只需要利用 App 封装的 %World 来实现即可，实际上像 readIORef 这种函数都只是看起来是纯函数，实际上是玄学，并没有依赖 Monad 去封装。</p>
+<p>还有一种实现是开个新的存档：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">storeProg</span> : <span class="type">Has</span> [<span class="type">Console</span>, <span class="type">StoreI</span>] e =&gt; <span class="type">App</span> e ()</span><br><span class="line"><span class="title">storeProg</span></span><br><span class="line">    = <span class="keyword">let</span> (&gt;&gt;=) = bindL <span class="keyword">in</span></span><br><span class="line">      <span class="keyword">let</span> (&gt;&gt;) = seqL <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">do</span> putStr <span class="string">&quot;Password: &quot;</span></span><br><span class="line">           password &lt;- <span class="type">Console</span>.getLine</span><br><span class="line">           connect $ \s =&gt;</span><br><span class="line">             <span class="keyword">do</span> <span class="keyword">let</span> <span class="type">True</span> # s = login s password</span><br><span class="line">                       | <span class="type">False</span> # s =&gt; <span class="keyword">do</span> putStrLn <span class="string">&quot;Incorrect password&quot;</span></span><br><span class="line">                                         disconnect s</span><br><span class="line">                putStrLn <span class="string">&quot;Door opened&quot;</span></span><br><span class="line">                <span class="keyword">let</span> s = logout s</span><br><span class="line">                putStrLn <span class="string">&quot;Door closed&quot;</span></span><br><span class="line">                disconnect s</span><br></pre></td></tr></table></figure>
+
+<p>注意这里 connect 里面是个全新的世界，虽然里面也要带着 Store 跑；不过注意里面也能访问到 %World，connect 负责给后面的函数喂参数执行，因此 connect 需要把对 %World 的访问权下放到函数里面，其实现应该很有趣：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">connect</span> : (<span class="number">1</span> prog : (<span class="number">1</span> d : <span class="type">Store</span> <span class="type">LoggedOut</span>) -&gt;</span><br><span class="line">          <span class="type">App</span> &#123;l&#125; e ()) -&gt; <span class="type">App</span> &#123;l&#125; e ()</span><br><span class="line"><span class="title">connect</span> f</span><br><span class="line">    = <span class="keyword">let</span> (&gt;&gt;=) = bindL <span class="keyword">in</span></span><br><span class="line">      <span class="keyword">let</span> (&gt;&gt;) = seqL <span class="keyword">in</span></span><br><span class="line">          <span class="keyword">do</span> putStrLn <span class="string">&quot;Connected&quot;</span></span><br><span class="line">             f (<span class="type">MkStore</span> <span class="string">&quot;xyzzy&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>但实际上调用这个函数之后就是一个 App e ()，跟前面带着跑一模一样，不需要特意下放 %World 的所有权。</p>
+<p>我们可以得出一个结论：在 Idris2 里面如果要真的带着一堆有状态的东西跑的话是很困难的，但由于 Idris2 的那群开发者喜欢把什么状态都往 IORef 里面存，所以最后有一个 %World 就能走遍天下（他们只是觉得这样性能更高，实际上也觉得丑）。如果我要写语言的话，还是需要找到一个更通用的方法，允许自定义 %World 性质的 Linear Token.</p>
+<p>并且由于我发现 Monad 在 IO 中实际上只是起到一个安慰剂的作用，实际上只要把 Monad 的实现展开之后代码里就会充斥着非纯函数，只是如果去掉一些接口（例如不允许透过 IO a 去看里面的内容）就是纯函数了。如果我要写的话，为了统一 IO 和其他状态，我会把 IO 也写成需要带着跑的形式，但对 Monad 的处理不会发生太大变化，因为有个变量作用域的问题：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">mod</span> : m#<span class="type">A</span> -&gt; m#<span class="type">A</span></span><br><span class="line"><span class="title">mod</span> m#a = <span class="keyword">do</span></span><br><span class="line">  m#b &lt;- m#(f a)</span><br><span class="line">  m#c &lt;- m#(g a b)</span><br><span class="line">  m#c</span><br></pre></td></tr></table></figure>
+
+<p>这个运算只依赖一个内存空间不可能完成。但这里我原先的想法是在 m#b 形成后就判定 a 无效，现在感觉允许 f a 出现都是不合理的。这里和 paper 里面的最大不同在于每个变量都对应了一块实际的内存，因此 m 这个 Linear Token 和 a 这个变量应该是绑定的，应该把 m 理解成 (1 a) 里面的 1 本身，但这也会带来无法交换变量的问题……</p>
+<p>如果只是单纯强制每个函数（包括构造函数）把值和 token 绑定呢？</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">mod</span> : m#<span class="type">A</span> -&gt; m#<span class="type">A</span></span><br><span class="line"><span class="title">mod</span> m#a =</span><br><span class="line">  <span class="keyword">let</span> m#b = f m#a <span class="keyword">in</span></span><br><span class="line">  <span class="keyword">let</span> m#c = g m#a <span class="keyword">in</span></span><br><span class="line">  m#c</span><br></pre></td></tr></table></figure>
+
+<p>注意 g 不能输入两个参数，否则 m 的使用次数会爆掉。这样虽然 g 在 f 把 b 放到 m 的时候引用了 a，但实际上编译器知道最后的结果是 c，根本不会去计算出 b. 同时也可以交换变量：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">swap</span> : m#<span class="type">A</span> -&gt; n#<span class="type">A</span> -&gt; m#<span class="type">A</span>, n#<span class="type">A</span></span><br><span class="line"><span class="title">swap</span> m#a n#b = m#b, n#a</span><br></pre></td></tr></table></figure>
+
+<p>编译器最终知道的只是变量的「流向」，至于具体如何用有限的寄存器实现这个流向，是编译器的事情。</p>
+<p>同时注意到我不再使用 Monad 了，我隐约感觉 Linear Type 的功能完全包括了 Monad 的功能并且更加强大，虽然暂时还无法说明这一点。或许以后我会因此遇到一些问题，但暂时先不用 Monad 吧！</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Protocol"><span class="toc-number">1.</span> <span class="toc-text">Protocol</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92"><span class="toc-number">2.</span> <span class="toc-text">消息传递</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Action"><span class="toc-number">3.</span> <span class="toc-text">Action</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B6%E5%B1%82%E8%AE%BE%E8%AE%A1"><span class="toc-number">4.</span> <span class="toc-text">顶层设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%98%A8%E5%A4%A9%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">5.</span> <span class="toc-text">昨天的问题</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/16/idr-session/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/16/idr-session/&text=在 Idris2 中实现多线程会话"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/16/idr-session/&title=在 Idris2 中实现多线程会话"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/16/idr-session/&is_video=false&description=在 Idris2 中实现多线程会话"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=在 Idris2 中实现多线程会话&body=Check out this article: https://blog.5eqn.top/2023/06/16/idr-session/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/16/idr-session/&title=在 Idris2 中实现多线程会话"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/16/idr-session/&title=在 Idris2 中实现多线程会话"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/16/idr-session/&title=在 Idris2 中实现多线程会话"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/16/idr-session/&title=在 Idris2 中实现多线程会话"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/16/idr-session/&name=在 Idris2 中实现多线程会话&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/16/idr-session/&t=在 Idris2 中实现多线程会话"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

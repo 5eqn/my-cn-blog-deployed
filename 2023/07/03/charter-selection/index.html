@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="本次的任务是写音频上传、音频选择以及 BPM 的操作，其中包含读取、自动测试、直接上传数字以及根据已有谱面调整，下一步是写制谱器本体。 后端更新需要给后端加入设置和同步 BPM 的功能，让 ChatGPT 写后端还是非常快的，反而是自己写的一个部分忘记 Preload 导致没有一发入魂。 HTTPie 有个神奇的语法，就是如果要指定 Raw JSON 的话，需要使用 :&#x3D; 表示赋值。 老">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实现制谱器音频选择">
+<meta property="og:url" content="https://blog.5eqn.top/2023/07/03/charter-selection/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="本次的任务是写音频上传、音频选择以及 BPM 的操作，其中包含读取、自动测试、直接上传数字以及根据已有谱面调整，下一步是写制谱器本体。 后端更新需要给后端加入设置和同步 BPM 的功能，让 ChatGPT 写后端还是非常快的，反而是自己写的一个部分忘记 Preload 导致没有一发入魂。 HTTPie 有个神奇的语法，就是如果要指定 Raw JSON 的话，需要使用 :&#x3D; 表示赋值。 老">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-07-03T02:55:49.000Z">
+<meta property="article:modified_time" content="2025-01-08T09:56:06.669Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="游戏">
+<meta property="article:tag" content="编程">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>实现制谱器音频选择</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/07/04/charter-final/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/07/02/charter-calibrate/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/07/03/charter-selection/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/07/03/charter-selection/&text=实现制谱器音频选择"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/07/03/charter-selection/&title=实现制谱器音频选择"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/07/03/charter-selection/&is_video=false&description=实现制谱器音频选择"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=实现制谱器音频选择&body=Check out this article: https://blog.5eqn.top/2023/07/03/charter-selection/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/07/03/charter-selection/&title=实现制谱器音频选择"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/07/03/charter-selection/&title=实现制谱器音频选择"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/07/03/charter-selection/&title=实现制谱器音频选择"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/07/03/charter-selection/&title=实现制谱器音频选择"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/07/03/charter-selection/&name=实现制谱器音频选择&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/07/03/charter-selection/&t=实现制谱器音频选择"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E7%AB%AF%E6%9B%B4%E6%96%B0"><span class="toc-number">1.</span> <span class="toc-text">后端更新</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%82%BB%E5%91%97%E9%99%A4%E9%9B%B6%E9%94%99%E8%AF%AF"><span class="toc-number">2.</span> <span class="toc-text">傻呗除零错误</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A5%9E%E7%A7%98%E7%BB%84%E4%BB%B6%E9%80%89%E6%8B%A9"><span class="toc-number">3.</span> <span class="toc-text">神秘组件选择</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%BC%E5%BC%8F"><span class="toc-number">4.</span> <span class="toc-text">格式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%86%E5%A4%A9-Audioplayers"><span class="toc-number">5.</span> <span class="toc-text">逆天 Audioplayers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A5%9E%E7%A7%98%E5%8F%91%E7%8E%B0"><span class="toc-number">6.</span> <span class="toc-text">神秘发现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%86%E5%A4%A9-nginx"><span class="toc-number">7.</span> <span class="toc-text">逆天 nginx</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        实现制谱器音频选择
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-07-03T02:55:49.000Z" class="dt-published" itemprop="datePublished">2023-07-03</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a>, <a class="p-category" href="/tags/%E7%BC%96%E7%A8%8B/" rel="tag">编程</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>本次的任务是写音频上传、音频选择以及 BPM 的操作，其中包含读取、自动测试、直接上传数字以及根据已有谱面调整，下一步是写制谱器本体。</p>
+<h2 id="后端更新"><a href="#后端更新" class="headerlink" title="后端更新"></a>后端更新</h2><p>需要给后端加入设置和同步 BPM 的功能，让 ChatGPT 写后端还是非常快的，反而是自己写的一个部分忘记 Preload 导致没有一发入魂。</p>
+<p>HTTPie 有个神奇的语法，就是如果要指定 Raw JSON 的话，需要使用 :&#x3D; 表示赋值。</p>
+<p>老是写一大堆才 git commit，这个习惯不好。</p>
+<h2 id="傻呗除零错误"><a href="#傻呗除零错误" class="headerlink" title="傻呗除零错误"></a>傻呗除零错误</h2><p>尝试让音频测试可以更换音频，发现输入无效，看后台有除零错误，后来才发现是因为歌曲的 BPM 数据还没有同步！草！</p>
+<h2 id="神秘组件选择"><a href="#神秘组件选择" class="headerlink" title="神秘组件选择"></a>神秘组件选择</h2><p>活用 IntrinsicHeight！可以解决诸如「我希望这个组件能够保持其自然高度，不要填满整个屏幕」之类的需求。</p>
+<h2 id="格式"><a href="#格式" class="headerlink" title="格式"></a>格式</h2><p>Flutter 在尾部逗号没加满的情况下会给出很丑的格式化方式！</p>
+<h2 id="逆天-Audioplayers"><a href="#逆天-Audioplayers" class="headerlink" title="逆天 Audioplayers"></a>逆天 Audioplayers</h2><p>Flutter 的音频播放竟然不能直接获取歌曲长度？</p>
+<p>好像是因为 URL 有 redirect 导致的，得直接请求到 assets 的地址。Web 端因为没有 File, 没法先下载到本地再 Play. 得改服务器咯！最后还是在 audioplayers 的 FAQ 里面找到的问题，网上都找不到有人因为 redirect 被坑的例子。</p>
+<p>Nginx 的作用在这种时候就体现出来了！</p>
+<p>补：Web 如果 ByteSource 能用的话就可以下载到本地然后 Play，但这样就要为不同平台写不同的代码了，很逆天。为什么不能用内存和 cache manager 模拟一个 Filesystem 呢？这样在不同系统可以写统一的代码。</p>
+<h2 id="神秘发现"><a href="#神秘发现" class="headerlink" title="神秘发现"></a>神秘发现</h2><p>Flutter Web 体验比 Linux Desktop 强多了！帧率更高，音频处理也更好。但是 CORS 也更多。</p>
+<h2 id="逆天-nginx"><a href="#逆天-nginx" class="headerlink" title="逆天 nginx"></a>逆天 nginx</h2><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">add_header</span> Header0 <span class="variable">$value</span>;</span><br><span class="line"><span class="attribute">if</span> (condA) &#123;</span><br><span class="line">  <span class="attribute">add_header</span> Header1 <span class="variable">$value</span>;</span><br><span class="line">  <span class="attribute">return</span> <span class="number">204</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果 condA 符合，nginx 直接不加 Header0！这让我想到某个内容包含买西瓜的程序员笑话，或许 nginx 是在提醒我们程序员要返璞归真，用正常人类的逻辑思考。</p>
+<p>Nginx 还自带文件大小限制！这很不 KISS.</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E7%AB%AF%E6%9B%B4%E6%96%B0"><span class="toc-number">1.</span> <span class="toc-text">后端更新</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%82%BB%E5%91%97%E9%99%A4%E9%9B%B6%E9%94%99%E8%AF%AF"><span class="toc-number">2.</span> <span class="toc-text">傻呗除零错误</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A5%9E%E7%A7%98%E7%BB%84%E4%BB%B6%E9%80%89%E6%8B%A9"><span class="toc-number">3.</span> <span class="toc-text">神秘组件选择</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%BC%E5%BC%8F"><span class="toc-number">4.</span> <span class="toc-text">格式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%86%E5%A4%A9-Audioplayers"><span class="toc-number">5.</span> <span class="toc-text">逆天 Audioplayers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A5%9E%E7%A7%98%E5%8F%91%E7%8E%B0"><span class="toc-number">6.</span> <span class="toc-text">神秘发现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%86%E5%A4%A9-nginx"><span class="toc-number">7.</span> <span class="toc-text">逆天 nginx</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/07/03/charter-selection/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/07/03/charter-selection/&text=实现制谱器音频选择"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/07/03/charter-selection/&title=实现制谱器音频选择"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/07/03/charter-selection/&is_video=false&description=实现制谱器音频选择"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=实现制谱器音频选择&body=Check out this article: https://blog.5eqn.top/2023/07/03/charter-selection/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/07/03/charter-selection/&title=实现制谱器音频选择"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/07/03/charter-selection/&title=实现制谱器音频选择"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/07/03/charter-selection/&title=实现制谱器音频选择"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/07/03/charter-selection/&title=实现制谱器音频选择"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/07/03/charter-selection/&name=实现制谱器音频选择&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/07/03/charter-selection/&t=实现制谱器音频选择"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

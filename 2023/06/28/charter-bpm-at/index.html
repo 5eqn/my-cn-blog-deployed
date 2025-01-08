@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="感谢 ChatGPT 让我发现 librosa 库里面已经有一个现成的分析 bpm 的算法了，先计算 onset strength，然后用动态规划算法算 bpm，但有一个致命的问题就是这玩意对歌曲本身没有理解，找到一个 align 的就直接 commit 了，导致可能搞到一些 3&#x2F;4 倍 bpm. 我觉得如果和昨天的算法结合，不仅可以提升精确度，而且可以实现查找 offset. 玄学调参">
+<meta property="og:type" content="article">
+<meta property="og:title" content="继续尝试搓 bpm 分析">
+<meta property="og:url" content="https://blog.5eqn.top/2023/06/28/charter-bpm-at/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="感谢 ChatGPT 让我发现 librosa 库里面已经有一个现成的分析 bpm 的算法了，先计算 onset strength，然后用动态规划算法算 bpm，但有一个致命的问题就是这玩意对歌曲本身没有理解，找到一个 align 的就直接 commit 了，导致可能搞到一些 3&#x2F;4 倍 bpm. 我觉得如果和昨天的算法结合，不仅可以提升精确度，而且可以实现查找 offset. 玄学调参">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-28T12:59:05.000Z">
+<meta property="article:modified_time" content="2025-01-08T09:55:04.590Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="游戏">
+<meta property="article:tag" content="编程">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>继续尝试搓 bpm 分析</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/06/30/charter-bpm-3/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/06/28/hott-learn/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/28/charter-bpm-at/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&text=继续尝试搓 bpm 分析"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&title=继续尝试搓 bpm 分析"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&is_video=false&description=继续尝试搓 bpm 分析"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=继续尝试搓 bpm 分析&body=Check out this article: https://blog.5eqn.top/2023/06/28/charter-bpm-at/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&title=继续尝试搓 bpm 分析"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&title=继续尝试搓 bpm 分析"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&title=继续尝试搓 bpm 分析"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&title=继续尝试搓 bpm 分析"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&name=继续尝试搓 bpm 分析&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&t=继续尝试搓 bpm 分析"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%84%E5%AD%A6%E8%B0%83%E5%8F%82"><span class="toc-number">1.</span> <span class="toc-text">玄学调参</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%86%E6%98%AF%E2%80%A6%E2%80%A6"><span class="toc-number">2.</span> <span class="toc-text">但是……</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-GCD-%E7%9A%84-BPM-%E8%AE%A1%E7%AE%97"><span class="toc-number">3.</span> <span class="toc-text">基于 GCD 的 BPM 计算</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%81%8F%E7%A7%BB%E8%AE%A1%E7%AE%97"><span class="toc-number">4.</span> <span class="toc-text">偏移计算</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        继续尝试搓 bpm 分析
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-06-28T12:59:05.000Z" class="dt-published" itemprop="datePublished">2023-06-28</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a>, <a class="p-category" href="/tags/%E7%BC%96%E7%A8%8B/" rel="tag">编程</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>感谢 ChatGPT 让我发现 librosa 库里面已经有一个现成的分析 bpm 的算法了，先计算 onset strength，然后用动态规划算法算 bpm，但有一个致命的问题就是这玩意对歌曲本身没有理解，找到一个 align 的就直接 commit 了，导致可能搞到一些 3&#x2F;4 倍 bpm. 我觉得如果和昨天的算法结合，不仅可以提升精确度，而且可以实现查找 offset.</p>
+<h2 id="玄学调参"><a href="#玄学调参" class="headerlink" title="玄学调参"></a>玄学调参</h2><p>降低采样率发现效果好一些。</p>
+<p>对噪声进行测试发现相关系数关于偏移呈现线性，于是以下补偿系数效果非常好：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mult = <span class="number">1</span> / (midpoint - np.arange(min_ndx, max_ndx))</span><br><span class="line">correl_midpoint_tmp = correl_midpoint_tmp * mult</span><br></pre></td></tr></table></figure>
+
+<p>补偿后可以安全地以 0.15 作为阈值排除噪声。</p>
+<p>为了检测更高 bpm 的歌曲，把上限从 220 调到了 240.</p>
+<p>在降采样的时候使用 max 比 mean 效果好。</p>
+<h2 id="但是……"><a href="#但是……" class="headerlink" title="但是……"></a>但是……</h2><p>我发现我能量分布算了之后直接丢掉了，用来跑 auto correlation 的是原音频数据！表现都比离散小波变换之后好！逆大天！</p>
+<h2 id="基于-GCD-的-BPM-计算"><a href="#基于-GCD-的-BPM-计算" class="headerlink" title="基于 GCD 的 BPM 计算"></a>基于 GCD 的 BPM 计算</h2><p>考虑对常用的比例进行试探，假如我们有一串数组 2d+x1, 3d+x2, 5d+x3…, 其中 xn 是很小的误差，我们起初不知道 2:3:5 这个比例，但可以分别假设第一个是 1d+rem, 2d+rem, …, 10d+rem, 然后计算后面的取余误差，最后采用误差最小且系数最小的一个即可。</p>
+<p>但这样算出来的 BPM 会太大！</p>
+<p>加一个 120-240 的限制，后续开放修改接口，然后以偏差的峰数而不是距离作为判断依据，就可以筛选出最合适的 bpm. 用任意一个峰计算的话误差可能比较大，但如果用最高峰计算，误差大概在 0.1 以内。</p>
+<h2 id="偏移计算"><a href="#偏移计算" class="headerlink" title="偏移计算"></a>偏移计算</h2><p>直接对 BPM 置信度峰值所在的窗口找 onset 最大的，这个是整首歌里面程序最能确定是「一拍」的地方，以这一拍的时值作为 offset. 发现需要给 onset 结果的 x 轴减去 1&#x2F;32 秒，根据 ChatGPT, 可能是因为内部算法有 starting offset, 但 librosa.times_like 函数不能给出这个确切值，只是从 0 开始。</p>
+<p>或许还是不加这个为好，keep it simple and stupid.</p>
+<p>还是手贱打了个 1 &#x2F; args.hop_length 上去。</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%84%E5%AD%A6%E8%B0%83%E5%8F%82"><span class="toc-number">1.</span> <span class="toc-text">玄学调参</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%86%E6%98%AF%E2%80%A6%E2%80%A6"><span class="toc-number">2.</span> <span class="toc-text">但是……</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-GCD-%E7%9A%84-BPM-%E8%AE%A1%E7%AE%97"><span class="toc-number">3.</span> <span class="toc-text">基于 GCD 的 BPM 计算</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%81%8F%E7%A7%BB%E8%AE%A1%E7%AE%97"><span class="toc-number">4.</span> <span class="toc-text">偏移计算</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/28/charter-bpm-at/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&text=继续尝试搓 bpm 分析"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&title=继续尝试搓 bpm 分析"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&is_video=false&description=继续尝试搓 bpm 分析"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=继续尝试搓 bpm 分析&body=Check out this article: https://blog.5eqn.top/2023/06/28/charter-bpm-at/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&title=继续尝试搓 bpm 分析"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&title=继续尝试搓 bpm 分析"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&title=继续尝试搓 bpm 分析"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&title=继续尝试搓 bpm 分析"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&name=继续尝试搓 bpm 分析&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/28/charter-bpm-at/&t=继续尝试搓 bpm 分析"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

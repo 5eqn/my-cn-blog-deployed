@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="本篇将在微积分考试前持续更新。 条件思维求一个东西实际上是求「满足条件」的东西，因此可能有多种结果，整个运算要在一个「条件空间」中进行。例如进行积分的时候要记得 + C！ 收敛的直观感觉一个级数在 n 趋于无穷时需要是 1&#x2F;n 以下级别的才能绝对收敛，1&#x2F;n 是条件收敛，以上则是发散。 级数的坑注意求和从 0 开始还是 1 开始！基本的一些，例如 e^x 和 1 &#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微积分，启动！">
+<meta property="og:url" content="https://blog.5eqn.top/2023/06/25/calculus-another/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="本篇将在微积分考试前持续更新。 条件思维求一个东西实际上是求「满足条件」的东西，因此可能有多种结果，整个运算要在一个「条件空间」中进行。例如进行积分的时候要记得 + C！ 收敛的直观感觉一个级数在 n 趋于无穷时需要是 1&#x2F;n 以下级别的才能绝对收敛，1&#x2F;n 是条件收敛，以上则是发散。 级数的坑注意求和从 0 开始还是 1 开始！基本的一些，例如 e^x 和 1 &#x2F;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-25T02:02:47.000Z">
+<meta property="article:modified_time" content="2025-01-08T09:54:46.473Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="课内">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>微积分，启动！</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/06/26/hott-book/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/06/25/present/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/25/calculus-another/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/25/calculus-another/&text=微积分，启动！"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/25/calculus-another/&title=微积分，启动！"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/25/calculus-another/&is_video=false&description=微积分，启动！"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=微积分，启动！&body=Check out this article: https://blog.5eqn.top/2023/06/25/calculus-another/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/25/calculus-another/&title=微积分，启动！"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/25/calculus-another/&title=微积分，启动！"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/25/calculus-another/&title=微积分，启动！"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/25/calculus-another/&title=微积分，启动！"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/25/calculus-another/&name=微积分，启动！&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/25/calculus-another/&t=微积分，启动！"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E6%80%9D%E7%BB%B4"><span class="toc-number">1.</span> <span class="toc-text">条件思维</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%B6%E6%95%9B%E7%9A%84%E7%9B%B4%E8%A7%82%E6%84%9F%E8%A7%89"><span class="toc-number">2.</span> <span class="toc-text">收敛的直观感觉</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BA%A7%E6%95%B0%E7%9A%84%E5%9D%91"><span class="toc-number">3.</span> <span class="toc-text">级数的坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E5%90%91%E7%9A%84%E5%9D%91"><span class="toc-number">4.</span> <span class="toc-text">方向的坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%A4%E7%B1%BB%E6%9B%B2%E9%9D%A2%E7%A7%AF%E5%88%86%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="toc-number">5.</span> <span class="toc-text">两类曲面积分的转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A3%80%E6%9F%A5%E6%96%B9%E5%90%91"><span class="toc-number">6.</span> <span class="toc-text">检查方向</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%99%E4%B8%8B%E8%BF%99%E4%B8%8B%E4%BA%86"><span class="toc-number">7.</span> <span class="toc-text">这下这下了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E5%BF%83%E9%80%86%E5%BA%8F%E6%A0%BC%E6%9E%97"><span class="toc-number">8.</span> <span class="toc-text">小心逆序格林</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E7%A1%AE%E5%AE%9A%E7%9A%84%E5%85%AC%E5%BC%8F%E4%B8%8D%E8%A6%81%E4%B9%B1%E7%94%A8"><span class="toc-number">9.</span> <span class="toc-text">不确定的公式不要乱用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E6%B1%82%E8%A7%A3"><span class="toc-number">10.</span> <span class="toc-text">全微分方程求解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%A4%E6%96%AD%E7%BA%A7%E6%95%B0%E6%94%B6%E6%95%9B"><span class="toc-number">11.</span> <span class="toc-text">判断级数收敛</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%82%85%E9%87%8C%E5%8F%B6%E7%BA%A7%E6%95%B0%E5%92%8C%E5%87%BD%E6%95%B0"><span class="toc-number">12.</span> <span class="toc-text">傅里叶级数和函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E5%92%8C%E7%BA%A7%E6%95%B0%E5%BE%AE%E8%B0%83"><span class="toc-number">13.</span> <span class="toc-text">调和级数微调</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B"><span class="toc-number">14.</span> <span class="toc-text">类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BA%A7%E6%95%B0%E5%92%8C%E5%87%BD%E6%95%B0%E7%9A%84%E8%B5%B7%E7%82%B9"><span class="toc-number">15.</span> <span class="toc-text">级数和函数的起点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5%E6%80%A7%E9%94%99%E8%AF%AF"><span class="toc-number">16.</span> <span class="toc-text">概念性错误</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%82%BB%E5%91%97"><span class="toc-number">17.</span> <span class="toc-text">傻呗</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A5%E5%BF%97"><span class="toc-number">18.</span> <span class="toc-text">日志</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        微积分，启动！
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-06-25T02:02:47.000Z" class="dt-published" itemprop="datePublished">2023-06-25</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E8%AF%BE%E5%86%85/" rel="tag">课内</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>本篇将在微积分考试前持续更新。</p>
+<h2 id="条件思维"><a href="#条件思维" class="headerlink" title="条件思维"></a>条件思维</h2><p>求一个东西实际上是求「满足条件」的东西，因此可能有多种结果，整个运算要在一个「条件空间」中进行。例如进行积分的时候要记得 + C！</p>
+<h2 id="收敛的直观感觉"><a href="#收敛的直观感觉" class="headerlink" title="收敛的直观感觉"></a>收敛的直观感觉</h2><p>一个级数在 n 趋于无穷时需要是 1&#x2F;n 以下级别的才能绝对收敛，1&#x2F;n 是条件收敛，以上则是发散。</p>
+<h2 id="级数的坑"><a href="#级数的坑" class="headerlink" title="级数的坑"></a>级数的坑</h2><p>注意求和从 0 开始还是 1 开始！基本的一些，例如 e^x 和 1 &#x2F; 1+x 都是从 0 开始。</p>
+<h2 id="方向的坑"><a href="#方向的坑" class="headerlink" title="方向的坑"></a>方向的坑</h2><p>曲线正方向为逆时针方向，和复平面幅角的计算方式一致。</p>
+<h2 id="两类曲面积分的转换"><a href="#两类曲面积分的转换" class="headerlink" title="两类曲面积分的转换"></a>两类曲面积分的转换</h2><p>因为曲面积分计算的是某个微元面法向量和某个向量的内积，在转换的时候直接认为特定轴的贡献和法向量方向余弦成正比，因此如果出现 z &#x3D; 2 - x^2 - y^2 的形式，则需要先求其法向量。</p>
+<p>可以用直线类比，f dS &#x3D; f sqrt{1+k^2} dx, 也有 f dS &#x3D; f cos a dx + f sin a dy, 其中 dy &#x3D; tan a dx, 这两个思路代数上是一致的。由于曲面积分的坐标形式是带了法向的，所以反直觉一些，但如果不是分配到每个轴而只是对一块面积加 buff，就可以直接对 x 和 y 求导，但这里 z 一定要是显式给出的。</p>
+<h2 id="检查方向"><a href="#检查方向" class="headerlink" title="检查方向"></a>检查方向</h2><p>查自己写的变量是不是自己和自己想的一样！（名实对应）</p>
+<h2 id="这下这下了"><a href="#这下这下了" class="headerlink" title="这下这下了"></a>这下这下了</h2><p>之前经常我的解法比答案简单，但现在这题我似乎一开始就算错了，即使没算错也想不到标准答案的方法。要求一个对三轴有良好对称性但是有瑕点的曲面积分，但积分范围在 z 轴有一个系数。答案首先利用高斯定理把要求的地方转换到对三轴有良好对称性的球面，去掉导致瑕点的分母，再进行计算。太巧了！</p>
+<h2 id="小心逆序格林"><a href="#小心逆序格林" class="headerlink" title="小心逆序格林"></a>小心逆序格林</h2><p>有些积分会写成先 dy 再 dx 的形式，要搞清楚格林公式的意义，是 Stokes 的弱化，还有环积分没有高斯定理。</p>
+<h2 id="不确定的公式不要乱用"><a href="#不确定的公式不要乱用" class="headerlink" title="不确定的公式不要乱用"></a>不确定的公式不要乱用</h2><p>例如原先是曲线对 ds 积分，不能直接改 dz，因为 ds 是会受其他方向斜率的 buff 的。</p>
+<h2 id="全微分方程求解"><a href="#全微分方程求解" class="headerlink" title="全微分方程求解"></a>全微分方程求解</h2><p>其实算的就是一个不定路径曲线积分，但也可以把方程拆成不同元素。具体地，例如 ydx + xdy，先对 ydx 积分得到 xy，然后对 y 求导得到 xdy，于是把 xdy 的项消掉，再处理其他的项。</p>
+<h2 id="判断级数收敛"><a href="#判断级数收敛" class="headerlink" title="判断级数收敛"></a>判断级数收敛</h2><p>只要变成级数形式之后达到调和级数的级别，就肯定发散，不需要再具体进行判断。需要进行具体判断的是在不呈现指数级别的时候。p 级数是比等比级数更细的划分，所有的 p 级数的等级都和公比为 1 的等比级数一样，实际分界线是调和级数。</p>
+<h2 id="傅里叶级数和函数"><a href="#傅里叶级数和函数" class="headerlink" title="傅里叶级数和函数"></a>傅里叶级数和函数</h2><p>课本上直接给了间断点取一半，目前证明不了，考虑直接用。</p>
+<h2 id="调和级数微调"><a href="#调和级数微调" class="headerlink" title="调和级数微调"></a>调和级数微调</h2><p>把调和级数非平方序号的替换成 -2 次级数，可以得到一个收敛但是不是 O(1&#x2F;n) 的级数。</p>
+<h2 id="类型"><a href="#类型" class="headerlink" title="类型"></a>类型</h2><p>散度是值（点乘），旋度是向量（叉乘）。</p>
+<h2 id="级数和函数的起点"><a href="#级数和函数的起点" class="headerlink" title="级数和函数的起点"></a>级数和函数的起点</h2><p>带着起点算，不要算完最后减，有可能余项前面积分已经没了还最后多减。</p>
+<h2 id="概念性错误"><a href="#概念性错误" class="headerlink" title="概念性错误"></a>概念性错误</h2><p>区分曲面积分和三重积分！</p>
+<h2 id="傻呗"><a href="#傻呗" class="headerlink" title="傻呗"></a>傻呗</h2><p>ln 里带一坨不要直接反转就完事了！</p>
+<h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><p>时间充裕的话如果对题目执行了化简可以考虑写下来！</p>
+<p>核心在于直观地认识题目，这样可以获得更多信息，卡着不可取！这包括化简堆栈、对称性、公式的意义、线性等……</p>
+<p>明天看一眼常用积分！例如 1 &#x2F; 1+x^2, 1 &#x2F; 1-x^2, 1 &#x2F; sqrt{1+x^2}, 1 &#x2F; sqrt{1-x^2}</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E6%80%9D%E7%BB%B4"><span class="toc-number">1.</span> <span class="toc-text">条件思维</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%B6%E6%95%9B%E7%9A%84%E7%9B%B4%E8%A7%82%E6%84%9F%E8%A7%89"><span class="toc-number">2.</span> <span class="toc-text">收敛的直观感觉</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BA%A7%E6%95%B0%E7%9A%84%E5%9D%91"><span class="toc-number">3.</span> <span class="toc-text">级数的坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E5%90%91%E7%9A%84%E5%9D%91"><span class="toc-number">4.</span> <span class="toc-text">方向的坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%A4%E7%B1%BB%E6%9B%B2%E9%9D%A2%E7%A7%AF%E5%88%86%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="toc-number">5.</span> <span class="toc-text">两类曲面积分的转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A3%80%E6%9F%A5%E6%96%B9%E5%90%91"><span class="toc-number">6.</span> <span class="toc-text">检查方向</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%99%E4%B8%8B%E8%BF%99%E4%B8%8B%E4%BA%86"><span class="toc-number">7.</span> <span class="toc-text">这下这下了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E5%BF%83%E9%80%86%E5%BA%8F%E6%A0%BC%E6%9E%97"><span class="toc-number">8.</span> <span class="toc-text">小心逆序格林</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E7%A1%AE%E5%AE%9A%E7%9A%84%E5%85%AC%E5%BC%8F%E4%B8%8D%E8%A6%81%E4%B9%B1%E7%94%A8"><span class="toc-number">9.</span> <span class="toc-text">不确定的公式不要乱用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E6%B1%82%E8%A7%A3"><span class="toc-number">10.</span> <span class="toc-text">全微分方程求解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%A4%E6%96%AD%E7%BA%A7%E6%95%B0%E6%94%B6%E6%95%9B"><span class="toc-number">11.</span> <span class="toc-text">判断级数收敛</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%82%85%E9%87%8C%E5%8F%B6%E7%BA%A7%E6%95%B0%E5%92%8C%E5%87%BD%E6%95%B0"><span class="toc-number">12.</span> <span class="toc-text">傅里叶级数和函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E5%92%8C%E7%BA%A7%E6%95%B0%E5%BE%AE%E8%B0%83"><span class="toc-number">13.</span> <span class="toc-text">调和级数微调</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B"><span class="toc-number">14.</span> <span class="toc-text">类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BA%A7%E6%95%B0%E5%92%8C%E5%87%BD%E6%95%B0%E7%9A%84%E8%B5%B7%E7%82%B9"><span class="toc-number">15.</span> <span class="toc-text">级数和函数的起点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5%E6%80%A7%E9%94%99%E8%AF%AF"><span class="toc-number">16.</span> <span class="toc-text">概念性错误</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%82%BB%E5%91%97"><span class="toc-number">17.</span> <span class="toc-text">傻呗</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A5%E5%BF%97"><span class="toc-number">18.</span> <span class="toc-text">日志</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/25/calculus-another/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/25/calculus-another/&text=微积分，启动！"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/25/calculus-another/&title=微积分，启动！"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/25/calculus-another/&is_video=false&description=微积分，启动！"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=微积分，启动！&body=Check out this article: https://blog.5eqn.top/2023/06/25/calculus-another/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/25/calculus-another/&title=微积分，启动！"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/25/calculus-another/&title=微积分，启动！"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/25/calculus-another/&title=微积分，启动！"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/25/calculus-another/&title=微积分，启动！"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/25/calculus-another/&name=微积分，启动！&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/25/calculus-another/&t=微积分，启动！"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

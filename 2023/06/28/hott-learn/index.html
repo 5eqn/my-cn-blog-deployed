@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="近期有大量企业参观活动，使用同伦类型论来消磨时间是极好的。 和常规类型论的不同同伦类型论为类型添加了拓扑意义：类型是一个空间，而其实例是这个空间中的点，其实例之间的「相等关系」是两个实例之间的「路径」，将构造出了两个实例之间的「路径」视为它们在「同伦意义上」相等。 遵循依值类型论传统，每个类型对应一个「构造方式」和「析构方式」。构造方式描述这个类型的实例可以被如何构造出来，析构方式描述这个类型的实">
+<meta property="og:type" content="article">
+<meta property="og:title" content="同伦类型论学习笔记">
+<meta property="og:url" content="https://blog.5eqn.top/2023/06/28/hott-learn/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="近期有大量企业参观活动，使用同伦类型论来消磨时间是极好的。 和常规类型论的不同同伦类型论为类型添加了拓扑意义：类型是一个空间，而其实例是这个空间中的点，其实例之间的「相等关系」是两个实例之间的「路径」，将构造出了两个实例之间的「路径」视为它们在「同伦意义上」相等。 遵循依值类型论传统，每个类型对应一个「构造方式」和「析构方式」。构造方式描述这个类型的实例可以被如何构造出来，析构方式描述这个类型的实">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-28T09:28:45.000Z">
+<meta property="article:modified_time" content="2025-01-08T10:47:39.360Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="数学">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>同伦类型论学习笔记</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/06/28/charter-bpm-at/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/06/27/charter-bpm/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/28/hott-learn/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/28/hott-learn/&text=同伦类型论学习笔记"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/28/hott-learn/&title=同伦类型论学习笔记"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/28/hott-learn/&is_video=false&description=同伦类型论学习笔记"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=同伦类型论学习笔记&body=Check out this article: https://blog.5eqn.top/2023/06/28/hott-learn/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/28/hott-learn/&title=同伦类型论学习笔记"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/28/hott-learn/&title=同伦类型论学习笔记"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/28/hott-learn/&title=同伦类型论学习笔记"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/28/hott-learn/&title=同伦类型论学习笔记"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/28/hott-learn/&name=同伦类型论学习笔记&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/28/hott-learn/&t=同伦类型论学习笔记"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%92%8C%E5%B8%B8%E8%A7%84%E7%B1%BB%E5%9E%8B%E8%AE%BA%E7%9A%84%E4%B8%8D%E5%90%8C"><span class="toc-number">1.</span> <span class="toc-text">和常规类型论的不同</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%92%E7%BA%B3%E5%92%8C%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D%E7%9A%84%E5%90%8C%E6%9E%84%E6%80%A7"><span class="toc-number">2.</span> <span class="toc-text">归纳和模式匹配的同构性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Identity-Type-%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E6%9E%90%E6%9E%84%E8%A7%84%E5%88%99"><span class="toc-number">3.</span> <span class="toc-text">Identity Type 的构造和析构规则</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        同伦类型论学习笔记
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-06-28T09:28:45.000Z" class="dt-published" itemprop="datePublished">2023-06-28</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E6%95%B0%E5%AD%A6/" rel="tag">数学</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>近期有大量企业参观活动，使用同伦类型论来消磨时间是极好的。</p>
+<h2 id="和常规类型论的不同"><a href="#和常规类型论的不同" class="headerlink" title="和常规类型论的不同"></a>和常规类型论的不同</h2><p>同伦类型论为类型添加了拓扑意义：类型是一个空间，而其实例是这个空间中的点，其实例之间的「相等关系」是两个实例之间的「路径」，将构造出了两个实例之间的「路径」视为它们在「同伦意义上」相等。</p>
+<p>遵循依值类型论传统，每个类型对应一个「构造方式」和「析构方式」。构造方式描述这个类型的实例可以被如何构造出来，析构方式描述这个类型的实例可以如何被「归纳」或者「模式匹配」，注意这两种方式是同构的，是理解同伦类型论的重难点，我会在后面进行具体解释。</p>
+<h2 id="归纳和模式匹配的同构性"><a href="#归纳和模式匹配的同构性" class="headerlink" title="归纳和模式匹配的同构性"></a>归纳和模式匹配的同构性</h2><p>例如我想要实现一个函数：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">f</span> : (n : <span class="type">Nat</span>) -&gt; <span class="type">C</span> n</span><br></pre></td></tr></table></figure>
+
+<p>但我只实现了：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">cz</span> : <span class="type">C</span> <span class="type">Z</span></span><br><span class="line"><span class="title">cs</span> : (n : <span class="type">Nat</span>) -&gt; <span class="type">C</span> n -&gt; <span class="type">C</span> (<span class="type">S</span> n)</span><br></pre></td></tr></table></figure>
+
+<p>在类型论中，最初的规定是可以使用下面的 defining equations 来构造出 f 的实例，注意这只是一种「规定」：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">f</span> <span class="type">Z</span> = cz</span><br><span class="line"><span class="title">f</span> (<span class="type">S</span> n) = cs n (f n)</span><br></pre></td></tr></table></figure>
+
+<p>注意这里我们强行承认 f 的这两种参数涵盖了「所有的」可能性，在这两种情况下经过简单的类型计算就能知道 f 是 well-typed 的。这和 pattern match 的语法非常相似：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">f</span> : (n : <span class="type">Nat</span>) -&gt; <span class="type">C</span> n</span><br><span class="line"><span class="title">f</span> = <span class="keyword">case</span> n <span class="keyword">of</span></span><br><span class="line">  <span class="type">Z</span> =&gt; cz</span><br><span class="line">  <span class="type">S</span> m =&gt; cs m (f m)</span><br></pre></td></tr></table></figure>
+
+<p>这里可以发现 case 分支里面的东西也不完全是目标类型，在我的类型检查实现里面是把 C n 替换成 C Z 或者 C (S n)，但实际上这只是一种对所有 Inductive Types 成立的一个规定。</p>
+<p>同时，defining equations 的写法也可以转换成 ind 函数的写法：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">ind</span> : (<span class="type">C</span> : <span class="type">Nat</span> -&gt; <span class="type">Type</span>) -&gt; <span class="type">C</span> <span class="type">Z</span> -&gt; ((n : <span class="type">Nat</span>) -&gt; <span class="type">C</span> n -&gt; <span class="type">C</span> (<span class="type">S</span> n)) -&gt; ((n : <span class="type">Nat</span>) -&gt; <span class="type">C</span> n)</span><br><span class="line"><span class="title">ind</span> <span class="type">C</span> cz cs n = <span class="keyword">case</span> n <span class="keyword">of</span></span><br><span class="line">  <span class="type">Z</span> =&gt; cz</span><br><span class="line">  <span class="type">S</span> m =&gt; cs m (ind <span class="type">C</span> cz cs m)</span><br></pre></td></tr></table></figure>
+
+<p>可以看出 ind 只是把 C, cz 和 cs 带着而已。</p>
+<h2 id="Identity-Type-的构造和析构规则"><a href="#Identity-Type-的构造和析构规则" class="headerlink" title="Identity Type 的构造和析构规则"></a>Identity Type 的构造和析构规则</h2><p>由于 identity type 的唯一构造方式是使用 refl : (a : A) -&gt; a &#x3D; a, 我之前认为在传统依值类型论里面，如果有一个 p : a &#x3D; a 可以直接析构出 refl a, 但看了下 Lean 的文档我发现这或许是错误的，因为 Lean 对 identity type 的析构进行了一层封装：</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">example (α : <span class="type">Type</span>) (a b : α) (p : α → <span class="type">Prop</span>)</span><br><span class="line">        (h1 : a = b) (h2 : p a) : p b :=</span><br><span class="line">  <span class="type">Eq</span>.subst h1 h2</span><br></pre></td></tr></table></figure>
+
+<p>然后再进行一层封装：</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">variable (a b c d e : <span class="type">Nat</span>)</span><br><span class="line">variable (h1 : a = b)</span><br><span class="line">variable (h2 : b = c + <span class="number">1</span>)</span><br><span class="line">variable (h3 : c = d)</span><br><span class="line">variable (h4 : e = <span class="number">1</span> + d)</span><br><span class="line"></span><br><span class="line">theorem <span class="type">T</span> : a = e :=</span><br><span class="line">  calc</span><br><span class="line">    a = b      := h1</span><br><span class="line">    _ = c + <span class="number">1</span>  := h2</span><br><span class="line">    _ = d + <span class="number">1</span>  := congrArg <span class="type">Nat</span>.succ h3</span><br><span class="line">    _ = <span class="number">1</span> + d  := <span class="type">Nat</span>.add_comm d <span class="number">1</span></span><br><span class="line">    _ = e      := <span class="type">Eq</span>.symm h4</span><br></pre></td></tr></table></figure>
+
+<p>导致不太看得出 pattern match 的痕迹。实际上，identity type 的析构和前面用于举例的自然数析构本质上没有不同，都可以写成 defining equation, pattern match 和 ind 这三种同构的形式，但其规则并不符合传统的 pattern match.</p>
+<p>Identity type 的析构有两种可以互相推导的形式，这里以 path induction 为例。若要构造出下面 f 的实例：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">f</span> : (x : <span class="type">A</span>) -&gt; (y : <span class="type">A</span>) -&gt; (p : x = y) -&gt; <span class="type">C</span> x y p</span><br></pre></td></tr></table></figure>
+
+<p>但我们只有：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">c</span> : (x : <span class="type">A</span>) -&gt; <span class="type">C</span> x x (refl x)</span><br></pre></td></tr></table></figure>
+
+<p>我们可以强行这样构造出 f 的实例：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">f</span> x x (refl x) = c x</span><br></pre></td></tr></table></figure>
+
+<p>注意我们只考虑了 x y p 符合 x x (refl x) 形式的情况，别的情况被强行忽略了，而在这种情况 f 也是 well-typed 的。</p>
+<p>若要写成 pattern matching 的格式，则是：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">f</span> : (x : <span class="type">A</span>) -&gt; (y : <span class="type">A</span>) -&gt; (p : x = y) -&gt; <span class="type">C</span> x y p</span><br><span class="line"><span class="title">f</span> x y p = <span class="keyword">case</span> (x ** (y ** p)) <span class="keyword">of</span></span><br><span class="line">  (u ** (u ** refl u)) =&gt; c u</span><br></pre></td></tr></table></figure>
+
+<p>注意 (a ** b) 是 dependent pair，即 Sigma type.</p>
+<p>若要写成 ind 函数的格式，则是：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">ind</span> : (<span class="type">C</span> : (x : <span class="type">A</span>) -&gt; (y : <span class="type">A</span>) -&gt; x = y -&gt; <span class="type">Type</span>) -&gt; ((x : <span class="type">A</span>) -&gt; <span class="type">C</span> x x (refl x)) -&gt; (x : <span class="type">A</span>) -&gt; (y : <span class="type">A</span>) -&gt; <span class="type">C</span> x y p</span><br><span class="line"><span class="title">ind</span> <span class="type">C</span> c x x (refl x) = c x</span><br></pre></td></tr></table></figure>
+
+<p>可以看出非常明显的同构性。</p>
+<p>注意这里 case 里面的 x 和 y 必须是不同的变量，如果是同一个变量，在拓扑学意义上这是一个「两端固定」的路径，不一定能收缩到一个点，这应当和 Lean 里面的情况是一致的，只是 HoTT 找到了这种关联性，暂时没有发现对原有类型论有什么规则上的修改，只有理念上的不同。或许后续涉及一些 univalence axiom 的时候我能够看到修改，也可能只是一个在原有类型论基础上的「洞见」，从而在原先类型论中已经可能的范围内进行实践的调整。</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%92%8C%E5%B8%B8%E8%A7%84%E7%B1%BB%E5%9E%8B%E8%AE%BA%E7%9A%84%E4%B8%8D%E5%90%8C"><span class="toc-number">1.</span> <span class="toc-text">和常规类型论的不同</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%92%E7%BA%B3%E5%92%8C%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D%E7%9A%84%E5%90%8C%E6%9E%84%E6%80%A7"><span class="toc-number">2.</span> <span class="toc-text">归纳和模式匹配的同构性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Identity-Type-%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E6%9E%90%E6%9E%84%E8%A7%84%E5%88%99"><span class="toc-number">3.</span> <span class="toc-text">Identity Type 的构造和析构规则</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/28/hott-learn/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/28/hott-learn/&text=同伦类型论学习笔记"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/28/hott-learn/&title=同伦类型论学习笔记"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/28/hott-learn/&is_video=false&description=同伦类型论学习笔记"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=同伦类型论学习笔记&body=Check out this article: https://blog.5eqn.top/2023/06/28/hott-learn/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/28/hott-learn/&title=同伦类型论学习笔记"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/28/hott-learn/&title=同伦类型论学习笔记"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/28/hott-learn/&title=同伦类型论学习笔记"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/28/hott-learn/&title=同伦类型论学习笔记"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/28/hott-learn/&name=同伦类型论学习笔记&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/28/hott-learn/&t=同伦类型论学习笔记"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

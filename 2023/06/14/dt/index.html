@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="在 Idris2 语言里，线性类型一般被用于描述「外部资源」，例如 IO 里面的 %World 以及自定义的一些其他外部资源，并没有强制用户对内存进行这样的建模，因此在内存管理上依然要依赖效率较低的 GC. 然而，如果强制对内存进行建模，或许能解决这个问题。然而，对内存建模是一件相当复杂的事情，所幸我们可以参考 Rust 的内存管理机制和 Unity 的面向数据设计。 单个值假设我们要完成「交换」">
+<meta property="og:type" content="article">
+<meta property="og:title" content="尝试使用线性类型对内存建模">
+<meta property="og:url" content="https://blog.5eqn.top/2023/06/14/dt/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="在 Idris2 语言里，线性类型一般被用于描述「外部资源」，例如 IO 里面的 %World 以及自定义的一些其他外部资源，并没有强制用户对内存进行这样的建模，因此在内存管理上依然要依赖效率较低的 GC. 然而，如果强制对内存进行建模，或许能解决这个问题。然而，对内存建模是一件相当复杂的事情，所幸我们可以参考 Rust 的内存管理机制和 Unity 的面向数据设计。 单个值假设我们要完成「交换」">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-14T13:19:10.000Z">
+<meta property="article:modified_time" content="2025-01-08T09:56:29.049Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="PL">
+<meta property="article:tag" content="编程">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>尝试使用线性类型对内存建模</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/06/15/idr-io/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/06/14/calculus-serial/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/14/dt/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/14/dt/&text=尝试使用线性类型对内存建模"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/14/dt/&title=尝试使用线性类型对内存建模"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/14/dt/&is_video=false&description=尝试使用线性类型对内存建模"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=尝试使用线性类型对内存建模&body=Check out this article: https://blog.5eqn.top/2023/06/14/dt/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/14/dt/&title=尝试使用线性类型对内存建模"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/14/dt/&title=尝试使用线性类型对内存建模"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/14/dt/&title=尝试使用线性类型对内存建模"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/14/dt/&title=尝试使用线性类型对内存建模"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/14/dt/&name=尝试使用线性类型对内存建模&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/14/dt/&t=尝试使用线性类型对内存建模"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%95%E4%B8%AA%E5%80%BC"><span class="toc-number">1.</span> <span class="toc-text">单个值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A0%E5%85%A5-IO"><span class="toc-number">2.</span> <span class="toc-text">加入 IO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84"><span class="toc-number">3.</span> <span class="toc-text">数组</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8-Dependent-Pair-%E7%9A%84%E5%BD%A2%E5%BC%8F%E7%9C%9F%E7%9A%84%E5%90%88%E7%90%86%E5%90%97%EF%BC%9F"><span class="toc-number">4.</span> <span class="toc-text">用 Dependent Pair 的形式真的合理吗？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9E%E9%A1%BE"><span class="toc-number">5.</span> <span class="toc-text">回顾</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        尝试使用线性类型对内存建模
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-06-14T13:19:10.000Z" class="dt-published" itemprop="datePublished">2023-06-14</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PL/" rel="tag">PL</a>, <a class="p-category" href="/tags/%E7%BC%96%E7%A8%8B/" rel="tag">编程</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>在 Idris2 语言里，线性类型一般被用于描述「外部资源」，例如 IO 里面的 %World 以及自定义的一些其他外部资源，并没有强制用户对内存进行这样的建模，因此在内存管理上依然要依赖效率较低的 GC. 然而，如果强制对内存进行建模，或许能解决这个问题。然而，对内存建模是一件相当复杂的事情，所幸我们可以参考 Rust 的内存管理机制和 Unity 的面向数据设计。</p>
+<h2 id="单个值"><a href="#单个值" class="headerlink" title="单个值"></a>单个值</h2><p>假设我们要完成「交换」任务，两个内存地址里面的值的类型都是 A，需要对它们的值进行交换。先尝试随便搓一个：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">swap</span> : (<span class="number">1</span> <span class="type">Loc</span> <span class="type">A</span>, <span class="number">1</span> <span class="type">Loc</span> <span class="type">A</span>) -&gt; (<span class="type">Loc</span> <span class="type">A</span>, <span class="type">Loc</span> <span class="type">A</span>)</span><br><span class="line"><span class="title">swap</span> (<span class="type">MkLoc</span> a x, <span class="type">MkLoc</span> b y) = (<span class="type">MkLoc</span> a y, <span class="type">MkLoc</span> b x)</span><br></pre></td></tr></table></figure>
+
+<p>这样的缺点是在类型签名里反映不出来值的「位置」。但首先如果要反映出来的话，就必须要写成 Dependent Pair 的形式；其次输出的位置和输入的位置并不是同一个变量，而是某种「复制品」，但因为原来那个立即不可用了，所以不需要真的去复制。</p>
+<p>写一个 Dependent Pair 的版本试试：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">swap</span> : ((<span class="number">0</span> m : <span class="type">Tok</span> ** <span class="number">1</span> <span class="type">Loc</span> m <span class="type">A</span>), (<span class="number">0</span> n : <span class="type">Tok</span> ** <span class="number">1</span> <span class="type">Loc</span> n <span class="type">A</span>)) -&gt; ((p : <span class="type">Tok</span> ** <span class="type">Loc</span> p <span class="type">A</span>), (q : <span class="type">Tok</span> ** <span class="type">Loc</span> q <span class="type">A</span>))</span><br><span class="line"><span class="title">swap</span> ((m ** <span class="type">MkLoc</span> m x), (n ** <span class="type">MkLoc</span> n y)) = ((m ** <span class="type">MkLoc</span> m y), (n ** <span class="type">MkLoc</span> n x))</span><br></pre></td></tr></table></figure>
+
+<p>但实际上 Dependent Pair 的 LHS 被抹除了，实际使用的时候不需要显式写出 Dependent Pair. 同时在这个场景里面，右边返回 Dependent Pair 也只是为了形式上的一致性。</p>
+<p>用一些语法糖便可以写成很简单的形式：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">swap</span> : m#<span class="type">A</span>, n#<span class="type">A</span> -&gt; p#<span class="type">A</span>, q#<span class="type">A</span></span><br><span class="line"><span class="title">swap</span> m#x, n#y = m#y, n#x</span><br></pre></td></tr></table></figure>
+
+<p>在编译这段程序的时候，如果基础语句里面有 swap 就可以直接调用，没有的话需要手动增加一个临时变量。由于增加临时变量是不符合人类直觉的，其不出现在程序中是一件好事。</p>
+<h2 id="加入-IO"><a href="#加入-IO" class="headerlink" title="加入 IO"></a>加入 IO</h2><p>如果要和 IO 对接，例如处理一个加和的任务，可以：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">sum</span> : io# -&gt; io#</span><br><span class="line"><span class="title">sum</span> io# = <span class="keyword">do</span></span><br><span class="line">  io#a &lt;- io.read#</span><br><span class="line">  m#a, io#b &lt;- <span class="type">MkMem</span>#a, io.read#</span><br><span class="line">  io# &lt;- io.write#(a+b)</span><br><span class="line">  io#</span><br></pre></td></tr></table></figure>
+
+<p>为了方便，这里将 Linear Type 弱化为 Affine Type 使 m 被释放。</p>
+<p>但通常意义上的 IO 以 Monad 的形式存在，虽然也内置了线性的 %World，但在外面 main 的签名只有一个 IO (). 在这方面我或许需要研究一下 Idris2 的源码，看看我上面写的 io# -&gt; io# 的签名和 IO () 的签名有什么联系。</p>
+<h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><p>假如要处理数组相加，把结果加到第一个数组里面，如何实现？</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">sum</span> : <span class="type">Vect</span> l m#<span class="type">A</span>, <span class="type">Vect</span> l m#<span class="type">A</span> -&gt; <span class="type">Vect</span> l m#<span class="type">A</span>, <span class="type">Vect</span> l m#<span class="type">A</span></span><br><span class="line"><span class="title">sum</span> lhs, rhs = unzip ((zip lhs rhs) &lt;$&gt; (\m#a, n#b =&gt; m#(a+b), n#b))</span><br></pre></td></tr></table></figure>
+
+<p>注意 Dependent Pair 里面新绑定的变量不会和其他 Dependent Pair 之间互相干扰，因为都封装在括号里面。</p>
+<p>这里 zip 不能用递归实现，这样可以避免做一些玄学尾递归优化，但通过 zip 之类的函数真的能描述所有的数据并行化处理可能性吗？</p>
+<p>还有一种思路是引入类似于 for 循环的东西：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">sum</span> : <span class="type">Vect</span> l m#<span class="type">A</span>, <span class="type">Vect</span> l m#<span class="type">A</span> -&gt; <span class="type">Vect</span> l m#<span class="type">A</span>, <span class="type">Vect</span> l m#<span class="type">A</span></span><br><span class="line"><span class="title">sum</span> lhs, rhs = unzip (for l &lt;$&gt; (\i =&gt;</span><br><span class="line">    <span class="keyword">let</span> m#a = lhs[i] <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">let</span> n#b = rhs[i] <span class="keyword">in</span></span><br><span class="line">    m#(a+b), n#b</span><br><span class="line">  ))</span><br></pre></td></tr></table></figure>
+
+<p>但看起来似乎更丑了一些，而且问题在于如何检查每个 memory token 都被用到了？玄学和类型检查可不兴叠加在一起啊！</p>
+<p>所以或许还是需要尾递归优化：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">sum</span> : <span class="type">Vect</span> l m#<span class="type">A</span>, <span class="type">Vect</span> l m#<span class="type">A</span> -&gt; <span class="type">Vect</span> l m#<span class="type">A</span>, <span class="type">Vect</span> l m#<span class="type">A</span></span><br><span class="line"><span class="title">sum</span> [], [] = [], []</span><br><span class="line"><span class="title">sum</span> m#a :: lhs, n#b :: rhs =</span><br><span class="line">  <span class="keyword">let</span> lans, rans = sum lhs, rhs <span class="keyword">in</span></span><br><span class="line">  m#(a+b) :: lans, n#b :: rans</span><br></pre></td></tr></table></figure>
+
+<p>这种形式下可以证明内存被正确地使用。</p>
+<p>还有一种思路是因为如果将 Vect 视为 Monad，其构造函数将不复存在，因此只需要对其 map 规则里明确 Quantity 就可以检查内存使用。不过这样也会导致一些命题无法被证明，因为 Monad 的表现没有被建模。</p>
+<p>考虑到真正的内存建模在于 “m” Tok，这是否意味着采用尾递归不仅对证明友好，而且由于内部使用了 “m” Tok 已经对内存和并行有建模，并不会对编译器优化造成困扰？</p>
+<h2 id="用-Dependent-Pair-的形式真的合理吗？"><a href="#用-Dependent-Pair-的形式真的合理吗？" class="headerlink" title="用 Dependent Pair 的形式真的合理吗？"></a>用 Dependent Pair 的形式真的合理吗？</h2><p>注意到 swap 的签名 swap : m#A, n#A -&gt; p#A, q#A 其实没有给出任何关于内存的信息。事实上应该去掉 Dependent Pair，采用这种形式：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">swap</span> : (<span class="number">0</span> m : <span class="type">Tok</span>) -&gt; (<span class="number">0</span> n : <span class="type">Tok</span>) -&gt; m#<span class="type">A</span>, n#<span class="type">A</span> -&gt; m#<span class="type">A</span>, n#<span class="type">A</span></span><br><span class="line"><span class="title">swap</span> m#a, n#b = m#b, n#a</span><br></pre></td></tr></table></figure>
+
+<p>其中 m#A 只是 Loc m A，而不是 (m : Tok ** Loc m A). 这样从类型签名里面就可以看出 swap 函数不会占用新的内存。</p>
+<p>Quantity 为 0 的 m 和 n 可以被省略掉。</p>
+<h2 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h2><p>其实 m#A 作为 Loc m A 的简写，可以看出 Loc m 应该至少是一个 Functor. 考虑到 IO 是 Monad，这些之间应该会有联系，同时 IO () 也恰巧可以用 io# -&gt; io# 的方式来表示。这是否意味着 IO () 内部的实现可以化简成 io# -&gt; io# 呢？还是有什么地方我没有考虑到？同时，我提倡将 Vect 看成 Monad，但 Monad 是否有机会和 Linear Type 产生效果上的同构呢？或许看看 Idris2 库里关于 IO 的实现我可以明白更多，并对理解更广泛情况的内存建模有所帮助。</p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%95%E4%B8%AA%E5%80%BC"><span class="toc-number">1.</span> <span class="toc-text">单个值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A0%E5%85%A5-IO"><span class="toc-number">2.</span> <span class="toc-text">加入 IO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E7%BB%84"><span class="toc-number">3.</span> <span class="toc-text">数组</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8-Dependent-Pair-%E7%9A%84%E5%BD%A2%E5%BC%8F%E7%9C%9F%E7%9A%84%E5%90%88%E7%90%86%E5%90%97%EF%BC%9F"><span class="toc-number">4.</span> <span class="toc-text">用 Dependent Pair 的形式真的合理吗？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9E%E9%A1%BE"><span class="toc-number">5.</span> <span class="toc-text">回顾</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/06/14/dt/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/06/14/dt/&text=尝试使用线性类型对内存建模"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/06/14/dt/&title=尝试使用线性类型对内存建模"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/06/14/dt/&is_video=false&description=尝试使用线性类型对内存建模"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=尝试使用线性类型对内存建模&body=Check out this article: https://blog.5eqn.top/2023/06/14/dt/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/06/14/dt/&title=尝试使用线性类型对内存建模"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/06/14/dt/&title=尝试使用线性类型对内存建模"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/06/14/dt/&title=尝试使用线性类型对内存建模"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/06/14/dt/&title=尝试使用线性类型对内存建模"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/06/14/dt/&name=尝试使用线性类型对内存建模&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/06/14/dt/&t=尝试使用线性类型对内存建模"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>
