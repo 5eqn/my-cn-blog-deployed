@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="官网 写在前面F* 目前只在 Emacs 有功能全面的编辑器插件， 但可惜本人太菜，只会用 Vim，因此只能在线写码。 State Monad可以理解为封装后的计算，接受初始状态，返回计算结果和后状态。 1let st a &#x3D; int -&gt; a &amp; int  read 是一个计算，不改变状态，返回的结果是状态本身。 123let read  : st int  &#x3D; fun s -&amp;g">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FStar 官方习题 A First Model of Computational Effects">
+<meta property="og:url" content="https://blog.5eqn.top/2023/01/23/fstar6/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="官网 写在前面F* 目前只在 Emacs 有功能全面的编辑器插件， 但可惜本人太菜，只会用 Vim，因此只能在线写码。 State Monad可以理解为封装后的计算，接受初始状态，返回计算结果和后状态。 1let st a &#x3D; int -&gt; a &amp; int  read 是一个计算，不改变状态，返回的结果是状态本身。 123let read  : st int  &#x3D; fun s -&amp;g">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-01-23T14:02:36.000Z">
+<meta property="article:modified_time" content="2025-01-08T11:25:33.210Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="PL">
+<meta property="article:tag" content="编程">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>FStar 官方习题 A First Model of Computational Effects</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/06/12/gpa/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/01/22/fstar5/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/01/23/fstar6/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/01/23/fstar6/&text=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/01/23/fstar6/&title=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/01/23/fstar6/&is_video=false&description=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=FStar 官方习题 A First Model of Computational Effects&body=Check out this article: https://blog.5eqn.top/2023/01/23/fstar6/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/01/23/fstar6/&title=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/01/23/fstar6/&title=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/01/23/fstar6/&title=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/01/23/fstar6/&title=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/01/23/fstar6/&name=FStar 官方习题 A First Model of Computational Effects&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/01/23/fstar6/&t=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#State-Monad"><span class="toc-number">2.</span> <span class="toc-text">State Monad</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%A0%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">习题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%88%E4%B8%80%E4%B8%AA%E4%B9%A0%E9%A2%98"><span class="toc-number">4.</span> <span class="toc-text">又一个习题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Computation-Trees"><span class="toc-number">5.</span> <span class="toc-text">Computation Trees</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%88%E6%9D%A5%E4%B9%A0%E9%A2%98"><span class="toc-number">6.</span> <span class="toc-text">又来习题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E7%A1%AE%E5%AE%9A%E6%80%A7%E4%BA%8B%E4%BB%B6"><span class="toc-number">7.</span> <span class="toc-text">不确定性事件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91"><span class="toc-number">8.</span> <span class="toc-text">并发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%90%8E%E7%9A%84%E4%B9%A0%E9%A2%98"><span class="toc-number">9.</span> <span class="toc-text">最后的习题</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        FStar 官方习题 A First Model of Computational Effects
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-01-23T14:02:36.000Z" class="dt-published" itemprop="datePublished">2023-01-23</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PL/" rel="tag">PL</a>, <a class="p-category" href="/tags/%E7%BC%96%E7%A8%8B/" rel="tag">编程</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p><a target="_blank" rel="noopener" href="http://fstar-lang.org/tutorial/book/part2/part2_par.html#a-first-model-of-computational-effects">官网</a></p>
+<h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><p><code>F*</code> 目前只在 <code>Emacs</code> 有功能全面的编辑器插件，</p>
+<p>但可惜本人太菜，只会用 <code>Vim</code>，因此只能在线写码。</p>
+<h2 id="State-Monad"><a href="#State-Monad" class="headerlink" title="State Monad"></a>State Monad</h2><p>可以理解为封装后的计算，接受初始状态，返回计算结果和后状态。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">let st a = int -&gt; a &amp; int</span><br></pre></td></tr></table></figure>
+
+<p><code>read</code> 是一个计算，不改变状态，返回的结果是状态本身。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let read</span><br><span class="line">  : st int</span><br><span class="line">  = fun s -&gt; s, s</span><br></pre></td></tr></table></figure>
+
+<p><code>write</code> 是一个计算，忽略原先的状态，接受一个参数 <code>s0</code> 并直接把状态修改成 <code>s0</code>，无计算结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let write (s1:int)</span><br><span class="line">  : st unit</span><br><span class="line">  = fun _ -&gt; (), s1</span><br></pre></td></tr></table></figure>
+
+<p><code>bind</code> 接受两个计算 <code>f</code> 和 <code>g</code>，但是 <code>g</code> 额外接受 <code>f</code> 的计算结果，</p>
+<p>最终体现的效果是输入初始状态，直接获得先执行 <code>f</code> 后执行 <code>g</code> 的最终状态，</p>
+<p>以及 <code>g</code> 的计算结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">let bind #a #b</span><br><span class="line">         (f: st a)</span><br><span class="line">         (g: a -&gt; st b)</span><br><span class="line">  : st b</span><br><span class="line">  = fun s0 -&gt;</span><br><span class="line">      let x, s1 = f s0 in</span><br><span class="line">      g x s1</span><br></pre></td></tr></table></figure>
+
+<p><code>return</code> 不改变状态，接受一个参数 <code>x</code>，计算结果直接是 <code>x</code>.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let return #a (x:a)</span><br><span class="line">  : st a</span><br><span class="line">  = fun s -&gt; x, s</span><br></pre></td></tr></table></figure>
+
+<p>使用这种风格构造出自增计算：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">let read_and_increment_v1 : st int =</span><br><span class="line">  bind read (fun x -&gt;</span><br><span class="line">  bind (write (x + 1)) (fun _ -&gt;</span><br><span class="line">  return x))</span><br></pre></td></tr></table></figure>
+
+<p>把 <code>bind</code> 转变成神秘的语法糖：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">let read_and_increment : st int =</span><br><span class="line">  x &lt;-- read;</span><br><span class="line">  write (x + 1);;</span><br><span class="line">  return x</span><br></pre></td></tr></table></figure>
+
+<h2 id="习题"><a href="#习题" class="headerlink" title="习题"></a>习题</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">// 先前 st 的状态一直是 int</span><br><span class="line">// 现在需要给出对任意类型状态的 st 的描述</span><br><span class="line">module Part2.ST</span><br><span class="line">// Make st parametric in the state, i.e.,</span><br><span class="line">//   st s a = s -&gt; a &amp; s</span><br><span class="line">// And redefined all the functions below to use it</span><br><span class="line"></span><br><span class="line">// 这里我不小心把类型参数搞反了……</span><br><span class="line">let st a s = s -&gt; a &amp; s</span><br><span class="line"></span><br><span class="line">// 剩下的就是把参数补全就好了</span><br><span class="line">let read u</span><br><span class="line">  : st u u</span><br><span class="line">  = fun s -&gt; s, s</span><br><span class="line"></span><br><span class="line">let write #u (s1:u)</span><br><span class="line">  : st unit u</span><br><span class="line">  = fun _ -&gt; (), s1</span><br><span class="line"></span><br><span class="line">let bind #a #b #u</span><br><span class="line">         (f: st a u)</span><br><span class="line">         (g: a -&gt; st b u)</span><br><span class="line">  : st b u</span><br><span class="line">  = fun s0 -&gt;</span><br><span class="line">      let x, s1 = f s0 in</span><br><span class="line">      g x s1</span><br><span class="line"></span><br><span class="line">let return #a #u (x:a)</span><br><span class="line">  : st a u</span><br><span class="line">  = fun s -&gt; x, s</span><br><span class="line"></span><br><span class="line">// 这些证明 SMT Prover 可以自己完成</span><br><span class="line">let feq #a #b (f g : a -&gt; b) = forall x. f x == g x</span><br><span class="line">let left_identity #a #b #u (x:a) (g: a -&gt; st b u)</span><br><span class="line">  : Lemma ((v &lt;-- return x; g v) `feq` g x)</span><br><span class="line">  = ()</span><br><span class="line">let right_identity #a #u (f:st a u)</span><br><span class="line">  : Lemma ((x &lt;-- f; return x) `feq` f)</span><br><span class="line">  = ()</span><br><span class="line">let associativity #a #b #c #u (f1:st a u) (f2:a -&gt; st b u) (f3:b -&gt; st c u)</span><br><span class="line">  : Lemma ((x &lt;-- f1; y &lt;-- f2 x; f3 y) `feq`</span><br><span class="line">           (y &lt;-- (x &lt;-- f1; f2 x); f3 y))</span><br><span class="line">  = ()</span><br><span class="line"></span><br><span class="line">let redundant_read_elim ()</span><br><span class="line">  : Lemma ((read int;; read int) `feq` read int)</span><br><span class="line">  = ()</span><br><span class="line"></span><br><span class="line">let redundant_write_elim (x y:int)</span><br><span class="line">  : Lemma ((write x ;; write y) `feq` write y)</span><br><span class="line">  = ()</span><br><span class="line"></span><br><span class="line">let read_write_noop ()</span><br><span class="line">  : Lemma ((x &lt;-- read int;  write x) `feq` return ())</span><br><span class="line">  = ()</span><br></pre></td></tr></table></figure>
+
+<h2 id="又一个习题"><a href="#又一个习题" class="headerlink" title="又一个习题"></a>又一个习题</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">// Option 因为存储了一个二元状态，Some 或 None</span><br><span class="line">// 因此也可以用于构造 Monad</span><br><span class="line">// 现在需要构造 Monad，并且证明其存在 Monad 的性质</span><br><span class="line">module Part2.Option</span><br><span class="line"></span><br><span class="line">// 只需要一些模式匹配即可</span><br><span class="line">let bind #a #b</span><br><span class="line">         (f: option a)</span><br><span class="line">         (g: a -&gt; option b)</span><br><span class="line">  : option b</span><br><span class="line">  = match f with</span><br><span class="line">    | Some a1 -&gt; g a1</span><br><span class="line">    | None -&gt; None</span><br><span class="line"></span><br><span class="line">let return #a (x:a)</span><br><span class="line">  : option a</span><br><span class="line">  = Some x</span><br><span class="line"></span><br><span class="line">let eq #a (f g : option a) = f == g</span><br><span class="line"></span><br><span class="line">// SMT Prover 可以直接证明出来这些</span><br><span class="line">let left_identity #a #b (x:a) (g: a -&gt; option b)</span><br><span class="line">  : Lemma ((v &lt;-- return x; g v) `eq` g x)</span><br><span class="line">  = ()</span><br><span class="line">let right_identity #a (f:option a)</span><br><span class="line">  : Lemma ((x &lt;-- f; return x) `eq` f)</span><br><span class="line">  = ()</span><br><span class="line">let associativity #a #b #c (f1:option a) (f2:a -&gt; option b) (f3:b -&gt; option c)</span><br><span class="line">  : Lemma ((x &lt;-- f1; y &lt;-- f2 x; f3 y) `eq`</span><br><span class="line">           (y &lt;-- (x &lt;-- f1; f2 x); f3 y))</span><br><span class="line">  = ()</span><br></pre></td></tr></table></figure>
+
+<h2 id="Computation-Trees"><a href="#Computation-Trees" class="headerlink" title="Computation Trees"></a>Computation Trees</h2><p>首先定义一个 Action Class，其实例描述 Action 的类别：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">noeq</span><br><span class="line">type action_class = &#123;</span><br><span class="line">  t : Type;</span><br><span class="line">  input_of : t -&gt; Type;</span><br><span class="line">  output_of : t -&gt; Type;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于读写操作，Action Class 长这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">type rw =</span><br><span class="line">  | Read</span><br><span class="line">  | Write</span><br><span class="line"></span><br><span class="line">let input_of : rw -&gt; Type =</span><br><span class="line">  fun a -&gt;</span><br><span class="line">    match a with</span><br><span class="line">    | Read -&gt; unit</span><br><span class="line">    | Write -&gt; int</span><br><span class="line"></span><br><span class="line">let output_of : rw -&gt; Type =</span><br><span class="line">  fun a -&gt;</span><br><span class="line">    match a with</span><br><span class="line">    | Read -&gt; int</span><br><span class="line">    | Write -&gt; unit</span><br><span class="line"></span><br><span class="line">let rw_action_class = &#123; t = rw; input_of ; output_of &#125;</span><br></pre></td></tr></table></figure>
+
+<p>Computation Tree 有两种模式：</p>
+<ul>
+<li><code>Return</code> 型，只包含一个结果信息</li>
+<li><code>DoThen</code> 型，<code>act</code> 和 <code>input</code> 一起描述输入，<code>continue</code> 是对每种可能输出的处理方式</li>
+</ul>
+<p>这种定义了保证对 <code>tree</code> 向下遍历，最终一定会遍历到 <code>Return</code> 树。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">noeq</span><br><span class="line">type tree (acts:action_class) (a:Type) =</span><br><span class="line">  | Return : x:a -&gt; tree acts a</span><br><span class="line">  | DoThen : act:acts.t -&gt;</span><br><span class="line">             input:acts.input_of act -&gt;</span><br><span class="line">             continue: (acts.output_of act -&gt; tree acts a) -&gt;</span><br><span class="line">             tree acts a</span><br></pre></td></tr></table></figure>
+
+<p>再定义 Monad 的关键函数，</p>
+<p>其中 <code>bind</code> 的 <code>DoThen</code> 分支中，</p>
+<p><code>k</code> 是 <code>f</code> 的子节点，因此更接近 <code>Return</code>，</p>
+<p>在下一步递归中 <code>k x</code> 抢占 <code>g</code> 的先机，并最终将返回结果传递给 <code>g</code>。</p>
+<p>考虑到 <code>bind</code> 的经典使用场景，<code>g</code> 内部是 <code>f</code> 计算结果造成的变量的生命周期，</p>
+<p>因此在 <code>f</code> 没有计算结果时 <code>g</code> 不被调用也不是一件奇怪的事情。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">let return #a #acts (x:a)</span><br><span class="line">  : tree acts a</span><br><span class="line">  = Return x</span><br><span class="line"></span><br><span class="line">let rec bind #acts #a #b (f: tree acts a) (g: a -&gt; tree acts b)</span><br><span class="line">  : tree acts b</span><br><span class="line">  = match f with</span><br><span class="line">    | Return x -&gt; g x</span><br><span class="line">    | DoThen act i k -&gt;</span><br><span class="line">      DoThen act i (fun x -&gt; bind (k x) g)</span><br></pre></td></tr></table></figure>
+
+<p>设计并无脑归纳证明树之间的相等关系：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">let rec equiv_refl #acts #a (x:tree acts a)</span><br><span class="line">  : Lemma (equiv x x)</span><br><span class="line">  = match x with</span><br><span class="line">    | Return v -&gt; ()</span><br><span class="line">    | DoThen act i k -&gt;</span><br><span class="line">      introduce forall o. equiv (k o) (k o)</span><br><span class="line">      with (equiv_refl (k o))</span><br><span class="line"></span><br><span class="line">let rec equiv_sym #acts #a (x y:tree acts a)</span><br><span class="line">  : Lemma</span><br><span class="line">    (requires equiv x y)</span><br><span class="line">    (ensures equiv y x)</span><br><span class="line">  = match x, y with</span><br><span class="line">    | Return _, Return _ -&gt; ()</span><br><span class="line">    | DoThen act i kx, DoThen _ _ ky -&gt;</span><br><span class="line">      introduce forall o. equiv (ky o) (kx o)</span><br><span class="line">      with equiv_sym (kx o) (ky o)</span><br><span class="line"></span><br><span class="line">let rec equiv_trans #acts #a (x y z: tree acts a)</span><br><span class="line">  : Lemma</span><br><span class="line">    (requires equiv x y /\ equiv y z)</span><br><span class="line">    (ensures equiv x z)</span><br><span class="line">  = match x, y, z with</span><br><span class="line">    | Return _, _, _ -&gt; ()</span><br><span class="line">    | DoThen act i kx, DoThen _ _ ky, DoThen _ _ kz -&gt;</span><br><span class="line">      introduce forall o. equiv (kx o) (kz o)</span><br><span class="line">      with equiv_trans (kx o) (ky o) (kz o)</span><br></pre></td></tr></table></figure>
+
+<p>证明其遵守 Monad 的规则：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">let right_identity #acts #a #b (x:a) (g:a -&gt; tree acts b)</span><br><span class="line">  : Lemma (bind (return x) g `equiv` g x)</span><br><span class="line">  = equiv_refl (g x)</span><br><span class="line"></span><br><span class="line">let rec left_identity #acts #a (f:tree acts a)</span><br><span class="line">  : Lemma (bind f return `equiv` f)</span><br><span class="line">  = match f with</span><br><span class="line">    | Return _ -&gt; ()</span><br><span class="line">    | DoThen act i k -&gt;</span><br><span class="line">      introduce forall o. bind (k o) return `equiv` (k o)</span><br><span class="line">      with left_identity (k o)</span><br><span class="line"></span><br><span class="line">let rec assoc #acts #a #b #c</span><br><span class="line">              (f1: tree acts a)</span><br><span class="line">              (f2: a -&gt; tree acts b)</span><br><span class="line">              (f3: b -&gt; tree acts c)</span><br><span class="line">  : Lemma (bind f1 (fun x -&gt; bind (f2 x) f3) `equiv`</span><br><span class="line">           bind (bind f1 f2) f3)</span><br><span class="line">  = match f1 with</span><br><span class="line">    | Return v -&gt;</span><br><span class="line">      right_identity v f2;</span><br><span class="line">      right_identity v (fun x -&gt; bind (f2 x) f3)</span><br><span class="line">    | DoThen act i k -&gt;</span><br><span class="line">      introduce forall o. bind (k o) (fun x -&gt; bind (f2 x) f3) `equiv`</span><br><span class="line">                     bind (bind (k o) f2) f3</span><br><span class="line">      with assoc (k o) f2 f3</span><br></pre></td></tr></table></figure>
+
+<p>这样便可以使用 Computation Trees 定义运算：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">let read : tree rw_action_class int = DoThen Read () Return</span><br><span class="line">let write (x:int) : tree rw_action_class unit = DoThen Write x Return</span><br><span class="line">let read_and_increment</span><br><span class="line">  : tree rw_action_class int</span><br><span class="line">  = x &lt;-- read ;</span><br><span class="line">    write (x + 1);;</span><br><span class="line">    return x</span><br></pre></td></tr></table></figure>
+
+<p>这样的 Computation Trees 可以被解释运行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">let st a = int -&gt; a &amp; int</span><br><span class="line">let rec interp #a (f: tree rw_action_class a)</span><br><span class="line">  : st a</span><br><span class="line">  = fun s0 -&gt;</span><br><span class="line">     match f with</span><br><span class="line">     | Return x -&gt; x, s0</span><br><span class="line">     | DoThen Read i k -&gt;</span><br><span class="line">       interp (k s0) s0</span><br><span class="line">     | DoThen Write s1 k -&gt;</span><br><span class="line">       interp (k ()) s1</span><br></pre></td></tr></table></figure>
+
+<h2 id="又来习题"><a href="#又来习题" class="headerlink" title="又来习题"></a>又来习题</h2><p>证明若两个 Computation Tree 相等，<code>interp</code> 它们会得到相等的函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">let feq #a #b (f g: a -&gt; b) = forall x. f x == g x</span><br><span class="line">let rec interp_equiv #a (f g:tree rw_action_class a)</span><br><span class="line">  : Lemma</span><br><span class="line">    (requires equiv f g)</span><br><span class="line">    (ensures feq (interp f) (interp g))</span><br><span class="line">  // 用树的思路递归</span><br><span class="line">  = match f, g with</span><br><span class="line">    | Return x, Return y -&gt; ()</span><br><span class="line">    | DoThen act i kf, DoThen _ _ kg -&gt;</span><br><span class="line">      // 尝试证明子树中的结论</span><br><span class="line">      introduce forall o. feq (interp (kf o)) (interp (kg o))</span><br><span class="line">      with interp_equiv (kf o) (kg o)</span><br></pre></td></tr></table></figure>
+
+<p>证明若两个 Computation Tree 满足 <code>equiv</code> 关系，那么它们满足 <code>==</code> 关系。</p>
+<p>注意 <code>==</code> 关系是 Provably Equal.</p>
+<p>定义函数相等如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">let funext =</span><br><span class="line">  #a:Type -&gt;</span><br><span class="line">  #b:(a -&gt; Type) -&gt;</span><br><span class="line">  f:(x:a -&gt; b x) -&gt;</span><br><span class="line">  g:(x:a -&gt; b x) -&gt;</span><br><span class="line">  Lemma (requires (forall (x:a). f x == g x))</span><br><span class="line">        (ensures f == g)</span><br></pre></td></tr></table></figure>
+
+<p>在前面的章节使用了奇技淫巧证明 $\eta$-expanded 函数的 <code>funext</code> 可以推出 <code>==</code>，</p>
+<p>虽然这里面有一堆暂未讲到的符号：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">let eta (#a:Type) (#b: a -&gt; Type) (f: (x:a -&gt; b x)) = fun x -&gt; f x</span><br><span class="line">let funext_on_eta (#a : Type) (#b: a -&gt; Type) (f g : (x:a -&gt; b x))</span><br><span class="line">                  (hyp : (x:a -&gt; Lemma (f x == g x)))</span><br><span class="line">  : squash (eta f == eta g)</span><br><span class="line">  = _ by (norm [delta_only [`%eta]];</span><br><span class="line">          pointwise (fun _ -&gt;</span><br><span class="line">             try_with</span><br><span class="line">                     (fun _ -&gt; mapply (quote hyp))</span><br><span class="line">                     (fun _ -&gt; trefl()));</span><br><span class="line">           trefl())</span><br></pre></td></tr></table></figure>
+
+<p>$\eta$-expanded 函数可以认为是将方法变为函数，可以参考 <a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/39445018/what-is-the-eta-expansion-in-scala">Stack Overflow</a>.</p>
+<p>具体做法就是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">let eta (#a:Type) (#b: a -&gt; Type) (f: (x:a -&gt; b x)) = fun x -&gt; f x</span><br></pre></td></tr></table></figure>
+
+<p>我的理解是未经 $\eta$-expanded 的函数可能签名不纯，</p>
+<p>比如可能带一些 Refinement 或者对象签名，</p>
+<p>但是 $\eta$-expand 之后就只剩下函数和返回值。</p>
+<p>比如，带有 Refinement 的函数可以满足 <code>funext</code>，但是不满足 <code>==</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">let f (x:nat) : int = 0</span><br><span class="line">let g (x:nat) : int = if x = 0 then 1 else 0</span><br><span class="line">let pos = x:nat&#123;x &gt; 0&#125;</span><br><span class="line">let full_funext_false (ax:funext)</span><br><span class="line">  : False</span><br><span class="line">  = ax #pos f g;</span><br><span class="line">    assert (f == g);</span><br><span class="line">    assert (f 0 == g 0);</span><br><span class="line">    false_elim()</span><br></pre></td></tr></table></figure>
+
+<p>回到计算树，要对树的 <code>==</code> 性质进行探索，首先要引入一些 <a target="_blank" rel="noopener" href="https://github.com/FStarLang/FStar/blob/master/ulib/FStar.FunctionalExtensionality.fst">奇怪的库</a>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">module F = FStar.FunctionalExtensionality</span><br><span class="line">open FStar.FunctionalExtensionality</span><br></pre></td></tr></table></figure>
+
+<p>然后要限定函数是 $\eta$-expaneded 的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">noeq</span><br><span class="line">type tree (acts:action_class) (a:Type) =</span><br><span class="line">  | Return : x:a -&gt; tree acts a</span><br><span class="line">  | DoThen : act:acts.t -&gt;</span><br><span class="line">             input:acts.input_of act -&gt;</span><br><span class="line">             //We have to restrict continuations to be eta expanded</span><br><span class="line">             //that what `^-&gt;` does. Its defined in FStar.FunctionalExtensionality</span><br><span class="line">             continue:(acts.output_of act ^-&gt; tree acts a) -&gt;</span><br><span class="line">             tree acts a</span><br></pre></td></tr></table></figure>
+
+<p>构造函数步骤也要修改：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">let rec bind #acts #a #b (f: tree acts a) (g: a -&gt; tree acts b)</span><br><span class="line">  : tree acts b</span><br><span class="line">  = match f with</span><br><span class="line">    | Return x -&gt; g x</span><br><span class="line">    | DoThen act i k -&gt;</span><br><span class="line">      //Now, we have to ensure that continuations are instances of</span><br><span class="line">      //F.( ^-&gt; )</span><br><span class="line">      DoThen act i (F.on _ (fun x -&gt; bind (k x) g))</span><br></pre></td></tr></table></figure>
+
+<p>最后调库即可：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">let rec equiv_is_equal #acts #a (x y: tree acts a)</span><br><span class="line">  : Lemma</span><br><span class="line">    (requires equiv x y)</span><br><span class="line">    (ensures x == y)</span><br><span class="line">  = match x, y with</span><br><span class="line">    | Return _, Return _ -&gt; ()</span><br><span class="line">    | DoThen act i kx, DoThen _ _ ky -&gt;</span><br><span class="line">      introduce forall o. kx o == ky o</span><br><span class="line">      with equiv_is_equal (kx o) (ky o);</span><br><span class="line">      F.extensionality _ _ kx ky</span><br></pre></td></tr></table></figure>
+
+<h2 id="不确定性事件"><a href="#不确定性事件" class="headerlink" title="不确定性事件"></a>不确定性事件</h2><p><code>Or</code> 接受两个 <code>tree acts a</code>，返回一个 <code>tree acts a</code>，</p>
+<p>是对在前两个 <code>tree</code> 里面随机选择一个执行（取决于解释器）的封装。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">noeq</span><br><span class="line">type tree (acts:action_class) (a:Type) =</span><br><span class="line">  | Return : x:a -&gt; tree acts a</span><br><span class="line">  | DoThen : act:acts.t -&gt;</span><br><span class="line">             input:acts.input_of act -&gt;</span><br><span class="line">             continue: (acts.output_of act -&gt; tree acts a) -&gt;</span><br><span class="line">             tree acts a</span><br><span class="line">  | Or :  tree acts a -&gt; tree acts a -&gt; tree acts a</span><br></pre></td></tr></table></figure>
+
+<p>注意 <code>bind</code> 函数在处理 <code>Or</code> 时，应该给每个分支都接上后面的步骤：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">let rec bind #acts #a #b (f: tree acts a) (g: a -&gt; tree acts b)</span><br><span class="line">  : tree acts b</span><br><span class="line">  = match f with</span><br><span class="line">    | Return x -&gt; g x</span><br><span class="line">    | DoThen act i k -&gt;</span><br><span class="line">      DoThen act i (fun x -&gt; bind (k x) g)</span><br><span class="line">    | Or m0 m1 -&gt; Or (bind m0 g) (bind m1 g)</span><br></pre></td></tr></table></figure>
+
+<p>解释器中增加 <code>Or</code> 分支，采用随机执行策略：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">let randomness = nat -&gt; bool</span><br><span class="line">let par_st a = randomness -&gt; pos:nat -&gt; s0:int -&gt; (a &amp; int &amp; nat)</span><br><span class="line">let rec interp #a (f:tree rw_actions a)</span><br><span class="line">  : par_st a</span><br><span class="line">  = fun rand pos s0 -&gt;</span><br><span class="line">      match f with</span><br><span class="line">      | Return x -&gt; x, s0, pos</span><br><span class="line">      | DoThen Read _ k -&gt; interp (k s0) rand pos s0</span><br><span class="line">      | DoThen Write s1 k -&gt; interp (k ()) rand pos s1</span><br><span class="line">      | Or l r -&gt;</span><br><span class="line">        if rand pos</span><br><span class="line">        then interp l rand (pos + 1) s0</span><br><span class="line">        else interp r rand (pos + 1) s0</span><br><span class="line">let st a = int -&gt; a &amp; int</span><br><span class="line">let interpret #a (f:tree rw_actions a)</span><br><span class="line">  : st a</span><br><span class="line">  = fun s0 -&gt;</span><br><span class="line">      let x, s, _ = interp f (fun n -&gt; n % 2 = 0) 0 s0 in</span><br><span class="line">      x, s</span><br></pre></td></tr></table></figure>
+
+<h2 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h2><p>参考 <code>bind</code>，对两个事件构建并发事件，运行逻辑是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">// 此并发逻辑优先执行 f</span><br><span class="line">let rec l_par #acts #a #b (f:tree acts a) (g:tree acts b)</span><br><span class="line">  : tree acts (a &amp; b)</span><br><span class="line">  = match f with</span><br><span class="line">    // f 任务结束后，专心执行 g</span><br><span class="line">    | Return v -&gt; x &lt;-- g; return (v, x)</span><br><span class="line">    // 如果 f 后面还有任务，执行任务后采用优先执行 g 的并发逻辑</span><br><span class="line">    | DoThen a i k -&gt;</span><br><span class="line">      DoThen a i (fun x -&gt; r_par (k x) g)</span><br><span class="line">    // 如果 f 是不确定性任务，则在每个分支后面加上 g</span><br><span class="line">    | Or m0 m1 -&gt; Or (l_par m0 g) (l_par m1 g)</span><br><span class="line"></span><br><span class="line">// 此并发逻辑优先执行 g</span><br><span class="line">and r_par #acts #a #b (f:tree acts a) (g: tree acts b)</span><br><span class="line">  : tree acts (a &amp; b)</span><br><span class="line">  = match g with</span><br><span class="line">    | Return v -&gt; x &lt;-- f; return (x, v)</span><br><span class="line">    | DoThen a i k -&gt;</span><br><span class="line">      DoThen a i (fun x -&gt; l_par f (k x))</span><br><span class="line">    | Or m0 m1 -&gt; Or (r_par f m0) (r_par f m1)</span><br><span class="line"></span><br><span class="line">let par #acts #a #b (f: tree acts a) (g: tree acts b)</span><br><span class="line">  : tree acts (a &amp; b)</span><br><span class="line">  // 随机选择先执行 f 还是 g</span><br><span class="line">  = Or (l_par f g) (r_par f g)</span><br></pre></td></tr></table></figure>
+
+<p>直接使用 <code>par</code> 构造并发任务：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">let read : tree rw_actions int = DoThen Read () Return</span><br><span class="line">let write (x:int) : tree rw_actions unit = DoThen Write x Return</span><br><span class="line">let inc</span><br><span class="line">  : tree rw_actions unit</span><br><span class="line">  = x &lt;-- read ;</span><br><span class="line">    write (x + 1)</span><br><span class="line">let par_inc = par inc inc</span><br></pre></td></tr></table></figure>
+
+<p>由于 <code>par</code> 可以视为构造 <strong>一个</strong> 顺序执行事件，</p>
+<p>程序会连续读两次，然后连续写两次，</p>
+<p>最后只会自增一次而不是两次。</p>
+<p>可以采用这种方式检验：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">let test_prog = assert_norm (forall x. snd (interpret par_inc x) == x + 1)</span><br></pre></td></tr></table></figure>
+
+<h2 id="最后的习题"><a href="#最后的习题" class="headerlink" title="最后的习题"></a>最后的习题</h2><p>写一个支持原子化自增的计算树解释系统。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line">module Part2.AtomicIncrement</span><br><span class="line">open FStar.Classical.Sugar</span><br><span class="line"></span><br><span class="line">noeq</span><br><span class="line">type action_class = &#123;</span><br><span class="line">  t : Type;</span><br><span class="line">  input_of : t -&gt; Type;</span><br><span class="line">  output_of : t -&gt; Type;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">noeq</span><br><span class="line">type tree (acts:action_class) (a:Type) =</span><br><span class="line">  | Return : x:a -&gt; tree acts a</span><br><span class="line">  | DoThen : act:acts.t -&gt;</span><br><span class="line">             input:acts.input_of act -&gt;</span><br><span class="line">             continue: (acts.output_of act -&gt; tree acts a) -&gt;</span><br><span class="line">             tree acts a</span><br><span class="line">  | Or :  tree acts a -&gt; tree acts a -&gt; tree acts a</span><br><span class="line"></span><br><span class="line">let return #acts #a (x:a)</span><br><span class="line">  : tree acts a</span><br><span class="line">  = Return x</span><br><span class="line"></span><br><span class="line">let rec bind #acts #a #b (f: tree acts a) (g: a -&gt; tree acts b)</span><br><span class="line">  : tree acts b</span><br><span class="line">  = match f with</span><br><span class="line">    | Return x -&gt; g x</span><br><span class="line">    | DoThen act i k -&gt;</span><br><span class="line">      DoThen act i (fun x -&gt; bind (k x) g)</span><br><span class="line">    | Or m0 m1 -&gt; Or (bind m0 g) (bind m1 g)</span><br><span class="line"></span><br><span class="line">let rec l_par #acts #a #b (f:tree acts a) (g:tree acts b)</span><br><span class="line">  : tree acts (a &amp; b)</span><br><span class="line">  = match f with</span><br><span class="line">    | Return v -&gt; x &lt;-- g; return (v, x)</span><br><span class="line">    | DoThen a i k -&gt;</span><br><span class="line">      DoThen a i (fun x -&gt; r_par (k x) g)</span><br><span class="line">    | Or m0 m1 -&gt; Or (l_par m0 g) (l_par m1 g)</span><br><span class="line"></span><br><span class="line">and r_par #acts #a #b (f:tree acts a) (g: tree acts b)</span><br><span class="line">  : tree acts (a &amp; b)</span><br><span class="line">  = match g with</span><br><span class="line">    | Return v -&gt; x &lt;-- f; return (x, v)</span><br><span class="line">    | DoThen a i k -&gt;</span><br><span class="line">      DoThen a i (fun x -&gt; l_par f (k x))</span><br><span class="line">    | Or m0 m1 -&gt; Or (r_par f m0) (r_par f m1)</span><br><span class="line"></span><br><span class="line">let par #acts #a #b (f: tree acts a) (g: tree acts b)</span><br><span class="line">  : tree acts (a &amp; b)</span><br><span class="line">  = Or (l_par f g) (r_par f g)</span><br><span class="line"></span><br><span class="line">type rwi =</span><br><span class="line">  | R</span><br><span class="line">  | W</span><br><span class="line">  | Inc</span><br><span class="line"></span><br><span class="line">// R 只输出，W 只输入，Inc 不输入不输出</span><br><span class="line">let input_of_rwi : rwi -&gt; Type</span><br><span class="line">  = fun a -&gt;</span><br><span class="line">      match a with</span><br><span class="line">      | R -&gt; unit</span><br><span class="line">      | W -&gt; int</span><br><span class="line">      | Inc -&gt; unit</span><br><span class="line">let output_of_rwi : rwi -&gt; Type</span><br><span class="line">  = fun a -&gt;</span><br><span class="line">      match a with</span><br><span class="line">      | R -&gt; int</span><br><span class="line">      | W -&gt; unit</span><br><span class="line">      | Inc -&gt; unit</span><br><span class="line"></span><br><span class="line">let rwi_actions = &#123; t = rwi; input_of=input_of_rwi ; output_of=output_of_rwi &#125;</span><br><span class="line"></span><br><span class="line">// 编译器一直说 x &lt;-- y 的语法 deprecated</span><br><span class="line">// 因此使用推荐的 let in 语法</span><br><span class="line">// 理论上 R W 走一遍也没影响</span><br><span class="line">// 但答案只用了 Inc，更符合直觉一些</span><br><span class="line">let atomic_inc : tree rwi_actions unit = DoThen Inc () Return</span><br><span class="line">let randomness = nat -&gt; bool</span><br><span class="line">let par_st a = randomness -&gt; pos:nat -&gt; s0:int -&gt; (a &amp; int &amp; nat)</span><br><span class="line"></span><br><span class="line">let rec interp_rwi #a (f:tree rwi_actions a)</span><br><span class="line">  : par_st a</span><br><span class="line">  = fun rand pos s0 -&gt;</span><br><span class="line">      match f with</span><br><span class="line">      | Return x -&gt; x, s0, pos</span><br><span class="line">      // 对三种操作分类讨论</span><br><span class="line">      | DoThen R _ k -&gt; interp_rwi (k s0) rand pos s0</span><br><span class="line">      | DoThen W s1 k -&gt; interp_rwi (k ()) rand pos s1</span><br><span class="line">      // 自增的时候不需要输入参数，也不需要返回值</span><br><span class="line">      | DoThen Inc _ k -&gt; interp_rwi (k ()) rand pos (s0 + 1)</span><br><span class="line">      | Or l r -&gt;</span><br><span class="line">        if rand pos</span><br><span class="line">        then interp_rwi l rand (pos + 1) s0</span><br><span class="line">        else interp_rwi r rand (pos + 1) s0</span><br><span class="line">let st a = int -&gt; a &amp; int</span><br><span class="line">let interpret_rwi #a (f:tree rwi_actions a)</span><br><span class="line">  : st a</span><br><span class="line">  = fun s0 -&gt;</span><br><span class="line">      let x, s, _ = interp_rwi f (fun n -&gt; n % 2 = 0) 0 s0 in</span><br><span class="line">      x, s</span><br><span class="line">let par_atomic_inc = par atomic_inc atomic_inc</span><br><span class="line"></span><br><span class="line">let test_par_atomic_inc =</span><br><span class="line">  assert_norm (forall x. snd (interpret_rwi par_atomic_inc x) == x + 2)</span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#State-Monad"><span class="toc-number">2.</span> <span class="toc-text">State Monad</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%A0%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">习题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%88%E4%B8%80%E4%B8%AA%E4%B9%A0%E9%A2%98"><span class="toc-number">4.</span> <span class="toc-text">又一个习题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Computation-Trees"><span class="toc-number">5.</span> <span class="toc-text">Computation Trees</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%88%E6%9D%A5%E4%B9%A0%E9%A2%98"><span class="toc-number">6.</span> <span class="toc-text">又来习题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E7%A1%AE%E5%AE%9A%E6%80%A7%E4%BA%8B%E4%BB%B6"><span class="toc-number">7.</span> <span class="toc-text">不确定性事件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91"><span class="toc-number">8.</span> <span class="toc-text">并发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%90%8E%E7%9A%84%E4%B9%A0%E9%A2%98"><span class="toc-number">9.</span> <span class="toc-text">最后的习题</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/01/23/fstar6/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/01/23/fstar6/&text=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/01/23/fstar6/&title=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/01/23/fstar6/&is_video=false&description=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=FStar 官方习题 A First Model of Computational Effects&body=Check out this article: https://blog.5eqn.top/2023/01/23/fstar6/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/01/23/fstar6/&title=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/01/23/fstar6/&title=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/01/23/fstar6/&title=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/01/23/fstar6/&title=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/01/23/fstar6/&name=FStar 官方习题 A First Model of Computational Effects&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/01/23/fstar6/&t=FStar 官方习题 A First Model of Computational Effects"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="概要这一小节讲述了如何用 F* 实现快排算法，并且证明其确实有排序的功能。 铺垫：快排实现递归计算 list 长度： 12345let rec length #a (l:list a)  : nat  &#x3D; match l with    | [] -&gt; 0    | _ :: tl -&gt; 1 + length tl  递归实现将一个 list 与另一个 list 合并： 12345le">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FStar 官方习题 Case Study - Quicksort">
+<meta property="og:url" content="https://blog.5eqn.top/2023/01/20/fstar2/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="概要这一小节讲述了如何用 F* 实现快排算法，并且证明其确实有排序的功能。 铺垫：快排实现递归计算 list 长度： 12345let rec length #a (l:list a)  : nat  &#x3D; match l with    | [] -&gt; 0    | _ :: tl -&gt; 1 + length tl  递归实现将一个 list 与另一个 list 合并： 12345le">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-01-20T15:12:33.000Z">
+<meta property="article:modified_time" content="2025-01-08T11:33:53.984Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="PL">
+<meta property="article:tag" content="编程">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>FStar 官方习题 Case Study - Quicksort</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/01/21/fstar3/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/2023/01/20/fstar1/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/01/20/fstar2/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/01/20/fstar2/&text=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/01/20/fstar2/&title=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/01/20/fstar2/&is_video=false&description=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=FStar 官方习题 Case Study - Quicksort&body=Check out this article: https://blog.5eqn.top/2023/01/20/fstar2/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/01/20/fstar2/&title=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar2/&title=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar2/&title=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar2/&title=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/01/20/fstar2/&name=FStar 官方习题 Case Study - Quicksort&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/01/20/fstar2/&t=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%A6%81"><span class="toc-number">1.</span> <span class="toc-text">概要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%93%BA%E5%9E%AB%EF%BC%9A%E5%BF%AB%E6%8E%92%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">铺垫：快排实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%A0%E9%A2%98%E4%B8%80"><span class="toc-number">3.</span> <span class="toc-text">习题一</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-number">3.1.</span> <span class="toc-text">目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF"><span class="toc-number">3.2.</span> <span class="toc-text">思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91"><span class="toc-number">3.3.</span> <span class="toc-text">坑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">3.4.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">3.5.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AC-%E4%BB%A3%E7%A0%81"><span class="toc-number">3.6.</span> <span class="toc-text">AC 代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%A0%E9%A2%98%E4%BA%8C"><span class="toc-number">4.</span> <span class="toc-text">习题二</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87-1"><span class="toc-number">4.1.</span> <span class="toc-text">目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF-1"><span class="toc-number">4.2.</span> <span class="toc-text">思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91-1"><span class="toc-number">4.3.</span> <span class="toc-text">坑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF-1"><span class="toc-number">4.4.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AC-%E4%BB%A3%E7%A0%81-1"><span class="toc-number">4.5.</span> <span class="toc-text">AC 代码</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        FStar 官方习题 Case Study - Quicksort
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-01-20T15:12:33.000Z" class="dt-published" itemprop="datePublished">2023-01-20</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PL/" rel="tag">PL</a>, <a class="p-category" href="/tags/%E7%BC%96%E7%A8%8B/" rel="tag">编程</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h2><p>这一小节讲述了如何用 <code>F*</code> 实现快排算法，并且证明其确实有排序的功能。</p>
+<h2 id="铺垫：快排实现"><a href="#铺垫：快排实现" class="headerlink" title="铺垫：快排实现"></a>铺垫：快排实现</h2><p>递归计算 <code>list</code> 长度：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">let rec length #a (l:list a)</span><br><span class="line">  : nat</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; 0</span><br><span class="line">    | _ :: tl -&gt; 1 + length tl</span><br></pre></td></tr></table></figure>
+
+<p>递归实现将一个 <code>list</code> 与另一个 <code>list</code> 合并：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">let rec append #a (l1 l2:list a)</span><br><span class="line">  : list a</span><br><span class="line">  = match l1 with</span><br><span class="line">    | [] -&gt; l2</span><br><span class="line">    | hd :: tl -&gt; hd :: append tl l2</span><br></pre></td></tr></table></figure>
+
+<p>递归实现将列表根据大于或小于等于 <code>pivot</code> 分成两半，</p>
+<p>注意在函数签名中指定该函数不改变列表总长，</p>
+<p>这样在排序时可以让 SMT Prover 相信递归会结束。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">let rec partition (#a:Type) (f:a -&gt; bool) (l:list a)</span><br><span class="line">  : x:(list a &amp; list a) &#123; length (fst x) + length (snd x) = length l &#125;</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; [], []</span><br><span class="line">    | hd::tl -&gt;</span><br><span class="line">      let l1, l2 = partition f tl in</span><br><span class="line">      if f hd</span><br><span class="line">      then hd::l1, l2</span><br><span class="line">      else l1, hd::l2</span><br></pre></td></tr></table></figure>
+
+<p>递归实现排序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">let rec sort (l:list int)</span><br><span class="line">  : Tot (list int) (decreases (length l))</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; []</span><br><span class="line">    | pivot :: tl -&gt;</span><br><span class="line">      let hi, lo  = partition ((&lt;=) pivot) tl in</span><br><span class="line">      append (sort lo) (pivot :: sort hi)</span><br></pre></td></tr></table></figure>
+
+<h2 id="习题一"><a href="#习题一" class="headerlink" title="习题一"></a>习题一</h2><h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><ul>
+<li>给定任意偏序函数，实现快排</li>
+<li>证明排序后列表有序</li>
+<li>证明排序后出现在原列表的元素一定出现在新的列表中</li>
+<li>给出 <code>extrinsic</code> 和 <code>intrinsic</code> 两种形式的证明</li>
+</ul>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>考虑递归证明，假设 <code>partition</code> 后的两个子列表均有序，</p>
+<p>要证整体有序，我们需要将 <code>partition</code> 的意义告知 SMT Prover：</p>
+<p><code>partition</code> 后所有左侧元素 <code>x</code> 满足 <code>f pivot x</code>，右侧则不满足，</p>
+<p>其中 <code>f</code> 是偏序函数。</p>
+<p>要证原列表元素一定出现在新列表，还需要 <code>partition</code> 的另一重意义：</p>
+<p>在 <code>partition</code> 列表参数中出现的元素，一定出现在返回值两个列表中的一个。</p>
+<p>同时，由于涉及 <code>append</code> 操作，也需要证明 <code>append</code> 不损失元素的性质。</p>
+<p>因此，用 <code>partition_mem</code> 证明 <code>partition</code> 和 <code>mem</code> 相关的性质，</p>
+<p>用 <code>append_mem</code> 证明 <code>append</code> 和 <code>mem</code> 相关的性质，</p>
+<p><code>sorted_concat</code> 表示子序列有序，合并后也有序，</p>
+<p><code>sort_correct</code> 表示排序满足给定的要求。</p>
+<p>对于 <code>intrinsic</code> 的证明，只需把需要满足的条件用提纯类型的方式表述出来，</p>
+<p>然后在算法内部补充必要的证明即可。</p>
+<p>由于证明的递归方式和算法的递归方式一致，不需要重复书写证明的递归方式。</p>
+<h3 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h3><ul>
+<li>在每个 <code>sort</code> 及其相关的证明都需要输入偏序函数！</li>
+</ul>
+<h3 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h3><p><code>intrinsic</code> 的方式美丽至极！这种方式把类型论、算法、证明天衣无缝地连结在一起！</p>
+<p>自证明的魅力真的让人为之倾倒……</p>
+<p>这可比算法竞赛有意思多了！</p>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">module Part1.Quicksort.Generic</span><br><span class="line"></span><br><span class="line">//Some auxiliary definitions to make this a standalone example</span><br><span class="line">let rec length #a (l:list a)</span><br><span class="line">  : nat</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; 0</span><br><span class="line">    | _ :: tl -&gt; 1 + length tl</span><br><span class="line"></span><br><span class="line">let rec append #a (l1 l2:list a)</span><br><span class="line">  : list a</span><br><span class="line">  = match l1 with</span><br><span class="line">    | [] -&gt; l2</span><br><span class="line">    | hd :: tl -&gt; hd :: append tl l2</span><br><span class="line"></span><br><span class="line">let total_order (#a:Type) (f: (a -&gt; a -&gt; bool)) =</span><br><span class="line">    (forall a. f a a)                                         (* reflexivity   *)</span><br><span class="line">    /\ (forall a1 a2. (f a1 a2 /\ a1=!=a2)  &lt;==&gt; not (f a2 a1))  (* anti-symmetry *)</span><br><span class="line">    /\ (forall a1 a2 a3. f a1 a2 /\ f a2 a3 ==&gt; f a1 a3)        (* transitivity  *)</span><br><span class="line">    /\ (forall a1 a2. f a1 a2 \/ f a2 a1)                       (* totality  *)</span><br><span class="line"></span><br><span class="line">let total_order_t (a:Type) = f:(a -&gt; a -&gt; bool) &#123; total_order f &#125;</span><br><span class="line"></span><br><span class="line">let rec sorted #a  (f:total_order_t a) (l:list a)</span><br><span class="line">  : bool</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; true</span><br><span class="line">    | [x] -&gt; true</span><br><span class="line">    | x :: y :: xs -&gt; f x y &amp;&amp; sorted f (y :: xs)</span><br><span class="line"></span><br><span class="line">let rec mem (#a:eqtype) (i:a) (l:list a)</span><br><span class="line">  : bool</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; false</span><br><span class="line">    | hd :: tl -&gt; hd = i || mem i tl</span><br></pre></td></tr></table></figure>
+
+<h3 id="AC-代码"><a href="#AC-代码" class="headerlink" title="AC 代码"></a>AC 代码</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"> //SNIPPET_START: partition</span><br><span class="line">let rec partition (#a:Type) (f:a -&gt; bool) (l:list a)</span><br><span class="line">  : x:(list a &amp; list a) &#123; length (fst x) + length (snd x) = length l &#125;</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; [], []</span><br><span class="line">    | hd::tl -&gt;</span><br><span class="line">      let l1, l2 = partition f tl in</span><br><span class="line">      if f hd</span><br><span class="line">      then hd::l1, l2</span><br><span class="line">      else l1, hd::l2</span><br><span class="line">//SNIPPET_END: partition</span><br><span class="line"></span><br><span class="line">//SNIPPET_START: sort-impl</span><br><span class="line">let rec sort #a (f:total_order_t a) (l:list a)</span><br><span class="line">  : Tot (list a) (decreases (length l))</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; []</span><br><span class="line">    | pivot :: tl -&gt;</span><br><span class="line">      let hi, lo  = partition (f pivot) tl in</span><br><span class="line">      append (sort f lo) (pivot :: sort f hi)</span><br><span class="line">//SNIPPET_END: sort-impl</span><br><span class="line"></span><br><span class="line">//SNIPPET_START: partition_mem</span><br><span class="line">let rec partition_mem (#a:eqtype)</span><br><span class="line">                      (f:(a -&gt; bool))</span><br><span class="line">                      (l:list a)</span><br><span class="line">  : Lemma (let l1, l2 = partition f l in</span><br><span class="line">           (forall x. mem x l1 ==&gt; f x) /\</span><br><span class="line">           (forall x. mem x l2 ==&gt; not (f x)) /\</span><br><span class="line">           (forall x. mem x l = (mem x l1 || mem x l2)))</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; ()</span><br><span class="line">    | hd :: tl -&gt; partition_mem f tl</span><br><span class="line">//SNIPPET_END: partition_mem</span><br><span class="line"></span><br><span class="line">//SNIPPET_START: sorted_concat</span><br><span class="line">let rec sorted_concat (#a:eqtype)</span><br><span class="line">                      (f:total_order_t a)</span><br><span class="line">                      (l1:list a&#123;sorted f l1&#125;)</span><br><span class="line">                      (l2:list a&#123;sorted f l2&#125;)</span><br><span class="line">                      (pivot:a)</span><br><span class="line">  : Lemma (requires (forall y. mem y l1 ==&gt; not (f pivot y)) /\</span><br><span class="line">                    (forall y. mem y l2 ==&gt; f pivot y))</span><br><span class="line">          (ensures sorted f (append l1 (pivot :: l2)))</span><br><span class="line">  = match l1 with</span><br><span class="line">    | [] -&gt; ()</span><br><span class="line">    | hd :: tl -&gt; sorted_concat f tl l2 pivot</span><br><span class="line">//SNIPPET_END: sorted_concat</span><br><span class="line"></span><br><span class="line">//SNIPPET_START: append_mem</span><br><span class="line">let rec append_mem (#t:eqtype)</span><br><span class="line">                   (l1 l2:list t)</span><br><span class="line">  : Lemma (ensures (forall a. mem a (append l1 l2) = (mem a l1 || mem a l2)))</span><br><span class="line">  = match l1 with</span><br><span class="line">    | [] -&gt; ()</span><br><span class="line">    | hd::tl -&gt; append_mem tl l2</span><br><span class="line">//SNIPPET_END: append_mem</span><br><span class="line"></span><br><span class="line">let rec sort_correct (#a:eqtype) (f:total_order_t a) (l:list a)</span><br><span class="line">  : Lemma (ensures (</span><br><span class="line">           let m = sort f l in</span><br><span class="line">           sorted f m /\</span><br><span class="line">           (forall i. mem i l = mem i m)))</span><br><span class="line">          (decreases (length l))</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; ()</span><br><span class="line">    | pivot :: tl -&gt;</span><br><span class="line">      let hi, lo  = partition (f pivot) tl in</span><br><span class="line">      sort_correct f hi;</span><br><span class="line">      sort_correct f lo;</span><br><span class="line">      partition_mem (f pivot) tl;</span><br><span class="line">      sorted_concat f (sort f lo) (sort f hi) pivot;</span><br><span class="line">      append_mem (sort f lo) (pivot :: sort f hi)</span><br><span class="line"></span><br><span class="line">let rec sort_intrinsic (#a:eqtype) (f:total_order_t a) (l:list a)</span><br><span class="line">  : Tot (m:list a &#123;</span><br><span class="line">                sorted f m /\</span><br><span class="line">                (forall i. mem i l = mem i m)</span><br><span class="line">         &#125;)</span><br><span class="line">   (decreases (length l))</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; []</span><br><span class="line">    | pivot :: tl -&gt;</span><br><span class="line">      let hi, lo  = partition (fun x -&gt; f pivot x) tl in</span><br><span class="line">      partition_mem (fun x -&gt; f pivot x) tl;</span><br><span class="line">      sorted_concat f (sort_intrinsic f lo) (sort_intrinsic f hi) pivot;</span><br><span class="line">      append_mem (sort_intrinsic f lo) (pivot :: sort_intrinsic f hi);</span><br><span class="line">partition_mem_permutation      append (sort_intrinsic f lo) (pivot :: sort_intrinsic f hi)</span><br></pre></td></tr></table></figure>
+
+<h2 id="习题二"><a href="#习题二" class="headerlink" title="习题二"></a>习题二</h2><h3 id="目标-1"><a href="#目标-1" class="headerlink" title="目标"></a>目标</h3><ul>
+<li>证明排序后任意元素出现在原列表与新列表的次数相同</li>
+<li>给出 <code>extrinsic</code> 和 <code>intrinsic</code> 两种形式的证明</li>
+</ul>
+<h3 id="思路-1"><a href="#思路-1" class="headerlink" title="思路"></a>思路</h3><p>考虑递归证明，上一阶段的证明结果只涉及两个子序列，但最终要证明子序列加 <code>pivot</code> 的性质。</p>
+<p>由于 <code>count</code> 比较复杂，依照官方提示，考虑单独证明从两个子序列的性质能过渡到最终结果。</p>
+<p>考虑到 <code>append</code> 对 <code>count</code> 具备可加性，而大部分其他函数由 <code>append</code> 构造，</p>
+<p>因此只需要把涉及到的所有 <code>append</code> 操作的保持数量的性质进行证明即可。</p>
+<p>官方的答案有较多多余的证明，我的答案相对精简。</p>
+<h3 id="坑-1"><a href="#坑-1" class="headerlink" title="坑"></a>坑</h3><ul>
+<li><code>partition</code> 返回的 <code>hi</code> 和 <code>lo</code> 在不同函数参数中的预期位置不同！<ul>
+<li>我花了至少一小时才找到这个问题 qwq</li>
+</ul>
+</li>
+</ul>
+<h3 id="背景-1"><a href="#背景-1" class="headerlink" title="背景"></a>背景</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">module Part1.Quicksort.Permutation</span><br><span class="line"></span><br><span class="line">//Some auxiliary definitions to make this a standalone example</span><br><span class="line">let rec length #a (l:list a)</span><br><span class="line">  : nat</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; 0</span><br><span class="line">    | _ :: tl -&gt; 1 + length tl</span><br><span class="line"></span><br><span class="line">let rec append #a (l1 l2:list a)</span><br><span class="line">  : list a</span><br><span class="line">  = match l1 with</span><br><span class="line">    | [] -&gt; l2</span><br><span class="line">    | hd :: tl -&gt; hd :: append tl l2</span><br><span class="line"></span><br><span class="line">let total_order (#a:Type) (f: (a -&gt; a -&gt; bool)) =</span><br><span class="line">    (forall a. f a a)                                         (* reflexivity   *)</span><br><span class="line">    /\ (forall a1 a2. (f a1 a2 /\ a1=!=a2)  &lt;==&gt; not (f a2 a1))  (* anti-symmetry *)</span><br><span class="line">    /\ (forall a1 a2 a3. f a1 a2 /\ f a2 a3 ==&gt; f a1 a3)        (* transitivity  *)</span><br><span class="line">    /\ (forall a1 a2. f a1 a2 \/ f a2 a1)                       (* totality *)</span><br><span class="line">let total_order_t (a:Type) = f:(a -&gt; a -&gt; bool) &#123; total_order f &#125;</span><br><span class="line"></span><br><span class="line">let rec sorted #a  (f:total_order_t a) (l:list a)</span><br><span class="line">  : bool</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; true</span><br><span class="line">    | [x] -&gt; true</span><br><span class="line">    | x :: y :: xs -&gt; f x y &amp;&amp; sorted f (y :: xs)</span><br><span class="line"></span><br><span class="line">//SNIPPET_START: count permutation</span><br><span class="line">let rec count (#a:eqtype) (x:a) (l:list a)</span><br><span class="line">  : nat</span><br><span class="line">  = match l with</span><br><span class="line">    | hd::tl -&gt; (if hd = x then 1 else 0) + count x tl</span><br><span class="line">    | [] -&gt; 0</span><br><span class="line"></span><br><span class="line">let mem (#a:eqtype) (i:a) (l:list a)</span><br><span class="line">  : bool</span><br><span class="line">  = count i l &gt; 0</span><br><span class="line"></span><br><span class="line">let is_permutation (#a:eqtype) (l m:list a) =</span><br><span class="line">  forall x. count x l = count x m</span><br><span class="line"></span><br><span class="line">let rec append_count (#t:eqtype)</span><br><span class="line">                     (l1 l2:list t)</span><br><span class="line">  : Lemma (ensures (forall a. count a (append l1 l2) = (count a l1 + count a l2)))</span><br><span class="line">  = match l1 with</span><br><span class="line">    | [] -&gt; ()</span><br><span class="line">    | hd::tl -&gt; append_count tl l2</span><br><span class="line">//SNIPPET_END: count permutation</span><br></pre></td></tr></table></figure>
+
+<h3 id="AC-代码-1"><a href="#AC-代码-1" class="headerlink" title="AC 代码"></a>AC 代码</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line">let rec partition (#a:Type) (f:a -&gt; bool) (l:list a)</span><br><span class="line">  : x:(list a &amp; list a) &#123; length (fst x) + length (snd x) = length l &#125;</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; [], []</span><br><span class="line">    | hd::tl -&gt;</span><br><span class="line">      let l1, l2 = partition f tl in</span><br><span class="line">      if f hd</span><br><span class="line">      then hd::l1, l2</span><br><span class="line">      else l1, hd::l2</span><br><span class="line"></span><br><span class="line">let rec sort #a (f:total_order_t a) (l:list a)</span><br><span class="line">  : Tot (list a) (decreases (length l))</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; []</span><br><span class="line">    | pivot :: tl -&gt;</span><br><span class="line">      let hi, lo  = partition (f pivot) tl in</span><br><span class="line">      append (sort f lo) (pivot :: sort f hi)</span><br><span class="line"></span><br><span class="line">let rec partition_mem_permutation (#a:eqtype)</span><br><span class="line">                                  (f:(a -&gt; bool))</span><br><span class="line">                                  (l:list a)</span><br><span class="line">  : Lemma (let l1, l2 = partition f l in</span><br><span class="line">           (forall x. mem x l1 ==&gt; f x) /\</span><br><span class="line">           (forall x. mem x l2 ==&gt; not (f x)) /\</span><br><span class="line">           (is_permutation l (append l1 l2)))</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; ()</span><br><span class="line">    | hd :: tl -&gt;</span><br><span class="line">      let l1, l2 = partition f tl in</span><br><span class="line">      append_count l1 l2;</span><br><span class="line">      partition_mem_permutation f tl</span><br><span class="line"></span><br><span class="line">let rec sorted_concat (#a:eqtype)</span><br><span class="line">                      (f:total_order_t a)</span><br><span class="line">                      (l1:list a&#123;sorted f l1&#125;)</span><br><span class="line">                      (l2:list a&#123;sorted f l2&#125;)</span><br><span class="line">                      (pivot:a)</span><br><span class="line">  : Lemma (requires (forall y. mem y l1 ==&gt; not (f pivot y)) /\</span><br><span class="line">                    (forall y. mem y l2 ==&gt; f pivot y))</span><br><span class="line">          (ensures sorted f (append l1 (pivot :: l2)))</span><br><span class="line">  = match l1 with</span><br><span class="line">    | [] -&gt; ()</span><br><span class="line">    | hd :: tl -&gt; sorted_concat f tl l2 pivot</span><br><span class="line"></span><br><span class="line">let permutation_app_lemma (#a:eqtype) (hd:a) (tl:list a)</span><br><span class="line">                          (l1:list a) (l2:list a)</span><br><span class="line">   : Lemma (requires (is_permutation tl (append l1 l2)))</span><br><span class="line">           (ensures (is_permutation (hd::tl) (append l1 (hd::l2))))</span><br><span class="line">  = append_count l1 l2;</span><br><span class="line">    append_count l1 (hd::l2)</span><br><span class="line"></span><br><span class="line">let rec sort_correct (#a:eqtype) (f:total_order_t a) (l:list a)</span><br><span class="line">  : Lemma (ensures (</span><br><span class="line">           sorted f (sort f l) /\</span><br><span class="line">           is_permutation l (sort f l)))</span><br><span class="line">          (decreases (length l))</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; ()</span><br><span class="line">    | pivot :: tl -&gt;</span><br><span class="line">      let hi, lo  = partition (f pivot) tl in</span><br><span class="line">      sort_correct f hi;</span><br><span class="line">      sort_correct f lo;</span><br><span class="line">      partition_mem_permutation (f pivot) tl;</span><br><span class="line">      sorted_concat f (sort f lo) (sort f hi) pivot;</span><br><span class="line">      append_count hi lo;</span><br><span class="line">      permutation_app_lemma pivot tl (sort f hi) (sort f lo)</span><br><span class="line"></span><br><span class="line">let rec sort_intrinsic (#a:eqtype) (f:total_order_t a) (l:list a)</span><br><span class="line">  : Tot (m:list a &#123;</span><br><span class="line">                sorted f m /\</span><br><span class="line">                is_permutation l m</span><br><span class="line">         &#125;)</span><br><span class="line">   (decreases (length l))</span><br><span class="line">  = match l with</span><br><span class="line">    | [] -&gt; []</span><br><span class="line">    | pivot :: tl -&gt;</span><br><span class="line">      let hi, lo  = partition (fun x -&gt; f pivot x) tl in</span><br><span class="line">      partition_mem_permutation (fun x -&gt; f pivot x) tl;</span><br><span class="line">      sorted_concat f (sort_intrinsic f lo) (sort_intrinsic f hi) pivot;</span><br><span class="line">      append_count hi lo;</span><br><span class="line">      permutation_app_lemma pivot tl (sort f hi) (sort f lo);</span><br><span class="line">      append (sort_intrinsic f lo) (pivot :: sort_intrinsic f hi)</span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%A6%81"><span class="toc-number">1.</span> <span class="toc-text">概要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%93%BA%E5%9E%AB%EF%BC%9A%E5%BF%AB%E6%8E%92%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">铺垫：快排实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%A0%E9%A2%98%E4%B8%80"><span class="toc-number">3.</span> <span class="toc-text">习题一</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-number">3.1.</span> <span class="toc-text">目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF"><span class="toc-number">3.2.</span> <span class="toc-text">思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91"><span class="toc-number">3.3.</span> <span class="toc-text">坑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">3.4.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">3.5.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AC-%E4%BB%A3%E7%A0%81"><span class="toc-number">3.6.</span> <span class="toc-text">AC 代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%A0%E9%A2%98%E4%BA%8C"><span class="toc-number">4.</span> <span class="toc-text">习题二</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87-1"><span class="toc-number">4.1.</span> <span class="toc-text">目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF-1"><span class="toc-number">4.2.</span> <span class="toc-text">思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91-1"><span class="toc-number">4.3.</span> <span class="toc-text">坑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF-1"><span class="toc-number">4.4.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AC-%E4%BB%A3%E7%A0%81-1"><span class="toc-number">4.5.</span> <span class="toc-text">AC 代码</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/01/20/fstar2/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/01/20/fstar2/&text=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/01/20/fstar2/&title=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/01/20/fstar2/&is_video=false&description=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=FStar 官方习题 Case Study - Quicksort&body=Check out this article: https://blog.5eqn.top/2023/01/20/fstar2/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/01/20/fstar2/&title=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar2/&title=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar2/&title=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar2/&title=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/01/20/fstar2/&name=FStar 官方习题 Case Study - Quicksort&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/01/20/fstar2/&t=FStar 官方习题 Case Study - Quicksort"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

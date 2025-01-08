@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="FStar 是什么？F* 是一种面向证明的编程语言，运用大量奇技淫巧实现程序自证明，例如：  依值类型，Dependent Type，简而言之就是允许类型依赖于具体的值 函数式编程，Functional Programming，函数是一等公民，能像值一样作为参数和返回值 元语言，Meta Language，模糊程序与数据的边界，允许程序生成程序 提纯类型（瞎翻），Refinement Type，给">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FStar 官方教程习题 Pt. 1">
+<meta property="og:url" content="https://blog.5eqn.top/2023/01/20/fstar1/index.html">
+<meta property="og:site_name" content="5eqn 的博客">
+<meta property="og:description" content="FStar 是什么？F* 是一种面向证明的编程语言，运用大量奇技淫巧实现程序自证明，例如：  依值类型，Dependent Type，简而言之就是允许类型依赖于具体的值 函数式编程，Functional Programming，函数是一等公民，能像值一样作为参数和返回值 元语言，Meta Language，模糊程序与数据的边界，允许程序生成程序 提纯类型（瞎翻），Refinement Type，给">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-01-20T11:17:24.000Z">
+<meta property="article:modified_time" content="2025-01-08T11:25:20.437Z">
+<meta property="article:author" content="5eqn">
+<meta property="article:tag" content="PL">
+<meta property="article:tag" content="编程">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>FStar 官方教程习题 Pt. 1</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="5eqn 的博客" type="application/atom+xml" />
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/2023/01/20/fstar2/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/01/20/fstar1/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/01/20/fstar1/&text=FStar 官方教程习题 Pt. 1"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/01/20/fstar1/&title=FStar 官方教程习题 Pt. 1"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/01/20/fstar1/&is_video=false&description=FStar 官方教程习题 Pt. 1"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=FStar 官方教程习题 Pt. 1&body=Check out this article: https://blog.5eqn.top/2023/01/20/fstar1/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/01/20/fstar1/&title=FStar 官方教程习题 Pt. 1"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar1/&title=FStar 官方教程习题 Pt. 1"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar1/&title=FStar 官方教程习题 Pt. 1"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar1/&title=FStar 官方教程习题 Pt. 1"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/01/20/fstar1/&name=FStar 官方教程习题 Pt. 1&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/01/20/fstar1/&t=FStar 官方教程习题 Pt. 1"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#FStar-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">FStar 是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FStar-%E7%BB%83%E4%B9%A0%EF%BC%9APart-1-Lemmas-and-proofs-by-induction"><span class="toc-number">2.</span> <span class="toc-text">FStar 练习：Part 1, Lemmas and proofs by induction</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        FStar 官方教程习题 Pt. 1
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">5eqn</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-01-20T11:17:24.000Z" class="dt-published" itemprop="datePublished">2023-01-20</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PL/" rel="tag">PL</a>, <a class="p-category" href="/tags/%E7%BC%96%E7%A8%8B/" rel="tag">编程</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="FStar-是什么？"><a href="#FStar-是什么？" class="headerlink" title="FStar 是什么？"></a>FStar 是什么？</h2><p><code>F*</code> 是一种面向证明的编程语言，运用大量奇技淫巧实现程序自证明，例如：</p>
+<ul>
+<li>依值类型，Dependent Type，简而言之就是允许类型依赖于具体的值</li>
+<li>函数式编程，Functional Programming，函数是一等公民，能像值一样作为参数和返回值</li>
+<li>元语言，Meta Language，模糊程序与数据的边界，允许程序生成程序</li>
+<li>提纯类型（瞎翻），Refinement Type，给已存在的类型加上限制，获得新的类型</li>
+</ul>
+<p>推荐从 <a target="_blank" rel="noopener" href="https://fstar-lang.org/">官网</a> 了解 <code>F*</code>。</p>
+<h2 id="FStar-练习：Part-1-Lemmas-and-proofs-by-induction"><a href="#FStar-练习：Part-1-Lemmas-and-proofs-by-induction" class="headerlink" title="FStar 练习：Part 1, Lemmas and proofs by induction"></a>FStar 练习：Part 1, Lemmas and proofs by induction</h2><p>证明递归实现的阶乘在 $x &gt; 2$ 时满足 $x! &gt; x$。</p>
+<p>只需要提示 Z3 SMT 证明器如何进行递归，它可以自动完成剩下的证明。</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> factorial (n:nat)</span><br><span class="line">  : nat</span><br><span class="line">  = <span class="keyword">if</span> n = <span class="number">0</span> <span class="keyword">then</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span> n * factorial (n - <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> factorial_is_greater_than_arg (x:<span class="built_in">int</span>)</span><br><span class="line">  : <span class="type">Lemma</span> (requires x &gt; <span class="number">2</span>)</span><br><span class="line">          (ensures factorial x &gt; x)</span><br><span class="line">  = <span class="keyword">if</span> x = <span class="number">3</span> <span class="keyword">then</span> <span class="literal">()</span></span><br><span class="line">    <span class="keyword">else</span> factorial_is_greater_than_arg (x - <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>证明斐波那契数列在 $n \ge 2$ 时满足 $f(n) \ge n$。</p>
+<p>这里偷了点懒，本来要递归到 $n - 1$ 和 $n - 2$，</p>
+<p>但是只提示到 $n - 1$ 已经足以让 SMT 完成证明。</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> fibonacci (n:nat)</span><br><span class="line">  : nat</span><br><span class="line">  = <span class="keyword">if</span> n &lt;= <span class="number">1</span></span><br><span class="line">    <span class="keyword">then</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span> fibonacci (n - <span class="number">1</span>) + fibonacci (n - <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> fibonacci_greater_than_arg (n:nat&#123;n &gt;= <span class="number">2</span>&#125;)</span><br><span class="line">  : <span class="type">Lemma</span> (fibonacci n &gt;= n)</span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> fibonacci_greater_than_arg n</span><br><span class="line">  = <span class="keyword">if</span> n = <span class="number">2</span> <span class="keyword">then</span> <span class="literal">()</span></span><br><span class="line">    <span class="keyword">else</span> fibonacci_greater_than_arg (n - <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>证明一个用于合并列表的函数的返回值长度为参数之和。</p>
+<p>对列表进行递归即可。</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> app #a (l1 l2:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="built_in">list</span> a</span><br><span class="line">  = <span class="keyword">match</span> l1 <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; l2</span><br><span class="line">    | hd :: tl -&gt; hd :: app tl l2</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> length #a (l:<span class="built_in">list</span> a)</span><br><span class="line">  : nat</span><br><span class="line">  = <span class="keyword">match</span> l <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; <span class="number">0</span></span><br><span class="line">    | _ :: tl -&gt; <span class="number">1</span> + length tl</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> app_length (#a:<span class="type">Type</span>) (l1 l2:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="type">Lemma</span> (length (app l1 l2) = length l1 + length l2)</span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> app_length l1 l2</span><br><span class="line">  = <span class="keyword">match</span> l1 <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | _ :: tl -&gt; app_length tl l2</span><br></pre></td></tr></table></figure>
+
+<p>证明两个列表如果反转后相同，原先也相同。</p>
+<p>这里采用了官方答案，直接用教程中出现的对反转操作可逆的证明，来证明反转操作是单射。</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> append (#a:<span class="type">Type</span>) (l1 l2:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="built_in">list</span> a</span><br><span class="line">  = <span class="keyword">match</span> l1 <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; l2</span><br><span class="line">    | hd::tl -&gt; hd :: append tl l2</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> reverse #a (l:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="built_in">list</span> a</span><br><span class="line">  = <span class="keyword">match</span> l <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; <span class="literal">[]</span></span><br><span class="line">    | hd :: tl -&gt; append (reverse tl) [hd]</span><br><span class="line"></span><br><span class="line"><span class="comment">(* snoc is &quot;cons&quot; backwards --- it adds an element to the end of a list *)</span></span><br><span class="line"><span class="keyword">let</span> snoc l h = append l [h]</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> snoc_cons #a (l:<span class="built_in">list</span> a) (h:a)</span><br><span class="line">  : <span class="type">Lemma</span> (reverse (snoc l h) == h :: reverse l)</span><br><span class="line">  = <span class="keyword">match</span> l <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | hd :: tl -&gt; snoc_cons tl h</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> rev_involutive #a (l:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="type">Lemma</span> (reverse (reverse l) == l)</span><br><span class="line">  = <span class="keyword">match</span> l <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | hd :: tl -&gt;</span><br><span class="line">      // (<span class="number">1</span>) [reverse (reverse tl) == tl]</span><br><span class="line">      rev_involutive tl;</span><br><span class="line">      // (<span class="number">2</span>) [reverse (append (reverse tl) [hd]) == h :: reverse (reverse tl)]</span><br><span class="line">      snoc_cons (reverse tl) hd</span><br><span class="line">      // <span class="type">These</span> two facts are enough <span class="keyword">for</span> <span class="type">Z3</span> <span class="keyword">to</span> prove the lemma:</span><br><span class="line">      //   reverse (reverse (hd :: tl))</span><br><span class="line">      //   =def= reverse (append (reverse tl) [hd])</span><br><span class="line">      //   =(<span class="number">2</span>)= hd :: reverse (reverse tl)</span><br><span class="line">      //   =(<span class="number">1</span>)= hd :: tl</span><br><span class="line">      //   =def= l</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> rev_injective_alt (#a:<span class="type">Type</span>) (l1 l2:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="type">Lemma</span> (requires reverse l1 == reverse l2)</span><br><span class="line">          (ensures  l1 == l2)</span><br><span class="line">  = rev_involutive l1; rev_involutive l2</span><br></pre></td></tr></table></figure>
+
+<p>证明优化后的线性复杂度反转函数和原先的平方复杂度反转函数一致。</p>
+<p>这个优化的原理是让反转函数接受两个参数，从而只需要对 <code>l2</code> 进行递归，</p>
+<p>每次递归后直接把答案放到 <code>l1</code> 参数里。</p>
+<p>本题官方的解答用到了最后压轴题定义的函数，我尝试写了另外一种方法：</p>
+<p>尝试找到 <code>rev</code>、<code>reverse</code> 和递归的一些性质：</p>
+<ul>
+<li><code>rev_aux</code> 递归时 <code>l1</code> 和 <code>l2</code> 的总长保持不变</li>
+<li><code>rev_aux</code> 会被拆成 <code>rev_aux (hd :: []) tl</code> 的形式</li>
+<li><code>reverse</code> 会被拆成 <code>append (reverse tl) [hd]</code> 的形式</li>
+<li>直接对 <code>l</code> 递归，则 <code>reverse tl</code> 等于 <code>rev_aux [] tl</code></li>
+</ul>
+<p>根据递归规则，找到关键命题 <code>rev_aux (hd :: []) tl == append (rev_aux [] tl) [hd]</code></p>
+<p>考虑 <code>rev_aux</code> 的递归规律，对 <code>tl</code> 和 <code>[]</code> 一减一增递归，抽象成 <code>l2</code> 和 <code>l1</code>。</p>
+<p>注意明确 <code>l2</code> 的递减标识，便于 SMT 确认该递归函数会终止。</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> rev_aux #a (l1 l2:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="type">Tot</span> (<span class="built_in">list</span> a) (decreases l2)</span><br><span class="line">  = <span class="keyword">match</span> l2 <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span>     -&gt; l1</span><br><span class="line">    | hd :: tl -&gt; rev_aux (hd :: l1) tl</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> rev #a (l:<span class="built_in">list</span> a) : <span class="built_in">list</span> a = rev_aux <span class="literal">[]</span> l</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> rev_step_snoc #a (l1 l2:<span class="built_in">list</span> a) (h:a)</span><br><span class="line">  : <span class="type">Lemma</span> (ensures rev_aux (append l1 [h]) l2 ==</span><br><span class="line">                   append (rev_aux l1 l2) [h])</span><br><span class="line">          (decreases l2)</span><br><span class="line">  = <span class="keyword">match</span> l1, l2 <span class="keyword">with</span></span><br><span class="line">    | _, h2 :: t2 -&gt;</span><br><span class="line">      rev_step_snoc (h2 :: l1) t2 h</span><br><span class="line">    | _ -&gt; <span class="literal">()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> rev_is_ok (#a:_) (l:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="type">Lemma</span> (rev l == reverse l)</span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> rev_is_ok l</span><br><span class="line">  = <span class="keyword">match</span> l <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | hd :: tl -&gt;</span><br><span class="line">      rev_step_snoc <span class="literal">[]</span> tl hd;</span><br><span class="line">      rev_is_ok tl</span><br></pre></td></tr></table></figure>
+
+<p>证明优化后的线性求斐波那契数列函数与原先的指数复杂度函数一致。</p>
+<p>由于 <code>fib_aux</code> 使用了三个参数，确认参数的变化规律后证明关键命题（这里是递推关系）即可。</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> fib_aux (a b n:nat)</span><br><span class="line">  : <span class="type">Tot</span> nat (decreases n)</span><br><span class="line">  = <span class="keyword">match</span> n <span class="keyword">with</span></span><br><span class="line">    | <span class="number">0</span> -&gt; a</span><br><span class="line">    | _ -&gt; fib_aux b (a+b) (n-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> fib (n:nat) : nat = fib_aux <span class="number">1</span> <span class="number">1</span> n</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> fib_step_aux (a b:nat) (n:nat&#123;n&gt;<span class="number">1</span>&#125;)</span><br><span class="line">  : <span class="type">Lemma</span> (ensures fib_aux a b (n - <span class="number">2</span>) + fib_aux a b (n - <span class="number">1</span>) ==</span><br><span class="line">                   fib_aux a b n)</span><br><span class="line">          (decreases n)</span><br><span class="line">  = <span class="keyword">match</span> n <span class="keyword">with</span></span><br><span class="line">    | <span class="number">2</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | _ -&gt; fib_step_aux b (a + b) (n - <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> fib_is_ok (n:nat)</span><br><span class="line">  : <span class="type">Lemma</span> (fibonacci n == fib n)</span><br><span class="line">  = <span class="keyword">match</span> n <span class="keyword">with</span></span><br><span class="line">    | <span class="number">0</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | <span class="number">1</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | _ -&gt;</span><br><span class="line">      fib_step_aux <span class="number">1</span> <span class="number">1</span> n;</span><br><span class="line">      fib_is_ok (n - <span class="number">1</span>);</span><br><span class="line">      fib_is_ok (n - <span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+
+<p>为查找函数找到隐式提纯类别和显式性质证明。</p>
+<p>隐式需要使用到 <code>o:option</code>，在前文没看到，我直接看了答案。</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//write a <span class="keyword">type</span> <span class="keyword">for</span> find</span><br><span class="line"><span class="keyword">val</span> find (#a:<span class="type">Type</span>) (f:a -&gt; <span class="built_in">bool</span>) (l:<span class="built_in">list</span> a)</span><br><span class="line">  : o:option a&#123;<span class="type">Some</span>? o ==&gt; f (<span class="type">Some</span>?.v o)&#125;</span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> find f l =</span><br><span class="line">  <span class="keyword">match</span> l <span class="keyword">with</span></span><br><span class="line">  | <span class="literal">[]</span> -&gt; <span class="type">None</span></span><br><span class="line">  | hd :: tl -&gt; <span class="keyword">if</span> f hd <span class="keyword">then</span> <span class="type">Some</span> hd <span class="keyword">else</span> find f tl</span><br></pre></td></tr></table></figure>
+
+<p>显式的默认在记事本里面已经给出了，注意 <code>Lemma</code> 里面也可以 <code>match</code> 即可，</p>
+<p>剩下的是简单的递归。</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> find_alt f l =</span><br><span class="line">  <span class="keyword">match</span> l <span class="keyword">with</span></span><br><span class="line">  | <span class="literal">[]</span> -&gt; <span class="type">None</span></span><br><span class="line">  | hd :: tl -&gt; <span class="keyword">if</span> f hd <span class="keyword">then</span> <span class="type">Some</span> hd <span class="keyword">else</span> find_alt f tl</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> find_alt_ok #a (f:a -&gt; <span class="built_in">bool</span>) (l:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="type">Lemma</span> (<span class="keyword">match</span> find_alt f l <span class="keyword">with</span></span><br><span class="line">           | <span class="type">Some</span> x -&gt; f x</span><br><span class="line">           | _ -&gt; <span class="literal">true</span>)</span><br><span class="line">  = <span class="keyword">match</span> l <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | _ :: tl -&gt; find_alt_ok f tl</span><br></pre></td></tr></table></figure>
+
+<p>证明左折叠 <code>Cons</code> 等效于 <code>reverse</code>。</p>
+<p>这和先前的 <code>rev_aux</code> 特别相似，</p>
+<p>这里我尝试采用答案思路完成，不过未遂。最后参考答案才做出来。</p>
+<p>关键依然在于 <code>fold_left</code> 的递归方式，在此基础上把同构的 <code>fold_left</code> 替换为 <code>reverse</code>。</p>
+<p>替换成 <code>reverse</code> 后就成为了统一的 <code>append</code> 格式，可以利用结合律等自然的规律处理。</p>
+<p>不过由于和保持一定的是返回值，相比前面的 <code>rev_aux</code> 更难看出规律。</p>
+<p>我一度想尝试采用一元递归完成证明，不过失败了。</p>
+<figure class="highlight ocaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> fold_left #a #b (f: b -&gt; a -&gt; a) (l: <span class="built_in">list</span> b) (acc:a)</span><br><span class="line">  : a</span><br><span class="line">  = <span class="keyword">match</span> l <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; acc</span><br><span class="line">    | hd :: tl -&gt; fold_left f tl (f hd acc)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> append_assoc (#a:<span class="type">Type</span>) (l1 l2 l3:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="type">Lemma</span> (append (append l1 l2) l3 == append l1 (append l2 l3))</span><br><span class="line">  = <span class="keyword">match</span> l1 <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | hd :: tl -&gt; append_assoc tl l2 l3</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> fold_generic (#a:<span class="type">Type</span>) (l1 l2:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="type">Lemma</span> (fold_left <span class="type">Cons</span> l1 l2 == append (reverse l1) l2)</span><br><span class="line">  = <span class="keyword">match</span> l1 <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | hd :: tl -&gt;</span><br><span class="line">      append_assoc (reverse tl) [hd] l2;</span><br><span class="line">      fold_generic tl (hd :: l2)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">rec</span> append_right_unit (#a:<span class="type">Type</span>) (l:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="type">Lemma</span> (append l <span class="literal">[]</span> == l)</span><br><span class="line">  = <span class="keyword">match</span> l <span class="keyword">with</span></span><br><span class="line">    | <span class="literal">[]</span> -&gt; <span class="literal">()</span></span><br><span class="line">    | hd :: tl -&gt; append_right_unit tl</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> fold_left_Cons_is_rev (#a:<span class="type">Type</span>) (l:<span class="built_in">list</span> a)</span><br><span class="line">  : <span class="type">Lemma</span> (fold_left <span class="type">Cons</span> l <span class="literal">[]</span> == reverse l)</span><br><span class="line">  = fold_generic l <span class="literal">[]</span>;</span><br><span class="line">    append_right_unit (reverse l)</span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/tags/">标签</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+          <li><a href="/friend/">友链</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#FStar-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">FStar 是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FStar-%E7%BB%83%E4%B9%A0%EF%BC%9APart-1-Lemmas-and-proofs-by-induction"><span class="toc-number">2.</span> <span class="toc-text">FStar 练习：Part 1, Lemmas and proofs by induction</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://blog.5eqn.top/2023/01/20/fstar1/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://blog.5eqn.top/2023/01/20/fstar1/&text=FStar 官方教程习题 Pt. 1"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://blog.5eqn.top/2023/01/20/fstar1/&title=FStar 官方教程习题 Pt. 1"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://blog.5eqn.top/2023/01/20/fstar1/&is_video=false&description=FStar 官方教程习题 Pt. 1"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=FStar 官方教程习题 Pt. 1&body=Check out this article: https://blog.5eqn.top/2023/01/20/fstar1/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://blog.5eqn.top/2023/01/20/fstar1/&title=FStar 官方教程习题 Pt. 1"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar1/&title=FStar 官方教程习题 Pt. 1"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar1/&title=FStar 官方教程习题 Pt. 1"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://blog.5eqn.top/2023/01/20/fstar1/&title=FStar 官方教程习题 Pt. 1"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://blog.5eqn.top/2023/01/20/fstar1/&name=FStar 官方教程习题 Pt. 1&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://blog.5eqn.top/2023/01/20/fstar1/&t=FStar 官方教程习题 Pt. 1"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2023-2025
+    5eqn
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/tags/">标签</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     --><!--
+       --><li><a href="/friend/">友链</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="https://github.com/5eqn">项目</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = '5eqn/my-cn-blog';
+      var utterances_issue_term = 'pathname';
+      var utterances_label = 'utteranc';
+      var utterances_theme = 'github-light';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>
